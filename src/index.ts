@@ -1,7 +1,7 @@
 import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { User } from "./entities/User";
+import { HomlyUser } from "./entities/User";
 import {
     getUsers,
 } from "./controllers/UserController";
@@ -17,7 +17,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING, 
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [User],
+  entities: [HomlyUser],
   synchronize: true,
   logging: false,
 
