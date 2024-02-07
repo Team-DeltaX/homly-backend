@@ -22,7 +22,6 @@ export class HomlyUser extends BaseEntity {
 
   @Column({
     type: "long",
-    default:'image'
   })
   image!: string;
 

@@ -7,6 +7,7 @@ import {
 } from "./controllers/UserController";
 
 import dotenv from "dotenv";
+import { addUsers } from "./routers/addUsers";
 dotenv.config();
 
 const app = express();
@@ -26,13 +27,22 @@ export const AppDataSource = new DataSource({
 AppDataSource.initialize()
   .then(() => {
     app.use(express.json());
+    app.use((req, res, next) => {
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      next();
+    });
 
     // Routes
     app.get("/users", getUsers);
+
     // app.get("/users/:id", getUserById);
     // app.post("/users", createUser);
     // app.put("/users/:id", updateUser);
     // app.delete("/users/:id", deleteUser);
+
+    app.use(addUsers);
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
