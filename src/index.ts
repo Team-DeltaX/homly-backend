@@ -3,11 +3,11 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { HomlyUser } from "./entities/User";
 import {
-    getUsers,
+ homly_user
 } from "./controllers/UserController";
 
 import dotenv from "dotenv";
-import { addUsers } from "./routers/addUsers";
+// import { homly_user } from "./routers/addUsers";
 dotenv.config();
 
 const app = express();
@@ -35,14 +35,14 @@ AppDataSource.initialize()
     });
 
     // Routes
-    app.get("/users", getUsers);
+    // app.get("/users", getUsers);
 
     // app.get("/users/:id", getUserById);
     // app.post("/users", createUser);
     // app.put("/users/:id", updateUser);
     // app.delete("/users/:id", deleteUser);
 
-    app.use(addUsers);
+    app.use('/',homly_user);
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
