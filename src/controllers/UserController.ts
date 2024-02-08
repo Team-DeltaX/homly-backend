@@ -11,7 +11,7 @@ const userExist = async (ServiceNo: string) => {
     service_number: ServiceNo,
   });
   
-  if (usersWithSameNo) {
+  if (usersWithSameNo && usersWithSameNo.verified) {
     return false;
   } else {
     return true;

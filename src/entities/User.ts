@@ -26,6 +26,11 @@ export class HomlyUser extends BaseEntity {
   })
   image!: string;
 
+  @Column({
+    default: false,
+  })
+  verified!:boolean;
+
   @CreateDateColumn({
     nullable: false,
   })
