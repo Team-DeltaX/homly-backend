@@ -13,8 +13,6 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
 
-// import path
-import path from "path";
 
 import { AppDataSource } from "../index";
 import { HomlyUser, UserVerification } from "../entities/User";
@@ -46,7 +44,7 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
     to: email,
     subject: "Homly User Verification",
     html: `<h1>Homly User Verification</h1><p>Click the link below to verify your account: <a href="${url}/${serviceNo}/${verificationCode}">Verify</a></p>`,
-    // text: `Click the link below to verify your account: ${url}verify/${serviceNo}/${verificationCode}`,
+    
   };
   // hash the verification code
   const saltRound = 10;
@@ -62,14 +60,7 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
         // expire after 1 minites
         expires_at: new Date(Date.now() + 1 * 60000),
       });
-      // console.log("verification code saved");
-      // transporter.sendMail(mailOptions, (error: any, info: any) => {
-      //   if (error) {
-      //     console.log(error);
-      //   } else {
-      //     console.log("Email sent: " + info.response);
-      //   }
-      // });
+      
 
       userVerification
         .save()
@@ -93,8 +84,9 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
 };
 
 // verify email
+// url with verification code and service number
 homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
-  let message, verified;
+  let message, verified; // send details to frontend
   const { serviceNo, verificationCode } = req.params;
   const userVerification = await AppDataSource.manager.findOneBy(
     UserVerification,
@@ -115,9 +107,9 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
           service_number: serviceNo,
         })
         .then((result) => {
-          // AppDataSource.manager.delete(HomlyUser, {
-          //   service_number: serviceNo,
-          // });
+          AppDataSource.manager.delete(HomlyUser, {
+            service_number: serviceNo,
+          });
         });
       message = "Verification Link is Expired";
       verified = false;
@@ -131,57 +123,24 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
           if (result) {
             // update user
             console.log("verified");
-            // AppDataSource.manager.update(
-            //   HomlyUser,
-            //   { service_number: serviceNo },
-            //   { verified: true }
-            // ).then(() => {
-            //   console.log("user verified and deleted from userverification table")
-            //   AppDataSource.manager.delete(UserVerification, {
-            //     service_number: serviceNo,
-            //   })
-            // })
-            // res.status(200).json({ message: "User verified", success: true });
-            verified = false;
-            message = "User verified";
+            AppDataSource.manager.update(
+              HomlyUser,
+              { service_number: serviceNo },
+              { verified: true }
+            ).then(() => {
+              console.log("user verified and deleted from userverification table")
+              AppDataSource.manager.delete(UserVerification, {
+                service_number: serviceNo,
+              })
+            })
+            verified = true;
+            message = "User is Verified";
             res.redirect(
               `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
             );
           }
         });
     }
-
-    // bcrypt.compare(verificationCode, userVerification.verification_code);
-
-    // if (true) {
-    //   const expiresAt = userVerification?.expires_at; // Add null check here
-
-    //   if (expiresAt && expiresAt < new Date()) {
-    //     // record has expired, then delete data
-    //     // delete user record from userverification table
-    //     await AppDataSource.manager
-    //       .delete(UserVerification, {
-    //         service_number: serviceNo,
-    //       })
-    //       .then((result) => {
-    //         AppDataSource.manager.delete(HomlyUser, {
-    //           service_number: serviceNo,
-    //         });
-    //       });
-    //   } else {
-    //     // update user
-    //     AppDataSource.manager.update(
-    //       HomlyUser,
-    //       { service_number: serviceNo },
-    //       { verified: true }
-    //     );
-    //     res.status(200).json({ message: "User verified", success: true });
-    //   }
-    // } else {
-    //   res
-    //     .status(200)
-    //     .json({ message: "Invalid verification code", success: false });
-    // }
   } else {
     message = "User not found";
     verified = false;
@@ -197,7 +156,7 @@ const userExist = async (ServiceNo: string) => {
     service_number: ServiceNo,
   });
 
-  if (usersWithSameNo && !usersWithSameNo.verified) {
+  if (usersWithSameNo && usersWithSameNo.verified) {
     return false;
   } else {
     return true;
@@ -209,27 +168,54 @@ homly_user.get("/", async (req, res) => {
   res.json(users);
 });
 
+
+// user registration
 homly_user.post("/add", async (req, res) => {
   const { ServiceNo, Password, Email, ContactNo, image } = req.body;
 
   if (await userExist(ServiceNo)) {
     sendVerificationEmail(Email, ServiceNo);
-    // const user = HomlyUser.create({
-    //   service_number: ServiceNo,
-    //   password: Password,
-    //   email: Email,
-    //   contact_number: ContactNo,
-    //   image,
-    // });
-    //  await user.save();
-    return res.status(201).json({
-      message: "Check your emails,We will send you a verification link",
-      success: true,
+    let hashedPassword;
+    // bcrypt password
+    const saltRounds = 10;
+    bcrypt.hash(Password, saltRounds).then(async (hash) => {
+      
+      const user =  HomlyUser.create({
+        service_number: ServiceNo,
+        password: hash,
+        email: Email,
+        contact_number: ContactNo,
+        image,
+      });
+      await user.save();
+      return res.status(201).json({
+        message: "Check your emails,We will send you a verification link",
+        success: true,
+      });
     });
   } else {
     return res
       .status(201)
       .json({ message: "User already exists!", success: false });
+  }
+});
+
+// user login
+homly_user.post("/login", async (req, res) => {
+  const { serviceNo, password } = req.body;
+  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
+    service_number: serviceNo,
+  });
+  if (user) {
+    bcrypt.compare(password, user.password).then((result) => {
+      if (result) {
+        res.status(200).json({ message: "Login successful", success: true });
+      } else {
+        res.status(200).json({ message: "Incorrect password or Username", success: false });
+      }
+    });
+  } else {
+    res.status(200).json({ message: "You are not a registered user", success: false });
   }
 });
 
