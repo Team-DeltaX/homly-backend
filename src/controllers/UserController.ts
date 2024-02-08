@@ -94,6 +94,7 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
 
 // verify email
 homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
+  let message, verified;
   const { serviceNo, verificationCode } = req.params;
   const userVerification = await AppDataSource.manager.findOneBy(
     UserVerification,
@@ -118,13 +119,18 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
           //   service_number: serviceNo,
           // });
         });
+      message = "Verification Link is Expired";
+      verified = false;
+      res.redirect(
+        `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
+      );
     } else {
       bcrypt
         .compare(verificationCode, userVerification.verification_code)
         .then((result) => {
           if (result) {
             // update user
-            console.log("verified")
+            console.log("verified");
             // AppDataSource.manager.update(
             //   HomlyUser,
             //   { service_number: serviceNo },
@@ -136,13 +142,14 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
             //   })
             // })
             // res.status(200).json({ message: "User verified", success: true });
+            verified = false;
+            message = "User verified";
+            res.redirect(
+              `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
+            );
           }
         });
     }
-
-    res.redirect('http://localhost:3000/verifiedRegistration')
-
-    
 
     // bcrypt.compare(verificationCode, userVerification.verification_code);
 
@@ -176,11 +183,14 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
     //     .json({ message: "Invalid verification code", success: false });
     // }
   } else {
+    message = "User not found";
+    verified = false;
     res.status(200).json({ message: "User not found", success: false });
+    res.redirect(
+      `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
+    );
   }
 });
-
-
 
 const userExist = async (ServiceNo: string) => {
   const usersWithSameNo = await AppDataSource.manager.findOneBy(HomlyUser, {
