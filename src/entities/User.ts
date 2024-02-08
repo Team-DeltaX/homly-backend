@@ -36,3 +36,23 @@ export class HomlyUser extends BaseEntity {
   })
   created_at!: Date;
 }
+
+
+@Entity()
+export class UserVerification extends BaseEntity {
+  @PrimaryColumn()
+  service_number!: string;
+
+  @Column()
+  verification_code!: string;
+
+  @Column({
+    nullable: false,
+  })
+  created_at!: Date;
+
+  @Column({
+    nullable: false,
+  })
+  expires_at!: Date;
+}
