@@ -13,7 +13,6 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
 
-
 import { AppDataSource } from "../index";
 import { HomlyUser, UserVerification } from "../entities/User";
 
@@ -44,7 +43,6 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
     to: email,
     subject: "Homly User Verification",
     html: `<h1>Homly User Verification</h1><p>Click the link below to verify your account: <a href="${url}/${serviceNo}/${verificationCode}">Verify</a></p>`,
-    
   };
   // hash the verification code
   const saltRound = 10;
@@ -60,7 +58,6 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
         // expire after 1 minites
         expires_at: new Date(Date.now() + 1 * 60000),
       });
-      
 
       userVerification
         .save()
@@ -123,16 +120,20 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
           if (result) {
             // update user
             console.log("verified");
-            AppDataSource.manager.update(
-              HomlyUser,
-              { service_number: serviceNo },
-              { verified: true }
-            ).then(() => {
-              console.log("user verified and deleted from userverification table")
-              AppDataSource.manager.delete(UserVerification, {
-                service_number: serviceNo,
-              })
-            })
+            AppDataSource.manager
+              .update(
+                HomlyUser,
+                { service_number: serviceNo },
+                { verified: true }
+              )
+              .then(() => {
+                console.log(
+                  "user verified and deleted from userverification table"
+                );
+                AppDataSource.manager.delete(UserVerification, {
+                  service_number: serviceNo,
+                });
+              });
             verified = true;
             message = "User is Verified";
             res.redirect(
@@ -168,7 +169,6 @@ homly_user.get("/", async (req, res) => {
   res.json(users);
 });
 
-
 // user registration
 homly_user.post("/add", async (req, res) => {
   const { ServiceNo, Password, Email, ContactNo, image } = req.body;
@@ -179,8 +179,7 @@ homly_user.post("/add", async (req, res) => {
     // bcrypt password
     const saltRounds = 10;
     bcrypt.hash(Password, saltRounds).then(async (hash) => {
-      
-      const user =  HomlyUser.create({
+      const user = HomlyUser.create({
         service_number: ServiceNo,
         password: hash,
         email: Email,
@@ -206,16 +205,59 @@ homly_user.post("/login", async (req, res) => {
   const user = await AppDataSource.manager.findOneBy(HomlyUser, {
     service_number: serviceNo,
   });
-  if (user) {
+  if (user && user.verified) {
     bcrypt.compare(password, user.password).then((result) => {
       if (result) {
-        res.status(200).json({ message: "Login successful", success: true });
+        res.status(200);
       } else {
-        res.status(200).json({ message: "Incorrect password or Username", success: false });
+        res
+          .status(200)
+          .json({ message: "Incorrect password or Username", success: false });
       }
     });
   } else {
-    res.status(200).json({ message: "You are not a registered user", success: false });
+    res
+      .status(200)
+      .json({ message: "You are not a registered user", success: false });
+  }
+});
+
+// forget password
+// generate OTP and send to email
+const sendOTP = (email: string) => {
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  const mailOptions = {
+    from: process.env.AUTH_EMAIL,
+    to: email,
+    subject: "Reset Password",
+    html: `<h1>Reset Your Password</h1><p>Your OTP is: ${otp}</p>`,
+  };
+  transporter.sendMail(mailOptions, (error: any, info: any) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email OTP sent: " + info.response);
+    }
+  });
+  return otp;
+};
+
+
+// get user by email,serviceno
+homly_user.post("/forgetPassword/details", async (req, res) => {
+  const { serviceNo, email } = req.body;
+  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
+    service_number: serviceNo,
+  });
+  if (user && user.verified) {
+    if (user.email === email) {
+      const otp = sendOTP(email);
+      res.status(200).json({ message: "Check your email", success: true });
+    } else {
+      res.status(200).json({ message: "Invalid Service Number or Email", success: false });
+    }
+  } else {
+    res.status(200).json({ message: "User not found", success: false });
   }
 });
 
