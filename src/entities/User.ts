@@ -39,12 +39,30 @@ export class HomlyUser extends BaseEntity {
 
 
 @Entity()
-export class UserVerification extends BaseEntity {
+export class UserEmailVerification extends BaseEntity {
   @PrimaryColumn()
   service_number!: string;
 
   @Column()
   verification_code!: string;
+
+  @Column({
+    nullable: false,
+  })
+  created_at!: Date;
+
+  @Column({
+    nullable: false,
+  })
+  expires_at!: Date;
+}
+@Entity()
+export class UserOTPVerification extends BaseEntity {
+  @PrimaryColumn()
+  service_number!: string;
+
+  @Column()
+  otp!: string;
 
   @Column({
     nullable: false,

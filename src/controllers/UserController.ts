@@ -14,7 +14,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { AppDataSource } from "../index";
-import { HomlyUser, UserVerification } from "../entities/User";
+import { HomlyUser, UserEmailVerification } from "../entities/User";
 
 const homly_user = express.Router();
 
@@ -51,7 +51,7 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
     .then((hashedVerificationCode) => {
       console.log(hashedVerificationCode);
       // set calues in userverification
-      const userVerification = UserVerification.create({
+      const userVerification = UserEmailVerification.create({
         service_number: serviceNo,
         verification_code: hashedVerificationCode,
         created_at: new Date(),
@@ -86,7 +86,7 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
   let message, verified; // send details to frontend
   const { serviceNo, verificationCode } = req.params;
   const userVerification = await AppDataSource.manager.findOneBy(
-    UserVerification,
+    UserEmailVerification,
     {
       service_number: serviceNo,
     }
@@ -100,7 +100,7 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
       // delete user record from userverification table
       console.log("expired");
       await AppDataSource.manager
-        .delete(UserVerification, {
+        .delete(UserEmailVerification, {
           service_number: serviceNo,
         })
         .then((result) => {
@@ -130,7 +130,7 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
                 console.log(
                   "user verified and deleted from userverification table"
                 );
-                AppDataSource.manager.delete(UserVerification, {
+                AppDataSource.manager.delete(UserEmailVerification, {
                   service_number: serviceNo,
                 });
               });
@@ -224,6 +224,8 @@ homly_user.post("/login", async (req, res) => {
 
 // forget password
 // generate OTP and send to email
+
+let OTP: number;
 const sendOTP = (email: string) => {
   const otp = Math.floor(100000 + Math.random() * 900000);
   const mailOptions = {
@@ -246,13 +248,15 @@ const sendOTP = (email: string) => {
 // get user by email,serviceno
 homly_user.post("/forgetPassword/details", async (req, res) => {
   const { serviceNo, email } = req.body;
+  console.log(serviceNo, email);
   const user = await AppDataSource.manager.findOneBy(HomlyUser, {
     service_number: serviceNo,
   });
+  console.log( user?.verified, user?.email === email)
   if (user && user.verified) {
     if (user.email === email) {
       const otp = sendOTP(email);
-      res.status(200).json({ message: "Check your email", success: true });
+      res.status(200).json({ message: "Check your email,We will send OTP", success: true });
     } else {
       res.status(200).json({ message: "Invalid Service Number or Email", success: false });
     }
@@ -260,5 +264,13 @@ homly_user.post("/forgetPassword/details", async (req, res) => {
     res.status(200).json({ message: "User not found", success: false });
   }
 });
+
+// get otp 
+homly_user.post("/forgetPassword/otp", async (req, res) => {
+  const { serviceNo, otp } = req.body;
+  console.log(serviceNo, otp);
+  res.status(200).json({ message: " OTP", success: true });
+});
+
 
 export { homly_user };
