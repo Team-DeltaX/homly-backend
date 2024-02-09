@@ -14,7 +14,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { AppDataSource } from "../index";
-import { HomlyUser, UserEmailVerification } from "../entities/User";
+import {
+  HomlyUser,
+  UserEmailVerification,
+  UserOTPVerification,
+} from "../entities/User";
 
 const homly_user = express.Router();
 
@@ -49,8 +53,7 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
   bcrypt
     .hash(verificationCode, saltRound)
     .then((hashedVerificationCode) => {
-      console.log(hashedVerificationCode);
-      // set calues in userverification
+      // add verification code to useremailverification table
       const userVerification = UserEmailVerification.create({
         service_number: serviceNo,
         verification_code: hashedVerificationCode,
@@ -98,7 +101,7 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
     if (expiresAt && expiresAt < new Date()) {
       // record has expired, then delete data
       // delete user record from userverification table
-      console.log("expired");
+      console.log("verified email expired");
       await AppDataSource.manager
         .delete(UserEmailVerification, {
           service_number: serviceNo,
@@ -119,7 +122,7 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
         .then((result) => {
           if (result) {
             // update user
-            console.log("verified");
+            console.log("email verified");
             AppDataSource.manager
               .update(
                 HomlyUser,
@@ -143,12 +146,25 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
         });
     }
   } else {
-    message = "User not found";
-    verified = false;
-    res.status(200).json({ message: "User not found", success: false });
-    res.redirect(
-      `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
-    );
+    const user = await AppDataSource.manager.findOneBy(HomlyUser, {
+      service_number: serviceNo,
+    });
+
+    if (user && user.verified) {
+      message = "User already verified";
+      verified = true;
+      res.status(200).json({ message: "User already verified", success: true });
+      res.redirect(
+        `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
+      );
+    } else {
+      message = "User not found";
+      verified = false;
+      res.status(200).json({ message: "User not found", success: false });
+      res.redirect(
+        `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
+      );
+    }
   }
 });
 
@@ -223,10 +239,8 @@ homly_user.post("/login", async (req, res) => {
 });
 
 // forget password
-// generate OTP and send to email
-
-let OTP: number;
-const sendOTP = (email: string) => {
+// generate OTP and send to email function
+const sendOTP = (email: string, serviceNo: string) => {
   const otp = Math.floor(100000 + Math.random() * 900000);
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
@@ -234,16 +248,41 @@ const sendOTP = (email: string) => {
     subject: "Reset Password",
     html: `<h1>Reset Your Password</h1><p>Your OTP is: ${otp}</p>`,
   };
-  transporter.sendMail(mailOptions, (error: any, info: any) => {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log("Email OTP sent: " + info.response);
-    }
-  });
-  return otp;
-};
 
+  // hash the otp
+  const saltRound = 10;
+  bcrypt
+    .hash(otp.toString(), saltRound)
+    .then((hashedOTP) => {
+      // add otp to userotpverification table
+      const userOTPVerification = UserOTPVerification.create({
+        service_number: serviceNo,
+        otp: hashedOTP,
+        created_at: new Date(),
+        // expire after 1 minites
+        expires_at: new Date(Date.now() + 1 * 60000),
+      });
+
+      userOTPVerification
+        .save()
+        .then(() => {
+          console.log("OTP saved");
+          transporter.sendMail(mailOptions, (error: any, info: any) => {
+            if (error) {
+              console.log(error);
+            } else {
+              console.log("Email OTP sent: " + info.response);
+            }
+          });
+        })
+        .catch((err) => {
+          console.log("error saving otp", err);
+        });
+    })
+    .catch((err) => {
+      console.log("error hashing otp", err);
+    });
+};
 
 // get user by email,serviceno
 homly_user.post("/forgetPassword/details", async (req, res) => {
@@ -252,25 +291,56 @@ homly_user.post("/forgetPassword/details", async (req, res) => {
   const user = await AppDataSource.manager.findOneBy(HomlyUser, {
     service_number: serviceNo,
   });
-  console.log( user?.verified, user?.email === email)
+  console.log(user?.verified, user?.email === email);
   if (user && user.verified) {
     if (user.email === email) {
-      const otp = sendOTP(email);
-      res.status(200).json({ message: "Check your email,We will send OTP", success: true });
+      sendOTP(email, serviceNo);
+
+      res
+        .status(200)
+        .json({ message: "Check your email,We will send OTP", success: true });
     } else {
-      res.status(200).json({ message: "Invalid Service Number or Email", success: false });
+      res
+        .status(200)
+        .json({ message: "Invalid Service Number or Email", success: false });
     }
   } else {
     res.status(200).json({ message: "User not found", success: false });
   }
 });
 
-// get otp 
+// get otp and validate
 homly_user.post("/forgetPassword/otp", async (req, res) => {
   const { serviceNo, otp } = req.body;
-  console.log(serviceNo, otp);
-  res.status(200).json({ message: " OTP", success: true });
-});
+  const userOTP = await AppDataSource.manager.findOneBy(UserOTPVerification, {
+    service_number: serviceNo,
+  });
 
+  if (userOTP) {
+    const expiresAt = userOTP.expires_at;
+
+    if (expiresAt && expiresAt < new Date()) {
+      // record has expired, then delete data
+      // delete user record from userotpverification table
+      console.log("otp expired");
+      await AppDataSource.manager.delete(UserOTPVerification, {
+        service_number: serviceNo,
+      });
+      res.status(200).json({ message: "OTP Expired", success: false });
+    } else {
+      bcrypt.compare(otp, userOTP.otp).then(async (result) => {
+        if (result) {
+          console.log("OTP Verified");
+          await AppDataSource.manager.delete(UserOTPVerification, {
+            service_number: serviceNo,
+          });
+          res.status(200).json({ message: "OTP Verified", success: true });
+        } else {
+          res.status(200).json({ message: "Invalid OTP", success: false });
+        }
+      });
+    }
+  }
+});
 
 export { homly_user };
