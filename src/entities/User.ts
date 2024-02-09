@@ -63,7 +63,12 @@ export class UserOTPVerification extends BaseEntity {
 
   @Column()
   otp!: string;
-
+  
+  @Column({
+    default: false,
+  })
+  verified!:boolean;
+  
   @Column({
     nullable: false,
   })
@@ -73,4 +78,6 @@ export class UserOTPVerification extends BaseEntity {
     nullable: false,
   })
   expires_at!: Date;
+
+
 }

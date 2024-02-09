@@ -191,7 +191,6 @@ homly_user.post("/add", async (req, res) => {
 
   if (await userExist(ServiceNo)) {
     sendVerificationEmail(Email, ServiceNo);
-    let hashedPassword;
     // bcrypt password
     const saltRounds = 10;
     bcrypt.hash(Password, saltRounds).then(async (hash) => {
@@ -224,7 +223,7 @@ homly_user.post("/login", async (req, res) => {
   if (user && user.verified) {
     bcrypt.compare(password, user.password).then((result) => {
       if (result) {
-        res.status(200);
+        res.status(200).json({ message: "Login Successful", success: true });
       } else {
         res
           .status(200)
@@ -331,9 +330,11 @@ homly_user.post("/forgetPassword/otp", async (req, res) => {
       bcrypt.compare(otp, userOTP.otp).then(async (result) => {
         if (result) {
           console.log("OTP Verified");
-          await AppDataSource.manager.delete(UserOTPVerification, {
-            service_number: serviceNo,
-          });
+          await AppDataSource.manager.update(
+            UserOTPVerification,
+            { service_number: serviceNo },
+            { verified: true }
+          )
           res.status(200).json({ message: "OTP Verified", success: true });
         } else {
           res.status(200).json({ message: "Invalid OTP", success: false });
@@ -343,6 +344,39 @@ homly_user.post("/forgetPassword/otp", async (req, res) => {
   }else{
     res.status(200).json({ message: "error", success: false });
   }
+});
+
+// reset password
+homly_user.post("/forgetPassword/reset", async (req, res) => {
+  const {serviceNo, password} = req.body;
+  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
+    service_number: serviceNo,
+  });
+  if(user && user.verified){
+    const otp = await AppDataSource.manager.findOneBy(UserOTPVerification, {
+      service_number: serviceNo,
+    }); 
+
+    if(otp?.verified){
+      const saltRounds = 10;
+      bcrypt.hash(password, saltRounds).then(async (hash) => {
+        await AppDataSource.manager.update(
+          HomlyUser,
+          { service_number: serviceNo },
+          { password: hash }
+        );
+        res.status(200).json({ message: "Password Reset Successful", success: true });
+      }).catch((err) => {
+        res.status(200).json({ message: "Error resetting password", success: false });
+      });
+    }else{
+      res.status(200).json({ message: "OTP not verified", success: false });
+    }
+  }else{
+    res.status(200).json({ message: "User not found", success: false });
+  }
+    
+
 });
 
 export { homly_user };
