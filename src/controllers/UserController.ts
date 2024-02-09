@@ -340,6 +340,8 @@ homly_user.post("/forgetPassword/otp", async (req, res) => {
         }
       });
     }
+  }else{
+    res.status(200).json({ message: "error", success: false });
   }
 });
 
