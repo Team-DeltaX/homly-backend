@@ -46,7 +46,7 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
     from: process.env.AUTH_EMAIL,
     to: email,
     subject: "Homly User Verification",
-    html: `<h1>Homly User Verification</h1><p>Click the link below to verify your account: <a href="${url}/${serviceNo}/${verificationCode}">Verify</a></p>`,
+    html: `<h1>Homly User Verification</h1><hr><h4>Click the link below to verify your account: <a href="${url}/${serviceNo}/${verificationCode}">Verify</a></p>`,
   };
   // hash the verification code
   const saltRound = 10;
@@ -245,7 +245,7 @@ const sendOTP = (email: string, serviceNo: string) => {
     from: process.env.AUTH_EMAIL,
     to: email,
     subject: "Reset Password",
-    html: `<h1>Reset Your Password</h1><p>Your OTP is: ${otp}</p>`,
+    html: `<h1>Reset Your Password</h1><hr><h3>Your OTP is: ${otp}</h3>`,
   };
 
   // hash the otp
