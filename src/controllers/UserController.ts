@@ -46,7 +46,7 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
     from: process.env.AUTH_EMAIL,
     to: email,
     subject: "Homly User Verification",
-    html: `<h1>Homly User Verification</h1><hr><h4>Click the link below to verify your account: <a href="${url}/${serviceNo}/${verificationCode}">Verify</a></p>`,
+    html: `<h1>Homly User Verification</h1><hr><h4>Click the link below to verify your account: <a href="${url}/${serviceNo}/${verificationCode}">Verify</a></h4><h4>Your Verification link expire in<span style="text-decoration: underline"> 1 minutes </span></h4>`,
   };
   // hash the verification code
   const saltRound = 10;
@@ -206,6 +206,10 @@ homly_user.post("/add", async (req, res) => {
         message: "Check your emails,We will send you a verification link",
         success: true,
       });
+    }).catch((err) => {
+      return res
+        .status(404)
+        .json({ message: "Error saving user", success: false });
     });
   } else {
     return res
@@ -245,7 +249,7 @@ const sendOTP = (email: string, serviceNo: string) => {
     from: process.env.AUTH_EMAIL,
     to: email,
     subject: "Reset Password",
-    html: `<h1>Reset Your Password</h1><hr><h3>Your OTP is: ${otp}</h3>`,
+    html: `<h1>Reset Your Password</h1><hr><h4>Your OTP is:</h4><h2 style="color:red">${otp}</h2><h4>Your OTP expire in<span style="text-decoration: underline"> 1 minutes </span></h4>`,
   };
 
   // hash the otp
