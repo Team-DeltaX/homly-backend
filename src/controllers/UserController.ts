@@ -151,16 +151,16 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
     });
 
     if (user && user.verified) {
+      // res.status(200).json({ message: "User already verified", success: true });
       message = "User already verified";
       verified = true;
-      res.status(200).json({ message: "User already verified", success: true });
       res.redirect(
         `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
       );
-    } else {
-      message = "User not found";
+    }else{
+      // res.status(200).json({ message: "User not found or Verification link is Expired", success: false });
+      message = "User not found or Verification link is Expired";
       verified = false;
-      res.status(200).json({ message: "User not found", success: false });
       res.redirect(
         `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
       );
