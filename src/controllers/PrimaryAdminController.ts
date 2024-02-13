@@ -42,5 +42,17 @@ router.post("/add", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/all", async (req: Request, res: Response) => {
+  const admins = await AppDataSource.manager.find(LocationAdmin);
+  try {
+    const admins = await AppDataSource.manager.find(LocationAdmin);
+    res.status(200).json(admins);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
 
 export { router };
