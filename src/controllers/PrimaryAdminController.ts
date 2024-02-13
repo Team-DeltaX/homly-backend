@@ -1,0 +1,46 @@
+import express from "express";
+const router = express.Router();
+import { LocationAdmin } from "../entities/LocationAdmin";
+import { Request, Response } from "express";
+import { AppDataSource } from "../index";
+import { error } from "console";
+
+router.post("/add", async (req: Request, res: Response) => {
+  const {
+    AdminNo,
+    UserName,
+    Password,
+    ContactNo,
+    Email,
+    WorkLocation,
+    Disabled,
+  } = req.body;
+
+  //   const locationadmin = LocationAdmin.create();
+
+  try {
+    await AppDataSource.createQueryBuilder()
+      .insert()
+      .into(LocationAdmin)
+      .values([
+        {
+          AdminNo,
+          UserName,
+          Password,
+          ContactNo,
+          Email,
+          WorkLocation,
+          Disabled,
+        },
+      ])
+      .execute();
+
+    res.status(201).json({ message: "User added successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+export { router };

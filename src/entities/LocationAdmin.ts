@@ -1,7 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn} from 'typeorm';
 
 @Entity()
-export class User {
+export class LocationAdmin {
+    Save() {
+        throw new Error("Method not implemented.");
+    }
   @PrimaryColumn()
   AdminNo!: String ;
 
@@ -21,7 +24,10 @@ export class User {
   WorkLocation!: string ;
 
   
-  @Column()
+  @Column({
+    default:false
+  })
   Disabled!: Boolean ;
+    static create: any;
 
 }
