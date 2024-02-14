@@ -159,7 +159,7 @@ homly_user.get("/verify/:serviceNo/:verificationCode", async (req, res) => {
       );
     }else{
       // res.status(200).json({ message: "User not found or Verification link is Expired", success: false });
-      message = "User not found or Verification link is Expired";
+      message = "User not found";
       verified = false;
       res.redirect(
         `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
@@ -186,7 +186,7 @@ homly_user.get("/", async (req, res) => {
 });
 
 // user registration
-homly_user.post("/add", async (req, res) => {
+homly_user.post("/register", async (req, res) => {
   const { ServiceNo, Password, Email, ContactNo, image } = req.body;
 
   if (await userExist(ServiceNo)) {
@@ -200,7 +200,7 @@ homly_user.post("/add", async (req, res) => {
         email: Email,
         contact_number: ContactNo,
         image,
-      });
+      }); 
       await user.save();
       return res.status(201).json({
         message: "Check your emails,We will send you a verification link",
@@ -351,7 +351,7 @@ homly_user.post("/forgetPassword/otp", async (req, res) => {
 });
 
 // reset password
-homly_user.post("/forgetPassword/reset", async (req, res) => {
+homly_user.put("/forgetPassword/reset", async (req, res) => {
   const {serviceNo, password} = req.body;
   const user = await AppDataSource.manager.findOneBy(HomlyUser, {
     service_number: serviceNo,
