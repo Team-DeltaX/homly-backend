@@ -63,7 +63,7 @@ router.post("/add", async (req: Request, res: Response) => {
 
     
 
-    transporter.sendMail(mailOptions, function (error, info) {
+    transporter.sendMail(mailOptions, function (error: any, info) {
       if (error) {
         console.log(error);
       } else {
@@ -71,10 +71,17 @@ router.post("/add", async (req: Request, res: Response) => {
       }
     });
 
-    res.status(201).json({ message: "User added successfully" });
+    // console.log("sucess added");
+
+    res.status(200).json({ message: "User added successfully" });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    
+    
+    
+      console.log(`error is ${error}`);
+      res.status(500).json({ message: "Internal Server Error!" });
+    
   }
 });
 
@@ -84,8 +91,8 @@ router.get("/all", async (req: Request, res: Response) => {
     const admins = await AppDataSource.manager.find(LocationAdmin);
     res.status(200).json(admins);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
   }
 });
 
@@ -103,7 +110,7 @@ router.put("/disable/:id", async (req: Request, res: Response) => {
     res.status(200).json({ message: "disable sucessful!" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ mes: "Internal Server Error" });
   }
 });
 
