@@ -28,6 +28,12 @@ export class LocationAdmin {
     default:false
   })
   Disabled!: Boolean ;
-    static create: any;
+    // static create: any;
+
+
+  @Column({
+    default:null
+  })
+  Sub!: string ;
 
 }
