@@ -21,8 +21,8 @@ export class HomlyUser extends BaseEntity {
   contact_number!: string;
 
   @Column({
-    type: "long",
-
+    type: "clob",
+    nullable: true,
   })
   image!: string;
 
@@ -35,4 +35,49 @@ export class HomlyUser extends BaseEntity {
     nullable: false,
   })
   created_at!: Date;
+}
+
+
+@Entity()
+export class UserEmailVerification extends BaseEntity {
+  @PrimaryColumn()
+  service_number!: string;
+
+  @Column()
+  verification_code!: string;
+
+  @Column({
+    nullable: false,
+  })
+  created_at!: Date;
+
+  @Column({
+    nullable: false,
+  })
+  expires_at!: Date;
+}
+@Entity()
+export class UserOTPVerification extends BaseEntity {
+  @PrimaryColumn()
+  service_number!: string;
+
+  @Column()
+  otp!: string;
+  
+  @Column({
+    default: false,
+  })
+  verified!:boolean;
+  
+  @Column({
+    nullable: false,
+  })
+  created_at!: Date;
+
+  @Column({
+    nullable: false,
+  })
+  expires_at!: Date;
+
+
 }
