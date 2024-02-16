@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn} from 'typeorm';
-
+import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany} from 'typeorm';
+import { Complaints } from './Complaint';
 @Entity()
 export class LocationAdmin {
     Save() {
@@ -35,5 +35,8 @@ export class LocationAdmin {
     default:null
   })
   Sub!: string ;
+
+  @OneToMany(() => Complaints, (complaints) => complaints.ComplaintID)
+  Complaint!: Complaints[]
 
 }

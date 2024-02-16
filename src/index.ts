@@ -1,10 +1,13 @@
 import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { User } from "./entities/User";
+import { Userdel } from "./entities/Userdel";
 import {LocationAdmin} from './entities/LocationAdmin';
 import {router} from '../src/controllers/PrimaryAdminController';
 // const cors = require('cors');
+import { Complaints } from "./entities/Complaint";
+import { BlackListedUser } from "./entities/BlackListedUser";
+import { BlackListHistory } from "./entities/BlackListHistory";
 
 
 import {
@@ -23,7 +26,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING, 
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [LocationAdmin,User],
+  entities: [LocationAdmin,Userdel,Complaints,BlackListedUser,BlackListHistory],
   synchronize: true,
   logging: false,
 
