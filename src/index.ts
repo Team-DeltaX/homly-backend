@@ -3,7 +3,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "./entities/User";
 import {
-    getUsers,
+  getUsers,
 } from "./controllers/UserController";
 
 import dotenv from "dotenv";
@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3002;
 
 export const AppDataSource = new DataSource({
   type: "oracle",
-  connectString: process.env.DB_CONNECTION_STRING, 
+  connectString: process.env.DB_CONNECTION_STRING,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   entities: [User],
@@ -36,7 +36,7 @@ AppDataSource.initialize()
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
-      
+
     });
   })
   .catch((error) => console.log(error));
