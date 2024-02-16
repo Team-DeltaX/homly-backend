@@ -58,7 +58,7 @@ router.post("/add", async (req: Request, res: Response) => {
         from: "mnbro123321@gmail.com",
         to: Email,
         subject: "You Are Added as Location Admin in Homly",
-        text: `Your Added As Location Admin in Homly.Your Password is ${Password} and Your UserName is ${UserName} and Your Work Location is ${WorkLocation}` ,
+        html: `<p>Your Added As Location Admin in Homly. Your <strong>Password</strong> is <strong>${Password}</strong> and Your <strong>UserName</strong> is <strong>${UserName}</strong> and Your Work Location is ${WorkLocation}</p><br><p>in any problem please contact the primary admin</p>`
       };
 
     

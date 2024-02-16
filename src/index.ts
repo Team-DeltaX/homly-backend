@@ -23,7 +23,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING, 
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [User,LocationAdmin],
+  entities: [LocationAdmin,User],
   synchronize: true,
   logging: false,
 
