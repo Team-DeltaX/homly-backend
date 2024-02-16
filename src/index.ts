@@ -2,9 +2,7 @@ import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { HomlyUser,UserEmailVerification,UserOTPVerification } from "./entities/User";
-import {
- homly_user
-} from "./controllers/UserController";
+import { homly_user } from "./routers/UserRouters";
 
 import dotenv from "dotenv";
 // import { homly_user } from "./routers/addUsers";
