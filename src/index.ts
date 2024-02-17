@@ -1,8 +1,7 @@
 import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { User } from "./entities/User";
-import {LocationAdmin} from './entities/LocationAdmin';
+import {SpecailReservation} from './entities/SpecialReservation';
 import {router} from '../src/controllers/PrimaryAdminController';
 // const cors = require('cors');
 
@@ -23,7 +22,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING, 
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [LocationAdmin,User],
+  entities: [SpecailReservation],
   synchronize: true,
   logging: false,
 
@@ -39,7 +38,7 @@ AppDataSource.initialize()
       next();
     });
 
-    app.use('/locationadmin',router)
+    app.use('/locationadmin/reservations',router)
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
       
