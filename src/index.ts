@@ -8,7 +8,7 @@ import {router} from '../src/controllers/PrimaryAdminController';
 import { Complaints } from "./entities/Complaint";
 import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
-
+import { LocationAdminRoute } from "./routes/LocationAdminRoute";
 
 import {
     getUsers,
@@ -42,7 +42,8 @@ AppDataSource.initialize()
       next();
     });
 
-    app.use('/locationadmin',router)
+    app.use('/locationadmin',LocationAdminRoute)
+    
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
       

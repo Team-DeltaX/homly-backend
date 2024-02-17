@@ -39,4 +39,10 @@ export class LocationAdmin {
   @OneToMany(() => Complaints, (complaints) => complaints.ComplaintID)
   Complaint!: Complaints[]
 
+
+  @Column({
+    default:false
+  })
+  Verified!: Boolean ;
+
 }
