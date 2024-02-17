@@ -313,6 +313,31 @@ export const disableadmin =async (req: Request, res: Response) => {
   }
 }
 
+
+export const editadmindeatails =async (req: Request, res: Response) => {
+  const AdminNo=req.body.AdminNo;
+  const Email=req.body.Email
+  const ContactNo=req.body.ContactNo
+  console.log(AdminNo,ContactNo,Email)
+  
+ 
+ try {
+    await AppDataSource.manager.update(
+      LocationAdmin,
+      { AdminNo: AdminNo },
+      { Email:Email,ContactNo:ContactNo},
+      
+      
+    );
+
+    res.status(200).json({ message: "update sucessful!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mes: "Internal Server Error" });
+  }
+}
+
+
 export const sendMail=async (req: Request, res: Response) => {
   
   const {UserName,Email,AdminNo}=req.body
