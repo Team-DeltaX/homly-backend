@@ -45,374 +45,166 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
     to: email,
     subject: "Homly User Verification",
     html: `
-    <!DOCTYPE HTML
-    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
-    xmlns:o="urn:schemas-microsoft-com:office:office">
+   
 
-<head>
-
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="x-apple-disable-message-reformatting">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+    <head>
     <title></title>
-
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <!--[if !mso]><!-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--<![endif]-->
+    <meta name="x-apple-disable-message-reformatting" content="" />
+    <meta content="target-densitydpi=device-dpi" name="viewport" />
+    <meta content="true" name="HandheldFriendly" />
+    <meta content="width=device-width" name="viewport" />
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no" />
     <style type="text/css">
-        @media only screen and (min-width: 620px) {
-            .u-row {
-                width: 600px !important;
-            }
-
-            .u-row .u-col {
-                vertical-align: top;
-            }
-
-            .u-row .u-col-100 {
-                width: 600px !important;
-            }
-
-        }
-
-        @media (max-width: 620px) {
-            .u-row-container {
-                max-width: 100% !important;
-                padding-left: 0px !important;
-                padding-right: 0px !important;
-            }
-
-            .u-row .u-col {
-                min-width: 320px !important;
-                max-width: 100% !important;
-                display: block !important;
-            }
-
-            .u-row {
-                width: 100% !important;
-            }
-
-            .u-col {
-                width: 100% !important;
-            }
-
-            .u-col>div {
-                margin: 0 auto;
-            }
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        table,
-        tr,
-        td {
-            vertical-align: top;
-            border-collapse: collapse;
-        }
-
-        p {
-            margin: 0;
-        }
-
-        .ie-container table,
-        .mso-container table {
-            table-layout: fixed;
-        }
-
-        * {
-            line-height: inherit;
-        }
-
-        a[x-apple-data-detectors='true'] {
-            color: inherit !important;
-            text-decoration: none !important;
-        }
-
-        table,
-        td {
-            color: #000000;
-        }
-
-        #u_body a {
-            color: #0000ee;
-            text-decoration: underline;
-        }
-
-        @media (max-width: 480px) {
-            #u_content_image_1 .v-src-width {
-                width: auto !important;
-            }
-
-            #u_content_image_1 .v-src-max-width {
-                max-width: 40% !important;
-            }
-
-            #u_content_heading_1 .v-font-size {
-                font-size: 38px !important;
-            }
-
-            #u_content_image_3 .v-src-width {
-                width: 100% !important;
-            }
-
-            #u_content_image_3 .v-src-max-width {
-                max-width: 100% !important;
-            }
-
-            #u_content_text_5 .v-container-padding-padding {
-                padding: 10px 30px 11px 10px !important;
-            }
-        }
+    table {
+    border-collapse: separate;
+    table-layout: fixed;
+    mso-table-lspace: 0pt;
+    mso-table-rspace: 0pt
+    }
+    table td {
+    border-collapse: collapse
+    }
+    .ExternalClass {
+    width: 100%
+    }
+    .ExternalClass,
+    .ExternalClass p,
+    .ExternalClass span,
+    .ExternalClass font,
+    .ExternalClass td,
+    .ExternalClass div {
+    line-height: 100%
+    }
+    body, a, li, p, h1, h2, h3 {
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    }
+    html {
+    -webkit-text-size-adjust: none !important
+    }
+    body, #innerTable {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale
+    }
+    #innerTable img+div {
+    display: none;
+    display: none !important
+    }
+    img {
+    Margin: 0;
+    padding: 0;
+    -ms-interpolation-mode: bicubic
+    }
+    h1, h2, h3, p, a {
+    line-height: 1;
+    overflow-wrap: normal;
+    white-space: normal;
+    word-break: break-word
+    }
+    a {
+    text-decoration: none
+    }
+    h1, h2, h3, p {
+    min-width: 100%!important;
+    width: 100%!important;
+    max-width: 100%!important;
+    display: inline-block!important;
+    border: 0;
+    padding: 0;
+    margin: 0
+    }
+    a[x-apple-data-detectors] {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important
+    }
+    a[href^="mailto"],
+    a[href^="tel"],
+    a[href^="sms"] {
+    color: inherit;
+    text-decoration: none
+    }
+    img,p{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:22px;font-weight:400;font-style:normal;font-size:16px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}h1{margin:0;Margin:0;font-family:Roboto,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:34px;font-weight:400;font-style:normal;font-size:28px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}h2{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:30px;font-weight:400;font-style:normal;font-size:24px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}h3{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:26px;font-weight:400;font-style:normal;font-size:20px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}
     </style>
-
-
-
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet"
-        type="text/css">
-
-</head>
-
-<body class="clean-body u_body"
-    style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #ffffff;color: #000000">
-
-    <table id="u_body"
-        style="border-collapse: collapse;table-layout: fixed;border-spacing: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;vertical-align: top;min-width: 320px;Margin: 0 auto;background-color: #ffffff;width:100%"
-        cellpadding="0" cellspacing="0">
-        <tbody>
-            <tr style="vertical-align: top">
-                <td style="word-break: break-word;border-collapse: collapse !important;vertical-align: top">
-
-
-                    <div class="u-row-container" style="padding: 0px;background-color: transparent">
-                        <div class="u-row"
-                            style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #f1f2f6;">
-                            <div
-                                style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
-
-                                <div class="u-col u-col-100"
-                                    style="max-width: 320px;min-width: 600px;display: table-cell;vertical-align: top;">
-                                    <div style="background-color: #ffffff;height: 100%;width: 100% !important;">
-                                        <div
-                                            style="box-sizing: border-box; height: 100%; padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;">
-
-                                            <table id="u_content_image_1" style="font-family:'Montserrat',sans-serif;"
-                                                role="presentation" cellpadding="0" cellspacing="0" width="100%"
-                                                border="0">
-                                                <tbody>
-                                                    <tr>
-                                                        <td class="v-container-padding-padding"
-                                                            style="overflow-wrap:break-word;word-break:break-word;padding:30px 10px 31px;font-family:'Montserrat',sans-serif;"
-                                                            align="left">
-
-                                                            <table width="100%" cellpadding="0" cellspacing="0"
-                                                                border="0">
-                                                                <tr>
-                                                                    <td style="padding-right: 0px;padding-left: 0px;"
-                                                                        align="center">
-
-                                                                        <img align="center" border="0"
-                                                                            src="https://drive.google.com/thumbnail?id=1A-WuiaOpfKXcAqZjIVZVNH0VEkzWMxI2&sz=w1000"
-                                                                            alt="Logo" title="Logo"
-                                                                            style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 24%;max-width: 139.2px;"
-                                                                            width="139.2"
-                                                                            class="v-src-width v-src-max-width" />
-
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-
-
-                        <div class="u-row-container" style="padding: 0px;background-color: transparent">
-                            <div class="u-row"
-                                style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #fbfcff;">
-                                <div
-                                    style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
-                                    <div class="u-col u-col-100"
-                                        style="max-width: 320px;min-width: 600px;display: table-cell;vertical-align: top;">
-                                        <div
-                                            style="height: 100%;width: 100% !important;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;">
-                                            <div
-                                                style="box-sizing: border-box; height: 100%; padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;">
-
-                                                <table id="u_content_heading_1"
-                                                    style="font-family:'Montserrat',sans-serif;" role="presentation"
-                                                    cellpadding="0" cellspacing="0" width="100%" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="v-container-padding-padding"
-                                                                style="overflow-wrap:break-word;word-break:break-word;padding:50px 10px 30px;font-family:'Montserrat',sans-serif;"
-                                                                align="left">
-
-                                                                <h1 class="v-font-size"
-                                                                    style="margin: 0px; color: #27187e; line-height: 140%; text-align: center; word-wrap: break-word; font-family: 'Montserrat',sans-serif; font-size: 36px; font-weight: 400;">
-                                                                    <span><strong>Verify Your Email
-                                                                            Address</strong></span></h1>
-
-
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                <table id="u_content_image_3"
-                                                    style="font-family:'Montserrat',sans-serif;" role="presentation"
-                                                    cellpadding="0" cellspacing="0" width="100%" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="v-container-padding-padding"
-                                                                style="overflow-wrap:break-word;word-break:break-word;padding:15px;font-family:'Montserrat',sans-serif;"
-                                                                align="left">
-
-                                                                <table width="100%" cellpadding="0" cellspacing="0"
-                                                                    border="0">
-                                                                    <tr>
-                                                                        <td style="padding-right: 0px;padding-left: 0px;"
-                                                                            align="center">
-
-                                                                            <img align="center" border="0"
-                                                                                src="https://drive.google.com/thumbnail?id=1uFMnsH8AYl5ax7U8MXvsZdkGKQy75uec&sz=w1000"
-                                                                                alt="Hero Image" title="Hero Image"
-                                                                                style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 55%;max-width: 313.5px;"
-                                                                                width="313.5"
-                                                                                class="v-src-width v-src-max-width" />
-
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-
-
-                            <div class="u-row-container" style="padding: 0px;background-color: transparent">
-                                <div class="u-row"
-                                    style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #fbfcff;">
-                                    <div
-                                        style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
-                                        <div class="u-col u-col-100"
-                                            style="max-width: 320px;min-width: 600px;display: table-cell;vertical-align: top;">
-                                            <div
-                                                style="height: 100%;width: 100% !important;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;">
-                                                <div
-                                                    style="box-sizing: border-box; height: 100%; padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;">
-
-                                                    <table id="u_content_text_5"
-                                                        style="font-family:'Montserrat',sans-serif;" role="presentation"
-                                                        cellpadding="0" cellspacing="0" width="100%" border="0">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td class="v-container-padding-padding"
-                                                                    style="overflow-wrap:break-word;word-break:break-word;padding:40px 30px 20px 40px;font-family:'Montserrat',sans-serif;"
-                                                                    align="left">
-
-                                                                    <div class="v-font-size"
-                                                                        style="font-size: 14px; color: #4b4a4a; line-height: 190%; text-align: left; word-wrap: break-word;">
-                                                                        <p style="font-size: 14px; line-height: 190%;">
-                                                                            <span
-                                                                                style="font-size: 18px; line-height: 34.2px;"><strong><span
-                                                                                        style="line-height: 34.2px; font-size: 18px;">Dear
-                                                                                        ${serviceNo},</span></strong></span>
-                                                                        </p>
-                                                                        <p style="font-size: 14px; line-height: 190%;">
-                                                                            <span
-                                                                                style="font-size: 16px; line-height: 30.4px;">Please
-                                                                                Verify Your Email</span></p>
-                                                                    </div>
-
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-
-                                                    <table style="font-family:'Montserrat',sans-serif; "
-                                                        role="presentation" cellpadding="0" cellspacing="0" width="100%"
-                                                        border="0">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td class="v-container-padding-padding"
-                                                                    style="overflow-wrap:break-word;word-break:break-word;padding:15px 10px 30px;font-family:'Montserrat',sans-serif;"
-                                                                    align="left">
-
-
-                                                                    <div align="center">
-
-                                                                        <a href=${link} target="_blank"
-                                                                            class="v-button v-font-size"
-                                                                            style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #ff8600; border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
-                                                                            <span
-                                                                                style="display:block;padding:16px 50px;line-height:120%;"><strong><span
-                                                                                        style="font-size: 14px; line-height: 16.8px;">C
-                                                                                        L I C K   H E R
-                                                                                        E</span></strong></span>
-                                                                        </a>
-
-                                                                    </div>
-
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-
-                                                    <table style="font-family:'Montserrat',sans-serif;"
-                                                        role="presentation" cellpadding="0" cellspacing="0" width="100%"
-                                                        border="0">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td class="v-container-padding-padding"
-                                                                    style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Montserrat',sans-serif;"
-                                                                    align="left">
-
-                                                                    <div class="v-font-size"
-                                                                        style="font-size: 14px; line-height: 140%; text-align: center; word-wrap: break-word;">
-                                                                        <p style="line-height: 140%;">This link expire
-                                                                            in 1 minute</p>
-                                                                    </div>
-
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</body>
-
-</html>
-
+    <style type="text/css">
+    @media (min-width: 481px) {
+    .hd { display: none!important }
+    }
+    </style>
+    <style type="text/css">
+    @media (max-width: 480px) {
+    .hm { display: none!important }
+    }
+    </style>
+    <style type="text/css">
+    [style*="Lato"] {font-family: 'Lato', BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif !important;} [style*="Albert Sans"] {font-family: 'Albert Sans', BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif !important;} [style*="Inter Tight"] {font-family: 'Inter Tight', BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif !important;}
+    @media only screen and (min-width: 481px) {img,p{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:22px;font-weight:400;font-style:normal;font-size:16px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}h1{margin:0;Margin:0;font-family:Roboto,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:34px;font-weight:400;font-style:normal;font-size:28px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}h2{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:30px;font-weight:400;font-style:normal;font-size:24px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}h3{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:26px;font-weight:400;font-style:normal;font-size:20px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}.t3,.t4{mso-line-height-alt:60px!important;line-height:60px!important;display:block!important}.t9{border-radius:8px!important;overflow:hidden!important;padding:60px!important}.t11{padding:60px!important;border-radius:8px!important;overflow:hidden!important;width:480px!important}.t15,.t37,.t57{width:600px!important}}
+    </style>
+    <style type="text/css" media="screen and (min-width:481px)">.moz-text-html img,.moz-text-html p{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:22px;font-weight:400;font-style:normal;font-size:16px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}.moz-text-html h1{margin:0;Margin:0;font-family:Roboto,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:34px;font-weight:400;font-style:normal;font-size:28px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}.moz-text-html h2{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:30px;font-weight:400;font-style:normal;font-size:24px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}.moz-text-html h3{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:26px;font-weight:400;font-style:normal;font-size:20px;text-decoration:none;text-transform:none;letter-spacing:0;direction:ltr;color:#333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px}.moz-text-html .t3,.moz-text-html .t4{mso-line-height-alt:60px!important;line-height:60px!important;display:block!important}.moz-text-html .t9{border-radius:8px!important;overflow:hidden!important;padding:60px!important}.moz-text-html .t11{padding:60px!important;border-radius:8px!important;overflow:hidden!important;width:480px!important}.moz-text-html .t15,.moz-text-html .t37,.moz-text-html .t57{width:600px!important}</style>
+    <!--[if !mso]><!-->
+    <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;800&amp;family=Inter+Tight:wght@900&amp;family=Lato:wght@400;700&amp;display=swap" rel="stylesheet" type="text/css" />
+    
+    </head>
+    <body class="t0" style="min-width:100%;Margin:0px;padding:0px;background-color:#F4F4F4;"><div class="t1" style="background-color:#F4F4F4;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td class="t2" style="font-size:0;line-height:0;mso-line-height-rule:exactly;background-color:#F4F4F4;" valign="top" align="center">
+    <!--[if mso]>
+    <v:background xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false">
+    <v:fill color="#F4F4F4"/>
+    </v:background>
+    <![endif]-->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" align="center" id="innerTable"><tr><td><div class="t3" style="mso-line-height-rule:exactly;font-size:1px;display:none;">&nbsp;</div></td></tr><tr><td>
+    <table class="t10" role="presentation" cellpadding="0" cellspacing="0" align="center"><tr>
+    <!--[if !mso]><!--><td class="t11" style="background-color:#FFFFFF;width:400px;padding:40px 40px 40px 40px;">
+    <!--<![endif]-->
+    <!--[if mso]><td class="t11" style="background-color:#FFFFFF;width:480px;padding:40px 40px 40px 40px;"><![endif]-->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td>
+    <table class="t46" role="presentation" cellpadding="0" cellspacing="0" align="left"><tr>
+    <!--[if !mso]><!--><td class="t47" style="width:134px;">
+    <!--<![endif]-->
+    <!--[if mso]><td class="t47" style="width:134px;"><![endif]-->
+    <div style="font-size:0px;"><img class="t53" style="display:block;border:0;height:auto;width:100%;Margin:0;max-width:100%;" width="134" height="36.59375" alt="" src="https://drive.google.com/thumbnail?id=1A-WuiaOpfKXcAqZjIVZVNH0VEkzWMxI2&sz=w1000"/></div></td>
+    </tr></table>
+    </td></tr><tr><td><div class="t45" style="mso-line-height-rule:exactly;mso-line-height-alt:29px;line-height:29px;font-size:1px;display:block;">&nbsp;</div></td></tr><tr><td>
+    <table class="t56" role="presentation" cellpadding="0" cellspacing="0" align="center"><tr>
+    <!--[if !mso]><!--><td class="t57" style="width:480px;">
+    <!--<![endif]-->
+    <!--[if mso]><td class="t57" style="width:480px;"><![endif]-->
+    <h3 class="t63" style="margin:0;Margin:0;font-family:BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif,'Lato';line-height:26px;font-weight:400;font-style:normal;font-size:20px;text-decoration:none;text-transform:none;direction:ltr;color:#333333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px;"><span class="t64" style="margin:0;Margin:0;font-weight:700;mso-line-height-rule:exactly;">Dear ${serviceNo},</span></h3></td>
+    </tr></table>
+    </td></tr><tr><td>
+    <table class="t14" role="presentation" cellpadding="0" cellspacing="0" align="center"><tr>
+    <!--[if !mso]><!--><td class="t15" style="width:480px;">
+    <!--<![endif]-->
+    <!--[if mso]><td class="t15" style="width:480px;"><![endif]-->
+    <h1 class="t21" style="margin:0;Margin:0;font-family:BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif,'Albert Sans';line-height:41px;font-weight:800;font-style:normal;font-size:39px;text-decoration:none;text-transform:none;letter-spacing:-1.56px;direction:ltr;color:#333333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:1px;">Confirm your account</h1></td>
+    </tr></table>
+    </td></tr><tr><td><div class="t13" style="mso-line-height-rule:exactly;mso-line-height-alt:16px;line-height:16px;font-size:1px;display:block;">&nbsp;</div></td></tr><tr><td>
+    <table class="t36" role="presentation" cellpadding="0" cellspacing="0" align="center"><tr>
+    <!--[if !mso]><!--><td class="t37" style="width:480px;">
+    <!--<![endif]-->
+    <!--[if mso]><td class="t37" style="width:480px;"><![endif]-->
+    <p class="t43" style="margin:0;Margin:0;font-family:BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif,'Albert Sans';line-height:21px;font-weight:400;font-style:normal;font-size:16px;text-decoration:none;text-transform:none;letter-spacing:-0.64px;direction:ltr;color:#333333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px;">Please click the button below to confirm your email address and finish setting up your account. This link is valid for 2 minutes.</p></td>
+    </tr></table>
+    </td></tr><tr><td><div class="t22" style="mso-line-height-rule:exactly;mso-line-height-alt:35px;line-height:35px;font-size:1px;display:block;">&nbsp;</div></td></tr><tr><td>
+    <table class="t24" role="presentation" cellpadding="0" cellspacing="0" align="left"><tr>
+    <!--[if !mso]><!--><td class="t25" style="background-color:#882233;overflow:hidden;width:105px;text-align:center;line-height:34px;mso-line-height-rule:exactly;mso-text-raise:6px;border-radius:40px 40px 40px 40px;">
+    <!--<![endif]-->
+    <!--[if mso]><td class="t25" style="background-color:#882233;overflow:hidden;width:105px;text-align:center;line-height:34px;mso-line-height-rule:exactly;mso-text-raise:6px;border-radius:40px 40px 40px 40px;"><![endif]-->
+        <a href="${link}"><span class="t31" style="display:block;margin:0;Margin:0;font-family:BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif,'Inter Tight';line-height:34px;font-weight:900;font-style:normal;font-size:13px;text-decoration:none;text-transform:uppercase;direction:ltr;color:#FFFFFF;text-align:center;mso-line-height-rule:exactly;mso-text-raise:6px;">Confirm</span></td>
+    </a>
+    </tr></table>
+    </td></tr></table></td>
+    </tr></table>
+    </td></tr><tr><td><div class="t4" style="mso-line-height-rule:exactly;font-size:1px;display:none;">&nbsp;</div></td></tr></table></td></tr></table></div></body>
+    </html>
     `,
   };
   // hash the verification code
