@@ -1,8 +1,13 @@
-// import { Request, Response } from 'express';
-// import { AppDataSource } from "../index"
-// import { User } from '../entities/User';
+import { Request, Response } from 'express';
+import { HolidayHome } from '../entities/HolidayHome';
 
-// export const getUsers = async (req: Request, res: Response) => {
-//   const users = await AppDataSource.manager.find(User);
-//   res.json(users);
-// };
+
+const getHolidayHomes = async (req: Request, res: Response) => {
+
+    const holidayhomes = await HolidayHome.find();
+    res.json(holidayhomes);
+    // res.send("hello");
+
+};
+
+export { getHolidayHomes }

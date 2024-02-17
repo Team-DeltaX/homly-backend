@@ -1,11 +1,11 @@
 import { BaseEntity, Entity,PrimaryColumn,Column,ManyToOne,JoinColumn, OneToMany} from "typeorm";
 import { HolidayHome } from "./HolidayHome";
-import { Room } from "./Room";
+// import { Room } from "./Room";
 
 @Entity()
 export class Unit extends BaseEntity{
     @PrimaryColumn()
-    UnitId!: string;
+    UnitId!: String;
 
     @Column({
         type: "numeric"
@@ -13,7 +13,7 @@ export class Unit extends BaseEntity{
     TotalPrice!: number;
 
     @Column()
-    ACNonAc!: string;
+    ACNonAc!: String;
 
     @Column({
         type: "numeric"
@@ -21,14 +21,18 @@ export class Unit extends BaseEntity{
     FloorLevel!: number;
 
     @Column()
-    Remarks!: string;
+    Remarks!: String;
 
-    @OneToMany(()=>Room, (room) => room.unitId)
-    room!: Room[];
+    // @OneToMany(()=>Room, (room) => room.unit)
+    // room!: Room[];
+
 
     @ManyToOne(()=>HolidayHome, (holidayhome) => holidayhome.unit)
     @JoinColumn({name: "HolidayHomeId"})
     holidayhome!: HolidayHome;
+
+    @PrimaryColumn()
+    HolidayHomeId!: string;
 
 
 }

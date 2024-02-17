@@ -1,4 +1,4 @@
-import {BaseEntity, Entity, ManyToOne, PrimaryColumn} from "typeorm";
+import {BaseEntity, Entity, JoinColumn, ManyToOne, PrimaryColumn} from "typeorm";
 import { HolidayHome } from "./HolidayHome";
 
 @Entity()
@@ -9,14 +9,10 @@ export class ContactNo extends BaseEntity{
     })
     ContactNo!: number;
 
+    @ManyToOne(()=>HolidayHome, (holidayhome) => holidayhome.contactNo)
+    @JoinColumn({name: "HolidayHomeId"})
+    holidayhome!: HolidayHome
+    
     @PrimaryColumn()
     HolidayHomeId!: string;
-
-    @ManyToOne(()=>HolidayHome, (holidayhome) => holidayhome.contactNo)
-    holidayhome!: HolidayHome
-
-
-
-    
-
 }

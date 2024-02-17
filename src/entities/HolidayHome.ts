@@ -1,10 +1,12 @@
-import { Entity, PrimaryColumn, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany } from "typeorm";
+import { Entity, PrimaryColumn, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
 import { CareTaker } from "./CareTaker";
 import { Hall } from "./Hall";
 import { Image } from "./Image";
 import { ContactNo } from "./ContactNo";
 import { Unit } from "./Unit";
 import { Room } from "./Room";
+import { LocationAdmin } from "./LocationAdmin";
+import { Rental } from "./Rental";
 @Entity()
 export class HolidayHome extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -48,14 +50,22 @@ export class HolidayHome extends BaseEntity {
   )
   OtherCharge!: number;
 
-  @Column()
+  @Column(
+    {
+      default:0
+    }
+  )
   MaxNoOfAdults!: number;
 
-  @Column()
+  @Column({
+    default:0
+  })
   MaxNoOfChildren!: number;
 
-  @Column()
-  ApprovedOrNot!: Boolean;
+  @Column({
+    default:false
+  })
+  Approved!: Boolean;
 
   @Column({
     default:null
@@ -100,4 +110,11 @@ export class HolidayHome extends BaseEntity {
 
   @OneToMany(()=> Room, (room) => room.holidayhome)
   room!: Room[] 
+
+  @OneToMany(()=>Rental, (room)=> room.holidayhome)
+  rental!: Rental[]
+
+  @ManyToOne(()=> LocationAdmin, (locationadmin) => locationadmin.holidayhome)
+  @JoinColumn({name: "AdminNo"})
+  locationadmin!: LocationAdmin
 }

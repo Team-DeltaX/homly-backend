@@ -1,22 +1,20 @@
-import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
-import { Unit } from "./Unit";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+// import { Unit } from "./Unit";
 import { HolidayHome } from "./HolidayHome";
-
+// import { Unit } from "./Unit";
 
 @Entity()
-export class Room extends BaseEntity{
+export class Room extends BaseEntity {
     @PrimaryColumn({
         unique: true
     })
     RoomId!: string;
 
-    @PrimaryColumn({
-        unique: true
-    })
-    HolidayHomeId!: string;
+    @Column()
+    UnitId!: string;
 
     @Column()
-    ACNonAC!: string;
+    ACNonAC!: String;
 
     @Column({
         type: "numeric"
@@ -24,10 +22,10 @@ export class Room extends BaseEntity{
     Rental!: number;
 
     @Column()
-    Remarks!: string;
+    Remarks!: String;
 
     @Column()
-    RoomType!: string;
+    RoomType!: String;
 
     @Column()
     NoOfBeds!: number;
@@ -36,19 +34,16 @@ export class Room extends BaseEntity{
     NoOfAdults!: number;
 
     @Column()
-    NoOfChildren!: number;  
+    NoOfChildren!: number;
 
     @Column()
     GroupedByUnit!: Boolean;
 
-    @ManyToOne(()=>Unit, (unit) => unit.room)
-    unitId!: Unit;
-
-    @ManyToOne(()=>HolidayHome, (holidayhome) => holidayhome.room)
+    @ManyToOne(() => HolidayHome, (holidayhome) => holidayhome.room)
+    @JoinColumn({ name: "HolidayHomeId" })
     holidayhome!: HolidayHome;
 
-    
-
-
+    @PrimaryColumn()
+    HolidayHomeId!: String;
 
 }

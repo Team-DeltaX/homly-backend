@@ -1,8 +1,8 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn,Column, ManyToOne, JoinColumn } from "typeorm";
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { HolidayHome } from "./HolidayHome";
 
 @Entity()
-export class CareTaker extends BaseEntity{
+export class CareTaker extends BaseEntity {
     @PrimaryGeneratedColumn()
     CareTakerId!: string;
 
@@ -26,15 +26,16 @@ export class CareTaker extends BaseEntity{
     Description!: string;
 
     @Column({
-        type:"clob",
+        type: "clob",
+        default: null
     })
     Image!: string;
 
-    @ManyToOne(()=>HolidayHome, (holidayhome) => holidayhome.careTaker)
-    @JoinColumn({name: "HolidayHomeId"})
+    @ManyToOne(() => HolidayHome, (holidayhome) => holidayhome.careTaker)
+    @JoinColumn({ name: "HolidayHomeId" })
     holidayhome!: HolidayHome
 
-    
+
 
 
 
