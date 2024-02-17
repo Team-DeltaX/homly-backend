@@ -3,6 +3,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { HomlyUser,UserEmailVerification,UserOTPVerification } from "./entities/User";
 import { homly_user } from "./routers/UserRouters";
+import { reg_users } from "./routers/RegUserRouters";
 
 import dotenv from "dotenv";
 // import { homly_user } from "./routers/addUsers";
@@ -41,6 +42,7 @@ AppDataSource.initialize()
     // app.delete("/users/:id", deleteUser);
 
     app.use('/users',homly_user);
+    app.use('/users/auth',reg_users);
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);

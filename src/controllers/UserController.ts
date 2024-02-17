@@ -732,6 +732,32 @@ const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
+// update user details
+const updateUserDetails = async (req: Request, res: Response) => {
+  const { serviceNo, email, contactNo, image } = req.body;
+  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
+    service_number: serviceNo,
+  });
+  try {
+    if (user && user.verified) {
+      await AppDataSource.manager.update(HomlyUser, { service_number: serviceNo }, {
+        email,
+        contact_number: contactNo,
+        image
+      });
+      res.status(200).json({ message: "User details updated", success: true });
+    } else {
+      res.status(200).json({ message: "User not found", success: false });
+    }
+  } catch (error: any) {
+    console.log(error);
+    res.status(200).json({ message: "Error updating user details", success: false });
+  }
+
+}
+
+
+
 export {
   allUsers,
   userRegistration,
@@ -740,4 +766,5 @@ export {
   forgetPasswordDetails,
   otpVerification,
   resetPassword,
+  updateUserDetails,
 };
