@@ -4,7 +4,6 @@ import { allUsers, userRegistration, emailVerification, userLogin, forgetPasswor
 
 const homly_user = express.Router();
 
-homly_user.get("/",allUsers);
 homly_user.post("/",userRegistration)
 homly_user.get("/verify/:serviceNo/:verificationCode",emailVerification);
 homly_user.post("/login",userLogin);

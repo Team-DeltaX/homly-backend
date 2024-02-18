@@ -339,9 +339,23 @@ const userExist = async (ServiceNo: string) => {
   }
 };
 
+// get all users
 const allUsers = async (req: Request, res: Response) => {
   const users = await AppDataSource.manager.find(HomlyUser);
   res.json(users);
+};
+
+// get user by service number
+const userById = async (req: Request, res: Response) => {
+  const { serviceNo } = req.params;
+  await AppDataSource.manager
+    .findOneBy(HomlyUser, { service_number: serviceNo })
+    .then((user) => {
+      res.status(200).json(user);
+    })
+    .catch((err) => {
+      res.status(404).json({ message: "User not found", success: false });
+    });
 };
 
 // user registration
@@ -740,26 +754,69 @@ const updateUserDetails = async (req: Request, res: Response) => {
   });
   try {
     if (user && user.verified) {
-      await AppDataSource.manager.update(HomlyUser, { service_number: serviceNo }, {
-        email,
-        contact_number: contactNo,
-        image
-      });
+      await AppDataSource.manager.update(
+        HomlyUser,
+        { service_number: serviceNo },
+        {
+          email,
+          contact_number: contactNo,
+          image,
+        }
+      );
       res.status(200).json({ message: "User details updated", success: true });
     } else {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (error: any) {
     console.log(error);
-    res.status(200).json({ message: "Error updating user details", success: false });
+    res
+      .status(200)
+      .json({ message: "Error updating user details", success: false });
   }
-
-}
-
-
+};
+// update user password
+const updateUserPassword = async (req: Request, res: Response) => {
+  const { serviceNo, oldPassword, newPassword } = req.body;
+  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
+    service_number: serviceNo,
+  });
+  if (user && user.verified) {
+    bcrypt.compare(oldPassword, user.password).then(async (result) => {
+      if (result) {
+        const saltRounds = 10;
+        bcrypt
+          .hash(newPassword, saltRounds)
+          .then(async (hash) => {
+            await AppDataSource.manager.update(
+              HomlyUser,
+              { service_number: serviceNo },
+              {
+                password: hash,
+              }
+            );
+            res
+              .status(200)
+              .json({ message: "Password updated", success: true });
+          })
+          .catch((err) => {
+            res
+              .status(200)
+              .json({ message: "Error updating password", success: false });
+          });
+      } else {
+        res
+          .status(200)
+          .json({ message: "Incorrect old password", success: false });
+      }
+    });
+  } else {
+    res.status(200).json({ message: "User not found", success: false });
+  }
+};
 
 export {
   allUsers,
+  userById,
   userRegistration,
   emailVerification,
   userLogin,
@@ -767,4 +824,5 @@ export {
   otpVerification,
   resetPassword,
   updateUserDetails,
+  updateUserPassword,
 };
