@@ -346,23 +346,37 @@ const allEmployees = async (req: Request, res: Response) => {
   res.json({ employees: employees });
 };
 
-
 // get all users
 const allUsers = async (req: Request, res: Response) => {
   const users = await AppDataSource.manager.find(HomlyUser);
   res.json(users);
 };
 
-
 // get user by service number
 const userById = async (req: Request, res: Response) => {
   const { serviceNo } = req.params;
-  await AppDataSource.manager
+  AppDataSource.manager
     .findOneBy(HomlyUser, { service_number: serviceNo })
     .then((user) => {
-      res.status(200).json(user);
+      AppDataSource.manager
+        .findOneBy(Employee, { service_number: serviceNo })
+        .then((employee) => {
+          res.status(200).json({
+            name: employee?.name,
+            nic: employee?.nic,
+            work: employee?.work_place,
+            address: employee?.address,
+            contactNo: user?.contact_number,
+            email: user?.email,
+            image: user?.image,
+          });
+        })
+        .catch(() => {
+          res.status(404).json({ message: "Error", success: false });
+        });
+      // res.status(200).json(user);
     })
-    .catch((err) => {
+    .catch(() => {
       res.status(404).json({ message: "User not found", success: false });
     });
 };
