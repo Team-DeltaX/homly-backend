@@ -2,13 +2,13 @@ import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import {SpecailReservation} from './entities/SpecialReservation';
-import {router} from '../src/controllers/PrimaryAdminController';
+import { SpecialReservationRouter } from "./routers/SpecialReservationRouter";
 // const cors = require('cors');
 
 
-import {
-    getUsers,
-} from "./controllers/UserController";
+// import {
+//     getUsers,
+// } from "./controllers/UserController";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -38,7 +38,7 @@ AppDataSource.initialize()
       next();
     });
 
-    app.use('/locationadmin/reservations',router)
+    app.use('/locationadmin/reservations',SpecialReservationRouter)
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
       

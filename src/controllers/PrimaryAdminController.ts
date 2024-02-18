@@ -22,7 +22,7 @@ import nodemailer from "nodemailer";
 //   }
 // });
 
-router.post("/add", async (req: Request, res: Response) => {
+const AddSpecialResrvation = async (req: Request, res: Response) => {
   const {
     SpecailReservationID,
     ServiceNo,
@@ -77,10 +77,10 @@ router.post("/add", async (req: Request, res: Response) => {
       res.status(500).json({ message: "Internal Server Error!" });
     
   }
-});
+};
 
 router.get("/all", async (req: Request, res: Response) => {
-  const admins = await AppDataSource.manager.find(SpecailReservation);
+  const SpecailReservations = await AppDataSource.manager.find(SpecailReservation);
   try {
     const SpecailReservations = await AppDataSource.manager.find(SpecailReservation);
     res.status(200).json(SpecailReservations);
@@ -91,4 +91,4 @@ router.get("/all", async (req: Request, res: Response) => {
 });
 
 
-export { router };
+export { AddSpecialResrvation };
