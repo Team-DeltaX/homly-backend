@@ -38,7 +38,7 @@ transporter.verify((error: any, success: any) => {
 });
 
 // send verification email
-const sendVerificationEmail = (email: string, serviceNo: string) => {
+const sendVerificationEmail = (email: string, serviceNo: string, name: string) => {
   const url = `http://localhost:3002/users/verify`;
   const verificationCode = uuidv4() + serviceNo;
   const link = `${url}/${serviceNo}/${verificationCode}`;
@@ -179,7 +179,7 @@ const sendVerificationEmail = (email: string, serviceNo: string) => {
     <!--[if !mso]><!--><td class="t57" style="width:480px;">
     <!--<![endif]-->
     <!--[if mso]><td class="t57" style="width:480px;"><![endif]-->
-    <h3 class="t63" style="margin:0;Margin:0;font-family:BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif,'Lato';line-height:26px;font-weight:400;font-style:normal;font-size:20px;text-decoration:none;text-transform:none;direction:ltr;color:#333333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px;"><span class="t64" style="margin:0;Margin:0;font-weight:700;mso-line-height-rule:exactly;">Dear ${serviceNo},</span></h3></td>
+    <h3 class="t63" style="margin:0;Margin:0;font-family:BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif,'Lato';line-height:26px;font-weight:400;font-style:normal;font-size:20px;text-decoration:none;text-transform:none;direction:ltr;color:#333333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px;"><span class="t64" style="margin:0;Margin:0;font-weight:700;mso-line-height-rule:exactly;">Dear ${name},</span></h3></td>
     </tr></table>
     </td></tr><tr><td>
     <table class="t14" role="presentation" cellpadding="0" cellspacing="0" align="center"><tr>
@@ -384,37 +384,52 @@ const userById = async (req: Request, res: Response) => {
 // user registration
 const userRegistration = async (req: Request, res: Response) => {
   const { ServiceNo, Password, Email, ContactNo, image } = req.body;
-
-  if (await userExist(ServiceNo)) {
-    sendVerificationEmail(Email, ServiceNo);
-    // bcrypt password
-    const saltRounds = 10;
-    bcrypt
-      .hash(Password, saltRounds)
-      .then(async (hash) => {
-        const user = HomlyUser.create({
-          service_number: ServiceNo,
-          password: hash,
-          email: Email,
-          contact_number: ContactNo,
-          image,
-        });
-        await user.save();
-        return res.status(201).json({
-          message: "Check your emails,We will send you a verification link",
-          success: true,
-        });
-      })
-      .catch((err) => {
-        return res
+  await AppDataSource.manager
+    .findOneBy(Employee, {
+      service_number: ServiceNo,
+    })
+    .then(async (employee) => {
+      if (employee) {
+        if (await userExist(ServiceNo)) {
+          sendVerificationEmail(Email, ServiceNo, employee.name);
+          // bcrypt password
+          const saltRounds = 10;
+          bcrypt
+            .hash(Password, saltRounds)
+            .then(async (hash) => {
+              const user = HomlyUser.create({
+                service_number: ServiceNo,
+                password: hash,
+                email: Email,
+                contact_number: ContactNo,
+                image,
+              });
+              await user.save();
+              return res.status(201).json({
+                message:
+                  "Check your emails,We will send you a verification link",
+                success: true,
+              });
+            })
+            .catch((err) => {
+              return res
+                .status(404)
+                .json({ message: "Error saving user", success: false });
+            });
+        } else {
+          return res
+            .status(201)
+            .json({ message: "User already exists!", success: false });
+        }
+      } else {
+        res
           .status(404)
-          .json({ message: "Error saving user", success: false });
-      });
-  } else {
-    return res
-      .status(201)
-      .json({ message: "User already exists!", success: false });
-  }
+          .json({ message: "Your are not an employee", success: false });
+      }
+    })
+    .catch((err) => {
+      res.status(404).json({ message: "Server Error", success: false });
+    });
 };
 
 // user login
@@ -442,7 +457,7 @@ const userLogin = async (req: Request, res: Response) => {
 
 // forget password
 // generate OTP and send to email function
-const sendOTP = (email: string, serviceNo: string) => {
+const sendOTP = (email: string, serviceNo: string, name: string) => {
   const otp = Math.floor(100000 + Math.random() * 900000);
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
@@ -596,7 +611,7 @@ img,p{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica N
 <!--[if !mso]><!--><td class="t45" style="width:480px;">
 <!--<![endif]-->
 <!--[if mso]><td class="t45" style="width:480px;"><![endif]-->
-<h3 class="t51" style="margin:0;Margin:0;font-family:BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif,'Lato';line-height:26px;font-weight:700;font-style:normal;font-size:20px;text-decoration:none;text-transform:none;direction:ltr;color:#333333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px;">Dear ${serviceNo}</h3></td>
+<h3 class="t51" style="margin:0;Margin:0;font-family:BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif,'Lato';line-height:26px;font-weight:700;font-style:normal;font-size:20px;text-decoration:none;text-transform:none;direction:ltr;color:#333333;text-align:left;mso-line-height-rule:exactly;mso-text-raise:2px;">Dear ${name}</h3></td>
 </tr></table>
 </td></tr><tr><td>
 <table class="t24" role="presentation" cellpadding="0" cellspacing="0" align="center"><tr>
@@ -675,10 +690,15 @@ const forgetPasswordDetails = async (req: Request, res: Response) => {
   const user = await AppDataSource.manager.findOneBy(HomlyUser, {
     service_number: serviceNo,
   });
-  console.log(user?.verified, user?.email === email);
+  const employee = await AppDataSource.manager.findOneBy(Employee, {
+    service_number: serviceNo,
+  });
+  
+  // console.log(user?.verified, user?.email === email);
   if (user && user.verified) {
     if (user.email === email) {
-      sendOTP(email, serviceNo);
+      
+      sendOTP(email, serviceNo, employee!.name);
 
       res
         .status(200)
