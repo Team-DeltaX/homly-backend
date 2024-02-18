@@ -423,12 +423,12 @@ const userRegistration = async (req: Request, res: Response) => {
         }
       } else {
         res
-          .status(404)
+          .status(202)
           .json({ message: "Your are not an employee", success: false });
       }
     })
     .catch((err) => {
-      res.status(404).json({ message: "Server Error", success: false });
+      res.status(202).json({ message: "Your are not an employee", success: false });
     });
 };
 
