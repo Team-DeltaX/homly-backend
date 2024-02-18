@@ -2,7 +2,7 @@ import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Userdel } from "./entities/Userdel";
-import {LocationAdmin} from './entities/LocationAdmin';
+import {Admin} from './entities/Admin';
 import {router} from '../src/controllers/PrimaryAdminController';
 // const cors = require('cors');
 import { Complaints } from "./entities/Complaint";
@@ -10,9 +10,9 @@ import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
 import { LocationAdminRoute } from "./routes/LocationAdminRoute";
 
-import {
-    getUsers,
-} from "./controllers/UserController";
+// import {
+//     getUsers,
+// } from "./controllers/UserController";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -26,7 +26,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING, 
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [LocationAdmin,Userdel,Complaints,BlackListedUser,BlackListHistory],
+  entities: [Admin,Userdel,Complaints,BlackListedUser,BlackListHistory],
   synchronize: true,
   logging: false,
 

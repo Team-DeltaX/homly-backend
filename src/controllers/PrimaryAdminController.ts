@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { LocationAdmin } from "../entities/LocationAdmin";
+import { Admin } from "../entities/Admin";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 import { error } from "console";
@@ -36,6 +36,8 @@ transporter.verify(function (error, success) {
     Sub,
   } = req.body;
 
+  const Role="LocationAdmin"
+
   //   const locationadmin = LocationAdmin.create();
   const loginurl="google.com"
   const str =uuid()
@@ -46,7 +48,7 @@ transporter.verify(function (error, success) {
   try {
     await AppDataSource.createQueryBuilder()
       .insert()
-      .into(LocationAdmin)
+      .into(Admin)
       .values([
         {
           AdminNo,
@@ -55,6 +57,7 @@ transporter.verify(function (error, success) {
           ContactNo,
           Email,
           WorkLocation,
+          Role,
           // Disabled,
           Sub,
 
@@ -283,9 +286,9 @@ img,p{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica N
 }
 
 export const getall=async (req: Request, res: Response) => {
-  const admins = await AppDataSource.manager.find(LocationAdmin);
+  const admins = await AppDataSource.manager.find(Admin);
   try {
-    const admins = await AppDataSource.manager.find(LocationAdmin);
+    const admins = await AppDataSource.manager.find(Admin);
     res.status(200).json(admins);
   } catch (error) {
     console.log(error);
@@ -301,7 +304,7 @@ export const disableadmin =async (req: Request, res: Response) => {
 
   try {
     await AppDataSource.manager.update(
-      LocationAdmin,
+     Admin,
       { AdminNo: id },
       { Disabled: true }
     );
@@ -323,7 +326,7 @@ export const editadmindeatails =async (req: Request, res: Response) => {
  
  try {
     await AppDataSource.manager.update(
-      LocationAdmin,
+      Admin,
       { AdminNo: AdminNo },
       { Email:Email,ContactNo:ContactNo},
       
@@ -567,9 +570,9 @@ export const sendMail=async (req: Request, res: Response) => {
 
   try {
     await AppDataSource.manager.update(
-      LocationAdmin,
+     Admin,
       { AdminNo: AdminNo },
-      { Verified: false }
+      { Verified: false,Password:Password }
     );
 
   

@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany,CreateDateColumn} from 'typeorm';
 import { Complaints } from './Complaint';
 @Entity()
-export class LocationAdmin {
+export class Admin {
     Save() {
         throw new Error("Method not implemented.");
     }
@@ -36,8 +36,18 @@ export class LocationAdmin {
   })
   Sub!: string ;
 
-  @OneToMany(() => Complaints, (complaints) => complaints.ComplaintID)
-  Complaint!: Complaints[]
+  @Column({
+   
+  })
+  Role!: string ;
+
+  @CreateDateColumn({
+   
+  })
+  createddate!: string ;
+
+  // @OneToMany(() => Complaints, (complaints) => complaints.ComplaintID)
+  // Complaint!: Complaints[]
 
 
   @Column({

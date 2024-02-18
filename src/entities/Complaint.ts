@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn} from 'typeorm';
-import {LocationAdmin} from '../entities/LocationAdmin';
+import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn,CreateDateColumn} from 'typeorm';
+// import {LocationAdmin} from './Admin';
 import { Userdel } from './Userdel';
 
 
@@ -15,20 +15,23 @@ export class Complaints{
   ServiceNo!:String;
 
 
-  @ManyToOne(() => Userdel, (userdel) =>userdel.ServiceNo)
-  @JoinColumn({ name: 'ServiceNo' })
-    ServiceNoEmp!: Userdel
+  // @ManyToOne(() => Userdel, (userdel) =>userdel.ServiceNo)
+  // @JoinColumn({ name: 'ServiceNo' })
+  //   ServiceNoEmp!: Userdel
 
 
 
 
-  @ManyToOne(() => LocationAdmin, (locationadmin) => locationadmin.Complaint)
-  @JoinColumn({ name: 'AdminNo' })
-    AdminNo!: LocationAdmin
+  // @ManyToOne(() => LocationAdmin, (locationadmin) => locationadmin.Complaint)
+  // @JoinColumn({ name: 'AdminNo' })
+  //   AdminNo!: LocationAdmin
+  @Column()
+  AdminNo!:String
 
   @Column()
   ReservationNo!:String;
 
+  // @CreateDateColumn()
   @Column()
   Date!:String;
 
