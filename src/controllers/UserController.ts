@@ -12,12 +12,14 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { AppDataSource } from "../index";
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import {
   HomlyUser,
   UserEmailVerification,
   UserOTPVerification,
 } from "../entities/User";
+
+import { Employee } from "../entities/Empolyee";
 
 let transporter = nodemailer.createTransport({
   service: "gmail",
@@ -338,12 +340,19 @@ const userExist = async (ServiceNo: string) => {
     return true;
   }
 };
+// get all employees
+const allEmployees = async (req: Request, res: Response) => {
+  const employees = await AppDataSource.manager.find(Employee);
+  res.json({ employees: employees });
+};
+
 
 // get all users
 const allUsers = async (req: Request, res: Response) => {
   const users = await AppDataSource.manager.find(HomlyUser);
   res.json(users);
 };
+
 
 // get user by service number
 const userById = async (req: Request, res: Response) => {
@@ -815,6 +824,7 @@ const updateUserPassword = async (req: Request, res: Response) => {
 };
 
 export {
+  allEmployees,
   allUsers,
   userById,
   userRegistration,
