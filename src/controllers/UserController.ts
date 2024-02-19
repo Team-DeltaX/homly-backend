@@ -11,6 +11,9 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
 
+// import twilio
+import twilio from "twilio";
+
 import { AppDataSource } from "../index";
 import e, { Request, Response } from "express";
 import {
@@ -36,6 +39,24 @@ transporter.verify((error: any, success: any) => {
     console.log("Server is ready to take messages");
   }
 });
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = twilio(accountSid, authToken);
+
+// sent sms
+const sendSMS = (number: string) => {
+  if (number.charAt(0) === "0") {
+    number = number.replace(/^0/, "+94");
+  }
+  client.messages
+    .create({
+      body: "This is a test message from Homly",
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: number,
+    })
+    .then((message) => console.log(message.sid));
+};
 
 // send verification email
 const sendVerificationEmail = (
@@ -706,27 +727,25 @@ const forgetPasswordDetails = async (req: Request, res: Response) => {
   const employee = await AppDataSource.manager.findOneBy(Employee, {
     service_number: serviceNo,
   });
-  
+
   if (user && user.verified) {
     if (!user.blacklisted) {
       if (user.email === email) {
         sendOTP(email, serviceNo, employee!.name);
 
-        res
-          .status(200)
-          .json({
-            message: "Check your email,We will send OTP",
-            success: true,
-          });
+        res.status(200).json({
+          message: "Check your email,We will send OTP",
+          success: true,
+        });
       } else {
         res
           .status(200)
           .json({ message: "Invalid Service Number or Email", success: false });
       }
-    }else{
+    } else {
       res
-      .status(200)
-      .json({ message: "You are a Blacklisted User", success: false });
+        .status(200)
+        .json({ message: "You are a Blacklisted User", success: false });
     }
   } else {
     res.status(200).json({ message: "User not found", success: false });
@@ -878,7 +897,18 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+const testSMS = async (req: Request, res: Response) => {
+  const { contactNo } = req.body;
+  try {
+    sendSMS(contactNo);
+    res.status(200).json({ message: "SMS sent", success: true });
+  } catch (err) {
+    res.status(200).json({ message: "Error sending SMS", success: false });
+  }
+};
+
 export {
+  testSMS,
   allEmployees,
   allUsers,
   userById,
