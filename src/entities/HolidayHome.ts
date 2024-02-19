@@ -21,6 +21,9 @@ export class HolidayHome extends BaseEntity {
   Address!: string;
 
   @Column()
+  District!: string;
+
+  @Column()
   Description!: string;
 
   @Column()
@@ -52,40 +55,45 @@ export class HolidayHome extends BaseEntity {
 
   @Column(
     {
-      default:0
+      default: 0
     }
   )
   MaxNoOfAdults!: number;
 
   @Column({
-    default:0
+    default: 0
   })
   MaxNoOfChildren!: number;
 
   @Column({
-    default:false
+    default: false
   })
   Approved!: Boolean;
 
   @Column({
-    default:null
+    default: null
   })
   Gym!: String;
 
   @Column({
-    default:null
+    default: null
   })
   Kitchen!: String;
 
   @Column({
-    default:null
+    default: null
   })
   Park!: String;
 
   @Column({
-    default:null
+    default: null
   })
-  Wifi!: String;  
+  Wifi!: String;
+
+  @Column({
+    default: null
+  })
+  Facilities!: string;
 
   @CreateDateColumn()
   createdAt!: Date;
@@ -93,28 +101,28 @@ export class HolidayHome extends BaseEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @OneToMany(()=> CareTaker, (careTaker) => careTaker.holidayhome)
+  @OneToMany(() => CareTaker, (careTaker) => careTaker.holidayhome)
   careTaker!: CareTaker[]
 
-  @OneToMany(()=> Hall, (hall) => hall.holidayhome)
+  @OneToMany(() => Hall, (hall) => hall.holidayhome)
   hall!: Hall[]
 
-  @OneToMany(()=> Image, (image) => image.holidayhome)
+  @OneToMany(() => Image, (image) => image.holidayhome)
   image!: Image[]
 
-  @OneToMany(()=> ContactNo, (contactNo) => contactNo.holidayhome)
+  @OneToMany(() => ContactNo, (contactNo) => contactNo.holidayhome)
   contactNo!: ContactNo[]
 
-  @OneToMany(()=> Unit, (unit) => unit.holidayhome)
+  @OneToMany(() => Unit, (unit) => unit.holidayhome)
   unit!: Unit[]
 
-  @OneToMany(()=> Room, (room) => room.holidayhome)
-  room!: Room[] 
+  @OneToMany(() => Room, (room) => room.holidayhome)
+  room!: Room[]
 
-  @OneToMany(()=>Rental, (room)=> room.holidayhome)
+  @OneToMany(() => Rental, (room) => room.holidayhome)
   rental!: Rental[]
 
-  @ManyToOne(()=> LocationAdmin, (locationadmin) => locationadmin.holidayhome)
-  @JoinColumn({name: "AdminNo"})
+  @ManyToOne(() => LocationAdmin, (locationadmin) => locationadmin.holidayhome)
+  @JoinColumn({ name: "AdminNo" })
   locationadmin!: LocationAdmin
 }

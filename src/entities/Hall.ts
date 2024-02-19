@@ -1,11 +1,11 @@
 import { Entity, PrimaryColumn, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToMany, ManyToOne, JoinColumn } from "typeorm";
 import { HolidayHome } from "./HolidayHome";
 @Entity()
-export class Hall extends BaseEntity{
+export class Hall extends BaseEntity {
     @PrimaryColumn({
         unique: true
     })
-    HallId!: string;
+    hallCode!: string;
 
     @PrimaryColumn({
         unique: true
@@ -13,22 +13,27 @@ export class Hall extends BaseEntity{
     HolidayHomeId!: string;
 
     @Column()
-    AcNonAc!: string;
+    hallAc!: string;
 
     @Column()
-    FloorLevel!: Number;
+    floorLevel!: Number;
 
     @Column()
-    NoOfAdults!: Number;
+    hallNoOfAdults!: Number;
 
     @Column()
-    NoOfChildren!: Number;
+    hallNoOfChildren!: Number;
 
     @Column()
-    Remarks!: string;
+    hallRemark!: string;
 
-    @ManyToOne(()=>HolidayHome, (holidayhome) => holidayhome.hall)
-    @JoinColumn({name: "HolidayHomeId"})
+    @Column({
+        type: "numeric"
+    })
+    hallRental!: Number;
+
+    @ManyToOne(() => HolidayHome, (holidayhome) => holidayhome.hall)
+    @JoinColumn({ name: "HolidayHomeId" })
     holidayhome!: HolidayHome;
 
 

@@ -8,21 +8,21 @@ export class Room extends BaseEntity {
     @PrimaryColumn({
         unique: true
     })
-    RoomId!: string;
+    roomCode!: string;
 
     @Column()
     UnitId!: string;
 
     @Column()
-    ACNonAC!: String;
+    roomAc!: String;
 
     @Column({
         type: "numeric"
     })
-    Rental!: number;
+    roomRental!: number;
 
     @Column()
-    Remarks!: String;
+    roomRemarks!: String;
 
     @Column()
     RoomType!: String;
@@ -37,7 +37,7 @@ export class Room extends BaseEntity {
     NoOfChildren!: number;
 
     @Column()
-    GroupedByUnit!: Boolean;
+    groupByUnit!: Boolean;
 
     @ManyToOne(() => HolidayHome, (holidayhome) => holidayhome.room)
     @JoinColumn({ name: "HolidayHomeId" })
