@@ -38,7 +38,11 @@ transporter.verify((error: any, success: any) => {
 });
 
 // send verification email
-const sendVerificationEmail = (email: string, serviceNo: string, name: string) => {
+const sendVerificationEmail = (
+  email: string,
+  serviceNo: string,
+  name: string
+) => {
   const url = `http://localhost:3002/users/verify`;
   const verificationCode = uuidv4() + serviceNo;
   const link = `${url}/${serviceNo}/${verificationCode}`;
@@ -428,7 +432,9 @@ const userRegistration = async (req: Request, res: Response) => {
       }
     })
     .catch((err) => {
-      res.status(202).json({ message: "Your are not an employee", success: false });
+      res
+        .status(202)
+        .json({ message: "Your are not an employee", success: false });
     });
 };
 
@@ -439,15 +445,22 @@ const userLogin = async (req: Request, res: Response) => {
     service_number: serviceNo,
   });
   if (user && user.verified) {
-    bcrypt.compare(password, user.password).then((result) => {
-      if (result) {
-        res.status(200).json({ message: "Login Successful", success: true });
-      } else {
-        res
-          .status(200)
-          .json({ message: "Incorrect password or Username", success: false });
-      }
-    });
+    if (!user.blacklisted) {
+      bcrypt.compare(password, user.password).then((result) => {
+        if (result) {
+          res.status(200).json({ message: "Login Successful", success: true });
+        } else {
+          res.status(200).json({
+            message: "Incorrect password or Username",
+            success: false,
+          });
+        }
+      });
+    } else {
+      res
+        .status(200)
+        .json({ message: "You are a Blacklisted User", success: false });
+    }
   } else {
     res
       .status(200)
@@ -694,19 +707,26 @@ const forgetPasswordDetails = async (req: Request, res: Response) => {
     service_number: serviceNo,
   });
   
-  // console.log(user?.verified, user?.email === email);
   if (user && user.verified) {
-    if (user.email === email) {
-      
-      sendOTP(email, serviceNo, employee!.name);
+    if (!user.blacklisted) {
+      if (user.email === email) {
+        sendOTP(email, serviceNo, employee!.name);
 
+        res
+          .status(200)
+          .json({
+            message: "Check your email,We will send OTP",
+            success: true,
+          });
+      } else {
+        res
+          .status(200)
+          .json({ message: "Invalid Service Number or Email", success: false });
+      }
+    }else{
       res
-        .status(200)
-        .json({ message: "Check your email,We will send OTP", success: true });
-    } else {
-      res
-        .status(200)
-        .json({ message: "Invalid Service Number or Email", success: false });
+      .status(200)
+      .json({ message: "You are a Blacklisted User", success: false });
     }
   } else {
     res.status(200).json({ message: "User not found", success: false });
@@ -754,6 +774,7 @@ const otpVerification = async (req: Request, res: Response) => {
 // reset password
 const resetPassword = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
+  console.log("reset password", serviceNo, password);
   const user = await AppDataSource.manager.findOneBy(HomlyUser, {
     service_number: serviceNo,
   });
