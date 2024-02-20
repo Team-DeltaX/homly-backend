@@ -1,10 +1,8 @@
 import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-
-// import {
-//   getUsers,
-// } from "./controllers/UserController";
+import {SpecailReservation} from './entities/SpecialReservation';
+import { SpecialReservationRouter } from "./routers/SpecialReservationRouter";
 
 import dotenv from "dotenv";
 import { Hall } from "./entities/Hall";
@@ -21,6 +19,7 @@ import { Rental } from "./entities/Rental";
 
 dotenv.config();
 const app = express();
+// app.use(cors)
 const PORT = process.env.PORT || 3002;
 
 export const AppDataSource = new DataSource({
@@ -28,7 +27,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [Hall, CareTaker, HolidayHome, Image, Unit, Room, ContactNo, LocationAdmin, Rental],
+  entities: [Hall, CareTaker, HolidayHome, Image, Unit, Room, ContactNo, LocationAdmin, Rental, SpecailReservation],
   synchronize: true,
   logging: false,
 
@@ -45,7 +44,7 @@ AppDataSource.initialize()
     });
 
     app.use('/locationadmin/holidayhome', HolidayHomeRouter);
-    
+    app.use('/locationadmin/reservations',SpecialReservationRouter)
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
       
@@ -54,19 +53,4 @@ AppDataSource.initialize()
   .catch((error) => console.log(error));
 
 
-
-
-// AppDataSource.initialize()
-// .then(() => {
-  
-  
-//   app.use(express.json());
-//   app.use("locationadmin/holidayhome", HolidayHomeRouter);
-
-//   app.listen(PORT, () => {
-//     console.log(`Server is running on http://localhost:${PORT}`);
-    
-//   });
-// })
-// .catch((error) => console.log(error));
 
