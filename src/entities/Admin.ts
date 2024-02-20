@@ -3,7 +3,7 @@ import { Complaints } from './Complaint';
 @Entity()
 export class Admin {
     Save() {
-        throw new Error("Method not implemented.");
+        throw new Error("Method not implemented. ");
     }
   @PrimaryColumn()
   AdminNo!: String ;
