@@ -1,6 +1,12 @@
 import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import { Userdel } from "./entities/Userdel";
+import {Admin} from './entities/Admin';
+import { Complaints } from "./entities/Complaint";
+import { BlackListedUser } from "./entities/BlackListedUser";
+import { BlackListHistory } from "./entities/BlackListHistory";
+import { LocationAdminRoute } from "./routes/LocationAdminRoute";
 import { HomlyUser,UserEmailVerification,UserOTPVerification } from "./entities/User";
 import { Employee } from "./entities/Empolyee";
 import { homly_user } from "./routers/UserRouters";
@@ -18,7 +24,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING, 
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [Employee,HomlyUser,UserEmailVerification,UserOTPVerification],
+  entities: [Employee,HomlyUser,UserEmailVerification,UserOTPVerification,Admin,Userdel,Complaints,BlackListedUser,BlackListHistory],
   synchronize: true,
   logging: false,
 
@@ -34,14 +40,7 @@ AppDataSource.initialize()
       next();
     });
 
-    // Routes
-    // app.get("/users", getUsers);
-
-    // app.get("/users/:id", getUserById);
-    // app.post("/users", createUser);
-    // app.put("/users/:id", updateUser);
-    // app.delete("/users/:id", deleteUser);
-
+    app.use('/locationadmin',LocationAdminRoute)
     app.use('/users',homly_user);
     app.use('/users/auth',reg_users);
 
