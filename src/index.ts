@@ -2,15 +2,14 @@ import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Userdel } from "./entities/Userdel";
-import {Admin} from './entities/Admin';
 import { Complaints } from "./entities/Complaint";
 import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
 import { LocationAdminRoute } from "./routes/LocationAdminRoute";
 import { HomlyUser,UserEmailVerification,UserOTPVerification } from "./entities/User";
 import { Employee } from "./entities/Empolyee";
-import { homly_user } from "./routers/UserRouters";
-import { reg_users } from "./routers/RegUserRouters";
+import { homly_user } from "./routes/UserRouters";
+import { reg_users } from "./routes/RegUserRouters";
 
 import dotenv from "dotenv";
 // import { homly_user } from "./routers/addUsers";
@@ -24,7 +23,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING, 
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [Employee,HomlyUser,UserEmailVerification,UserOTPVerification,Admin,Userdel,Complaints,BlackListedUser,BlackListHistory],
+  entities: [Employee,HomlyUser,UserEmailVerification,UserOTPVerification,Userdel,Complaints,BlackListedUser,BlackListHistory],
   synchronize: true,
   logging: false,
 
