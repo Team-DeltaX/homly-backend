@@ -1,5 +1,5 @@
 import express from 'express'
-import { AddAdmin,getall,disableadmin,sendMail,editadmindeatails} from "../controllers/SpecialReservaionController";
+import { AddAdmin,getall,disableadmin,sendMail,editadmindeatails} from "../controllers/PrimaryAdminController";
 const LocationAdminRoute = express.Router();
 
 
