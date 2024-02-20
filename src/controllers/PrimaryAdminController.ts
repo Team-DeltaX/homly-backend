@@ -8,11 +8,15 @@ import {v4 as uuid, v4} from 'uuid'
 // var nodemailer = require('nodemailer');
 import nodemailer from "nodemailer";
 
+// import dotenv
+import dotenv from "dotenv";
+dotenv.config();
+
 var transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "mnbro123321@gmail.com",
-    pass: "dtpf laju vxbe yhqk",
+    user: process.env.AUTH_EMAIL,
+    pass: process.env.AUTH_EMAIL_PASS,
   },
 });
 transporter.verify(function (error, success) {
@@ -66,7 +70,7 @@ transporter.verify(function (error, success) {
       .execute();
 
       var mailOptions = {
-        from: "mnbro123321@gmail.com",
+        from: process.env.AUTH_EMAIL,
         to: Email,
         subject: "You Are Added as Location Admin in Homly",
         html: `
@@ -359,7 +363,7 @@ export const sendMail=async (req: Request, res: Response) => {
     
 
       var mailOptions = {
-        from: "mnbro123321@gmail.com",
+        from: process.env.AUTH_EMAIL,
         to: Email,
         subject: "You Are Added as Location Admin in Homly",
         html: `<!--
