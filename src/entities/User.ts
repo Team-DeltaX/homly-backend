@@ -30,6 +30,11 @@ export class HomlyUser extends BaseEntity {
     default: false,
   })
   verified!:boolean;
+  
+  @Column({
+    default: false,
+  })
+  blacklisted!:boolean;
 
   @CreateDateColumn({
     nullable: false,
