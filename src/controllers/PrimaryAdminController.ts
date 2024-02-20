@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { Admin } from "../entities/Admin";
+import {HomlyAdmin } from "../entities/HomlyAdmin";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 import { error } from "console";
@@ -52,7 +52,7 @@ transporter.verify(function (error, success) {
   try {
     await AppDataSource.createQueryBuilder()
       .insert()
-      .into(Admin)
+      .into(HomlyAdmin)
       .values([
         {
           AdminNo,
@@ -290,9 +290,9 @@ img,p{margin:0;Margin:0;font-family:Lato,BlinkMacSystemFont,Segoe UI,Helvetica N
 }
 
 export const getall=async (req: Request, res: Response) => {
-  const admins = await AppDataSource.manager.find(Admin);
+  const admins = await AppDataSource.manager.find(HomlyAdmin);
   try {
-    const admins = await AppDataSource.manager.find(Admin);
+    const admins = await AppDataSource.manager.find(HomlyAdmin);
     res.status(200).json(admins);
   } catch (error) {
     console.log(error);
@@ -308,7 +308,7 @@ export const disableadmin =async (req: Request, res: Response) => {
 
   try {
     await AppDataSource.manager.update(
-     Admin,
+     HomlyAdmin,
       { AdminNo: id },
       { Disabled: true }
     );
@@ -330,7 +330,7 @@ export const editadmindeatails =async (req: Request, res: Response) => {
  
  try {
     await AppDataSource.manager.update(
-      Admin,
+      HomlyAdmin,
       { AdminNo: AdminNo },
       { Email:Email,ContactNo:ContactNo},
       
@@ -574,7 +574,7 @@ export const sendMail=async (req: Request, res: Response) => {
 
   try {
     await AppDataSource.manager.update(
-     Admin,
+     HomlyAdmin,
       { AdminNo: AdminNo },
       { Verified: false,Password:Password }
     );

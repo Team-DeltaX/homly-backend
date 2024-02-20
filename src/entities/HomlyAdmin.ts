@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany,CreateDateColumn} from 'typeorm';
 import { Complaints } from './Complaint';
 @Entity()
-export class Admin {
+export class HomlyAdmin {
     Save() {
         throw new Error("Method not implemented. ");
     }
