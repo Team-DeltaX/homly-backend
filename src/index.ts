@@ -2,23 +2,20 @@ import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Userdel } from "./entities/Userdel";
-import {Admin} from './entities/Admin';
-import {router} from '../src/controllers/PrimaryAdminController';
-// const cors = require('cors');
 import { Complaints } from "./entities/Complaint";
 import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
 import { LocationAdminRoute } from "./routes/LocationAdminRoute";
-
-// import {
-//     getUsers,
-// } from "./controllers/UserController";
+import { HomlyUser,UserEmailVerification,UserOTPVerification } from "./entities/User";
+import { Employee } from "./entities/Empolyee";
+import { homly_user } from "./routes/UserRouters";
+import { reg_users } from "./routes/RegUserRouters";
 
 import dotenv from "dotenv";
+// import { homly_user } from "./routers/addUsers";
 dotenv.config();
 
 const app = express();
-// app.use(cors)
 const PORT = process.env.PORT || 3002;
 
 export const AppDataSource = new DataSource({
@@ -26,7 +23,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING, 
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [Admin,Userdel,Complaints,BlackListedUser,BlackListHistory],
+  entities: [Employee,HomlyUser,UserEmailVerification,UserOTPVerification,Userdel,Complaints,BlackListedUser,BlackListHistory],
   synchronize: true,
   logging: false,
 
@@ -43,13 +40,13 @@ AppDataSource.initialize()
     });
 
     app.use('/locationadmin',LocationAdminRoute)
-    
+    app.use('/users',homly_user);
+    app.use('/users/auth',reg_users);
+
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
       
     });
   })
   .catch((error) => console.log(error));
-
-
 
