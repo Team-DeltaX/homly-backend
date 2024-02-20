@@ -2,9 +2,7 @@ import express from "express";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import {SpecailReservation} from './entities/SpecialReservation';
-import { SpecialReservationRouter } from "./routers/SpecialReservationRouter";
-
-import dotenv from "dotenv";
+import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
 import { HolidayHome } from "./entities/HolidayHome";
