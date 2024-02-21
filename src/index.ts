@@ -22,6 +22,7 @@ import { HomlyUser,UserEmailVerification,UserOTPVerification } from "./entities/
 import { Employee } from "./entities/Empolyee";
 import { homly_user } from "./routes/UserRouters";
 import { reg_users } from "./routes/RegUserRouters";
+import { admin_router } from "./routes/AdminRouters";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -49,10 +50,11 @@ AppDataSource.initialize()
       next();
     });
 
-    app.use('/locationadmin/holidayhome', HolidayHomeRouter);
-    app.use('/locationadmin/reservations',SpecialReservationRouter)
-    app.use('/locationadmin',LocationAdminRoute)
+    app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
+    app.use('/admin/auth/locationadmin/reservations',SpecialReservationRouter)
+    app.use('/admin/auth/locationadmin',LocationAdminRoute)
     app.use('/users',homly_user);
+    app.use('/admin',admin_router);
     app.use('/users/auth',reg_users);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
