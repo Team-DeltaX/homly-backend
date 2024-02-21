@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 import {HomlyAdmin } from "../entities/HomlyAdmin";
+import { Complaints } from "../entities/Complaint";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 import { error } from "console";
@@ -583,6 +584,17 @@ export const sendMail=async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
    
+  }
+}
+
+export const getcomplaints =async (req: Request, res: Response) => {
+  // const admins = await AppDataSource.manager.find(HomlyAdmin);
+  try {
+    const complaints = await AppDataSource.manager.find(Complaints);
+    res.status(200).json(complaints);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
   }
 }
 

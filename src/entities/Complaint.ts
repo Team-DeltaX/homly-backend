@@ -31,8 +31,8 @@ export class Complaints{
   @Column()
   ReservationNo!:String;
 
-  // @CreateDateColumn()
-  @Column()
+  @CreateDateColumn()
+  // @Column()
   Date!:String;
 
   @Column()
