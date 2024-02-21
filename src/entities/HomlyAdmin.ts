@@ -1,10 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany,CreateDateColumn} from 'typeorm';
+import { Entity, BaseEntity, Column ,PrimaryColumn, OneToMany,CreateDateColumn} from 'typeorm';
 import { Complaints } from './Complaint';
 @Entity()
-export class HomlyAdmin {
-    Save() {
-        throw new Error("Method not implemented. ");
-    }
+export class HomlyAdmin extends BaseEntity {
+    // Save() {
+    //     throw new Error("Method not implemented. ");
+    // }
   @PrimaryColumn()
   AdminNo!: String ;
 
