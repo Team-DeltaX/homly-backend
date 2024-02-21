@@ -1,6 +1,3 @@
-// email handler
-import * as nodemailer from "nodemailer";
-
 // unique string generator
 import { v4 as uuidv4 } from "uuid";
 
@@ -18,7 +15,7 @@ import sentOTPEmail from "../template/sentOTPEmail";
 import sentEmail from "../services/sentEmal";
 
 import { AppDataSource } from "../index";
-import e, { Request, Response } from "express";
+import { Request, Response } from "express";
 import {
   HomlyUser,
   UserEmailVerification,
