@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 import {HomlyAdmin } from "../entities/HomlyAdmin";
 import { Complaints } from "../entities/Complaint";
+import { HomlyUser } from "../entities/User";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 import { error } from "console";
@@ -597,6 +598,24 @@ export const getcomplaints =async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 }
+export const get_user_from_user=async(req:Request,res:Response)=>{
+  const serviceno=req.params.serviceno
+try{
+  const user = await HomlyUser.find({
+    where: {
+      service_number: serviceno,
+    },
+    
+})
+res.send(user)
 
+
+}
+catch(error){
+  console.log(error);
+  res.status(500).json({ error: "Internal Server Error!!" });
+
+}
+}
 
 export { router };
