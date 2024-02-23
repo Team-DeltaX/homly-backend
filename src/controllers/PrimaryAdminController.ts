@@ -16,6 +16,7 @@ import resetadmin from "../template/resetadmin";
 
 // import dotenv
 import dotenv from "dotenv";
+import { Employee } from "../entities/Empolyee";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -223,7 +224,7 @@ export const sendMail= (req: Request, res: Response) => {
          { Verified: false,Password:hashedPassword}
        );
 
-       sentEmail(Email,"You're Admin Password resetted'",addadminemail(UserName,Password,AdminNo,loginurl))
+       sentEmail(Email,"You're Admin Password resetted'",resetadmin(UserName,Password,AdminNo,loginurl))
            res.status(200).json({ message: "mail send sucessfull" });
 
        
@@ -298,5 +299,60 @@ catch(error){
 
 }
 }
+export const get_user_from_employee=async(req:Request,res:Response)=>{
+  const serviceno=req.params.serviceno
+try{
+  const user = await Employee.find({
+    where: {
+      service_number: serviceno,
+    },
+    
+})
+res.send(user)
 
+
+}
+catch(error){
+  console.log(error);
+  res.status(500).json({ error: "Internal Server Error!!" });
+
+}
+}
+
+
+// export const get_user_from_complaints=async(req:Request,res:Response)=>{
+//   const serviceno=req.body.ServiceNo
+// try{
+//   const complaints = await Complaints.find({
+//     where: {
+//       ServiceNo: serviceno,
+//     }
+    
+// })
+// res.send(complaints)
+
+
+// }
+// catch(error){
+//   console.log(error);
+//   res.status(500).json({ error: "Internal Server Error!!" });
+
+// }
+// }
+export const getprevcomplaints =async (req: Request, res: Response) => {
+  // const admins = await AppDataSource.manager.find(HomlyAdmin);
+  const serviceno=req.params.serviceno
+  try {
+    const complaints = await AppDataSource.manager.find(Complaints,{
+      where:{
+        ServiceNo:serviceno,
+        Marked:true
+      }
+    });
+    res.status(200).json(complaints);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+}
 export { router };
