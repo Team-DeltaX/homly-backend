@@ -52,7 +52,7 @@ AppDataSource.initialize()
 
     app.use('/locationadmin/holidayhome', HolidayHomeRouter);
     app.use('/locationadmin/reservations',SpecialReservationRouter)
-    app.use('/locationadmin',LocationAdminRoute)
+    app.use('/admin/auth/locationadmin',LocationAdminRoute)
     app.use('/users',homly_user);
     app.use('/users/auth',reg_users);
     app.listen(PORT, () => {
