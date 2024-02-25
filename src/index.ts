@@ -20,8 +20,10 @@ import { BlackListHistory } from "./entities/BlackListHistory";
 import { LocationAdminRoute } from "./routes/LocationAdminRoute";
 import { HomlyUser,UserEmailVerification,UserOTPVerification } from "./entities/User";
 import { Employee } from "./entities/Empolyee";
+import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { homly_user } from "./routes/UserRouters";
 import { reg_users } from "./routes/RegUserRouters";
+import { admin_router } from "./routes/AdminRouters";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -33,7 +35,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [Employee,HomlyUser,UserEmailVerification,UserOTPVerification,Userdel,Complaints,BlackListedUser,BlackListHistory,Hall, CareTaker, HolidayHome, Image, Unit, Room, ContactNo, LocationAdmin, Rental, SpecailReservation],
+  entities: [HomlyAdmin,Employee,HomlyUser,UserEmailVerification,UserOTPVerification,Userdel,Complaints,BlackListedUser,BlackListHistory,Hall, CareTaker, HolidayHome, Image, Unit, Room, ContactNo, LocationAdmin, Rental, SpecailReservation],
   synchronize: true,
   logging: false,
 
@@ -49,10 +51,11 @@ AppDataSource.initialize()
       next();
     });
 
-    app.use('/locationadmin/holidayhome', HolidayHomeRouter);
-    app.use('/locationadmin/reservations',SpecialReservationRouter)
-    app.use('/locationadmin',LocationAdminRoute)
+    app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
+    app.use('/admin/auth/locationadmin/reservations',SpecialReservationRouter)
+    app.use('/admin/auth/locationadmin',LocationAdminRoute)
     app.use('/users',homly_user);
+    app.use('/admin',admin_router);
     app.use('/users/auth',reg_users);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
