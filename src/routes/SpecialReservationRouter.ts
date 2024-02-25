@@ -1,6 +1,6 @@
 import express from "express";
-import { AddSpecialResrvation } from "../controllers/SpecialReservaionController";
+import { AddSpecialReservation } from "../controllers/SpecialReservaionController";
 
-const SpecialReservationRouter = express.Router ();
-SpecialReservationRouter.post("/",AddSpecialResrvation)
+const SpecialReservationRouter = express.Router();
+SpecialReservationRouter.post("/",AddSpecialReservation)
 export {SpecialReservationRouter}

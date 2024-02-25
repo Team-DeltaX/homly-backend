@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 
 
-const AddSpecialResrvation = async (req: Request, res: Response) => {
+const AddSpecialReservation = async (req: Request, res: Response) => {
   const {
     SpecailReservationID,
     ServiceNo,
@@ -57,4 +57,4 @@ router.get("/all", async (req: Request, res: Response) => {
 });
 
 
-export { AddSpecialResrvation };
+export { AddSpecialReservation };
