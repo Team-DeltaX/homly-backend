@@ -25,6 +25,7 @@ import { homly_user } from "./routes/UserRouters";
 import { reg_users } from "./routes/RegUserRouters";
 
 import dotenv from "dotenv";
+import { BlacklistRouter } from "./routes/BlacklistRouter";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -53,6 +54,7 @@ AppDataSource.initialize()
     app.use('/locationadmin/holidayhome', HolidayHomeRouter);
     app.use('/locationadmin/reservations',SpecialReservationRouter)
     app.use('/admin/auth/locationadmin',LocationAdminRoute)
+    app.use('/admin/auth',BlacklistRouter)
     app.use('/users',homly_user);
     app.use('/users/auth',reg_users);
     app.listen(PORT, () => {

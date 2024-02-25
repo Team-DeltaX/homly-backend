@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne,CreateDateColumn, BaseEntity} from 'typeorm';
 import { Userdel } from './Userdel';
 
 
 @Entity()
-export class BlackListedUser{
+export class BlackListedUser extends BaseEntity{
     Save() {
         throw new Error("Method not implemented.");
     }
@@ -13,12 +13,17 @@ export class BlackListedUser{
   @Column()
   BlackListReason!:String;
 
-  @Column()
-  Date!:String;
+  
+  @CreateDateColumn({
+    nullable: false,
+  })
+  Date!: Date;
 
-  @OneToOne(() => Userdel)
-    @JoinColumn()
-    ServiceNo!:Userdel
+  // @OneToOne(() => Userdel)
+  //   @JoinColumn()
+  //   ServiceNo!:Userdel
+  @Column()
+  ServiceNo!:String;
     
 
 
