@@ -34,21 +34,23 @@ export class HolidayHome extends BaseEntity {
 
   @Column(
     {
-      type: "numeric"
+      type: "numeric",
     }
   )
   TotalRental!: number;
 
   @Column(
     {
-      type: "numeric"
+      type: "numeric",
+      default: 0
     }
   )
   ServiceCharge!: number;
 
   @Column(
     {
-      type: "numeric"
+      type: "numeric",
+      default: 0
     }
   )
   OtherCharge!: number;
