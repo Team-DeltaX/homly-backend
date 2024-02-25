@@ -45,7 +45,7 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
   }
 };
 
-router.get("/all", async (req: Request, res: Response) => {
+const getSpecialReservation = async (req: Request, res: Response) => {
   const SpecailReservations = await AppDataSource.manager.find(SpecailReservation);
   try {
     const SpecailReservations = await AppDataSource.manager.find(SpecailReservation);
@@ -54,7 +54,7 @@ router.get("/all", async (req: Request, res: Response) => {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
   }
-});
+};
 
 
-export { AddSpecialResrvation };
+export { getSpecialReservation,AddSpecialResrvation };
