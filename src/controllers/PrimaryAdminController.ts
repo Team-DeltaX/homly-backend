@@ -361,4 +361,36 @@ export const addtoblacklist = async (req: Request, res: Response) => {
   }
 };
 
+
+
+export const getblacklistedusers = async (req: Request, res: Response) => {
+  // const admins = await AppDataSource.manager.find(HomlyAdmin);
+  try {
+    const BlackListedUsers = await AppDataSource.manager.find(BlackListedUser);
+    res.status(200).json(BlackListedUsers);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!! in getting all blacklisted users " });
+  }
+};
+export const checkuserexist=async(req:Request,res:Response)=>{
+  try{const serviceno=req.params.serviceno;
+    const count = await BlackListedUser.count({
+      where: {
+        ServiceNo: serviceno,
+      },
+    });
+    console.log(count)
+    if(count>0){ res.status(200).json({exist:true})
+  }else{
+    res.status(200).json({exist:false})
+}
+   
+    }
+    catch(error){
+      console.log('error in getting exist')
+    }
+  
+}
+
 export { router };
