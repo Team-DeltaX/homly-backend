@@ -7,7 +7,6 @@ import { AppDataSource } from "../index";
 
 const AddSpecialResrvation = async (req: Request, res: Response) => {
   const {
-    SpecailReservationID,
     ServiceNo,
     HolidayHome,
     CheckinDate,
@@ -22,7 +21,6 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
       .into(SpecailReservation)
       .values([
         {
-          SpecailReservationID,
           ServiceNo,
           HolidayHome,
           CheckinDate,
@@ -43,6 +41,7 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
       res.status(500).json({ message: "Internal Server Error!" });
     
   }
+  console.log(ServiceNo,HolidayHome,CheckinDate,CheckoutDate);
 };
 
 const getSpecialReservation = async (req: Request, res: Response) => {
