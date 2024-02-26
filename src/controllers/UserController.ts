@@ -8,6 +8,9 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
 
+// import jwt
+import jwt from "jsonwebtoken";
+
 // import html email template
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -23,6 +26,15 @@ import {
 } from "../entities/User";
 
 import { Employee } from "../entities/Empolyee";
+
+// create token
+const maxAge = 60*60;
+const createToken = (serviceNo:String) =>{
+  const secretCode = process.env.JWT_SECRET;
+  return jwt.sign({serviceNo},secretCode! ,{
+    expiresIn: maxAge
+  });
+}
 
 // send verification email
 const sendVerificationEmail = (
@@ -163,6 +175,7 @@ const userExist = async (ServiceNo: string) => {
 // get all employees
 const allEmployees = async (req: Request, res: Response) => {
   const employees = await AppDataSource.manager.find(Employee);
+  
   res.json({ employees: employees });
 };
 
@@ -260,10 +273,13 @@ const userLogin = async (req: Request, res: Response) => {
   const user = await AppDataSource.manager.findOneBy(HomlyUser, {
     service_number: serviceNo,
   });
+  // res.cookie("nameAruna","aruna",{httpOnly:true}).status(200).json({ message: "Login Successful", success: false });
   if (user && user.verified) {
     if (!user.blacklisted) {
       bcrypt.compare(password, user.password).then((result) => {
         if (result) {
+          const token = createToken(serviceNo);
+          res.cookie("jwt",token,{httpOnly:true,maxAge:maxAge*1000});
           res.status(200).json({ message: "Login Successful", success: true });
         } else {
           res.status(200).json({
