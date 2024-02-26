@@ -12,13 +12,16 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
         jwt.verify(token, secretCode!, (err: jwt.VerifyErrors | null, decodedToken: any) => {
         if (err) {
             console.log(err.message);
-            res.redirect("/");
+            res.status(401).json({ message: "Unauthorized", autherized: false});
         } else {
             console.log(decodedToken);
             next();
         }
         });
     } else {
+        console.log("No token");
         res.redirect("/");
     }
 }
+
+export { requireAuth };

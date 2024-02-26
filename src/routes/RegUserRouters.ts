@@ -5,10 +5,10 @@ import { allUsers, userById, updateUserDetails, updateUserPassword } from "../co
 const reg_users = express.Router();
 
 
-reg_users.get("/",allUsers);
-reg_users.get("/:serviceNo",userById)
-reg_users.put("/", updateUserDetails);
-reg_users.put("/password", updateUserPassword);
+reg_users.get("/auth/",allUsers);
+reg_users.get("/auth/:serviceNo",userById)
+reg_users.put("/auth/", updateUserDetails);
+reg_users.put("/auth/password", updateUserPassword);
 
 
 export { reg_users}

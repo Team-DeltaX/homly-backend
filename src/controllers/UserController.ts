@@ -28,7 +28,7 @@ import {
 import { Employee } from "../entities/Empolyee";
 
 // create token
-const maxAge = 60;
+const maxAge = 60*60;
 const createToken = (serviceNo:String) =>{
   const secretCode = process.env.JWT_SECRET;
   return jwt.sign({serviceNo},secretCode! ,{

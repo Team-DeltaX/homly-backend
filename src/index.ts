@@ -26,6 +26,7 @@ import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { homly_user } from "./routes/UserRouters";
 import { reg_users } from "./routes/RegUserRouters";
 import { admin_router } from "./routes/AdminRouters";
+import { requireAuth } from "./middleware/authMiddleware";
 
 
 import dotenv from "dotenv";
@@ -44,24 +45,26 @@ export const AppDataSource = new DataSource({
 
 });
 
+// app.use(express.static('public'));
 app.use(express.json());
+app.use(cookieParser());
 const corsOptions ={
-  origin:'http://localhost:3000', 
-  credentials:true,            //access-control-allow-credentials:true
-  optionSuccessStatus:200
+  origin: 'http://localhost:3000',
+  credentials: true,
+  optionSuccessStatus: 200
 }
 app.use(cors(corsOptions));
-app.use(cookieParser());
 
 AppDataSource.initialize()
   .then(() => {
-
+    // use requireAuth middleware to users/auth all paths
+    app.use('/users/auth/*', requireAuth);
     app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
     app.use('/admin/auth/locationadmin/reservations',SpecialReservationRouter)
     app.use('/admin/auth/locationadmin',LocationAdminRoute)
     app.use('/users',homly_user);
+    app.use('/users',reg_users);
     app.use('/admin',admin_router);
-    app.use('/users/auth',reg_users);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
       
