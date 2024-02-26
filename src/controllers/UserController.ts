@@ -11,6 +11,9 @@ dotenv.config();
 // import jwt
 import jwt from "jsonwebtoken";
 
+// import natural
+import natural from "natural";
+
 // import html email template
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -26,6 +29,35 @@ import {
 } from "../entities/User";
 
 import { Employee } from "../entities/Empolyee";
+
+// initialize natural
+const Analyzer = natural.SentimentAnalyzer;
+const stemmer = natural.PorterStemmer;
+const analyzer = new Analyzer("English", stemmer, "afinn");
+
+// test natural
+const tests = [
+  { input: "I love this tutorial" },
+  { input: "I hate this tutorial" },
+  { input: "This is an average tutorial" },
+  { input: "This is the best tutorial ever" },
+  { input: "This is the worst tutorial ever" },
+];
+
+function interpretSentiment(score: number) {
+  if (score > 0.5) return "Strongly Positive";
+  if (score > 0) return "Positive";
+  if (score === 0) return "Neutral";
+  if (score > -0.5) return "Negative";
+  return "Strongly Negative";
+}
+
+// tests.forEach((test, index) => {
+//   const result = analyzer.getSentiment(test.input.split(" "));
+//   const humanReadable = interpretSentiment(result);
+
+//   console.log(`Test ${index + 1}: Score is ${result} - ${humanReadable}`);
+// });
 
 // create token
 const maxAge = 60*60;
@@ -517,7 +549,16 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+// review sentiment
+const reviewSentiment = async (req: Request, res: Response) => {
+  const { review } = req.body;
+  const result = analyzer.getSentiment(review.split(" "));
+  const humanReadable = interpretSentiment(result);
+  res.status(200).json({ score: result, sentiment: humanReadable });
+};
+
 export {
+  reviewSentiment,
   allEmployees,
   allUsers,
   userById,
