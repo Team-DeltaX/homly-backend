@@ -1,4 +1,6 @@
 import express from "express";
+import cookieParser from "cookie-parser"; 
+import cors from "cors"; 
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import {SpecailReservation} from './entities/SpecialReservation';
@@ -25,6 +27,7 @@ import { homly_user } from "./routes/UserRouters";
 import { reg_users } from "./routes/RegUserRouters";
 import { admin_router } from "./routes/AdminRouters";
 
+
 import dotenv from "dotenv";
 dotenv.config();
 const app = express();
@@ -41,15 +44,17 @@ export const AppDataSource = new DataSource({
 
 });
 
+app.use(express.json());
+const corsOptions ={
+  origin:'http://localhost:3000', 
+  credentials:true,            //access-control-allow-credentials:true
+  optionSuccessStatus:200
+}
+app.use(cors(corsOptions));
+app.use(cookieParser());
+
 AppDataSource.initialize()
   .then(() => {
-    app.use(express.json());
-    app.use((req, res, next) => {
-      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-      next();
-    });
 
     app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
     app.use('/admin/auth/locationadmin/reservations',SpecialReservationRouter)

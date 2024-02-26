@@ -163,6 +163,7 @@ const userExist = async (ServiceNo: string) => {
 // get all employees
 const allEmployees = async (req: Request, res: Response) => {
   const employees = await AppDataSource.manager.find(Employee);
+  
   res.json({ employees: employees });
 };
 
@@ -260,28 +261,29 @@ const userLogin = async (req: Request, res: Response) => {
   const user = await AppDataSource.manager.findOneBy(HomlyUser, {
     service_number: serviceNo,
   });
-  if (user && user.verified) {
-    if (!user.blacklisted) {
-      bcrypt.compare(password, user.password).then((result) => {
-        if (result) {
-          res.status(200).json({ message: "Login Successful", success: true });
-        } else {
-          res.status(200).json({
-            message: "Incorrect password or Username",
-            success: false,
-          });
-        }
-      });
-    } else {
-      res
-        .status(200)
-        .json({ message: "You are a Blacklisted User", success: false });
-    }
-  } else {
-    res
-      .status(200)
-      .json({ message: "You are not a registered user", success: false });
-  }
+  res.cookie("nameAruna","aruna",{httpOnly:true}).status(200).json({ message: "Login Successful", success: false });
+  // if (user && user.verified) {
+  //   if (!user.blacklisted) {
+  //     bcrypt.compare(password, user.password).then((result) => {
+  //       if (result) {
+  //         res.status(200).json({ message: "Login Successful", success: true });
+  //       } else {
+  //         res.status(200).json({
+  //           message: "Incorrect password or Username",
+  //           success: false,
+  //         });
+  //       }
+  //     });
+  //   } else {
+  //     res
+  //       .status(200)
+  //       .json({ message: "You are a Blacklisted User", success: false });
+  //   }
+  // } else {
+  //   res
+  //     .status(200)
+  //     .json({ message: "You are not a registered user", success: false });
+  // }
 };
 
 // forget password
