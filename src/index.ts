@@ -26,6 +26,7 @@ import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { homly_user } from "./routes/UserRouters";
 import { reg_users } from "./routes/RegUserRouters";
 import { admin_router } from "./routes/AdminRouters";
+import { homly_review } from "./routes/Review";
 import { requireAuth } from "./middleware/authMiddleware";
 
 
@@ -64,6 +65,7 @@ AppDataSource.initialize()
     app.use('/admin/auth/locationadmin',LocationAdminRoute)
     app.use('/users',homly_user);
     app.use('/users',reg_users);
+    app.use('/users',homly_review);
     app.use('/admin',admin_router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
