@@ -12,7 +12,6 @@ dotenv.config();
 import jwt from "jsonwebtoken";
 
 
-
 // import html email template
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -190,7 +189,7 @@ const allUsers = async (req: Request, res: Response) => {
 
 // get user by service number
 const userById = async (req: Request, res: Response) => {
-  const { serviceNo } = req.params;
+  const  serviceNo  = req.cookies.serviceNo;
   AppDataSource.manager
     .findOneBy(HomlyUser, { service_number: serviceNo })
     .then((user) => {
@@ -198,6 +197,7 @@ const userById = async (req: Request, res: Response) => {
         .findOneBy(Employee, { service_number: serviceNo })
         .then((employee) => {
           res.status(200).json({
+            serviceNo: serviceNo,
             name: employee?.name,
             nic: employee?.nic,
             work: employee?.work_place,
@@ -210,7 +210,6 @@ const userById = async (req: Request, res: Response) => {
         .catch(() => {
           res.status(404).json({ message: "Error", success: false });
         });
-      // res.status(200).json(user);
     })
     .catch(() => {
       res.status(404).json({ message: "User not found", success: false });
@@ -276,7 +275,6 @@ const userLogin = async (req: Request, res: Response) => {
   const user = await AppDataSource.manager.findOneBy(HomlyUser, {
     service_number: serviceNo,
   });
-  // res.cookie("nameAruna","aruna",{httpOnly:true}).status(200).json({ message: "Login Successful", success: false });
   if (user && user.verified) {
     if (!user.blacklisted) {
       bcrypt.compare(password, user.password).then(async (result) => {
@@ -289,7 +287,11 @@ const userLogin = async (req: Request, res: Response) => {
             }
           );
           const token = createToken(serviceNo);
+          // set 2 cookies
+
+          res.cookie("serviceNo",serviceNo,{httpOnly:true,maxAge:maxAge*1000});
           res.cookie("jwt",token,{httpOnly:true,maxAge:maxAge*1000});
+
           res.status(200).json({ message: "Login Successful", success: true });
         } else {
           res.status(200).json({
