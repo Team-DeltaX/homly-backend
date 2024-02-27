@@ -2,11 +2,11 @@ import { BaseEntity, Entity, Column, PrimaryColumn } from "typeorm";
 import { HolidayHome } from "./HolidayHome";
 
 @Entity()
-export class ContactNo extends BaseEntity {
+export class SelectedRooms extends BaseEntity {
     @PrimaryColumn({
         unique: true,
     })
-    HolidayHomeId!: number;
+    HolidayHomeId!: String;
 
     @PrimaryColumn()
     unitCode!: string;

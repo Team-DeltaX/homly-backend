@@ -95,6 +95,16 @@ export class HolidayHome extends BaseEntity {
   @Column({
     default: null
   })
+  Pool!: String;
+
+  @Column({
+    default: null
+  })
+  Bar!: String;
+
+  @Column({
+    default: null
+  })
   Facilities!: string;
 
   @CreateDateColumn()
@@ -103,28 +113,9 @@ export class HolidayHome extends BaseEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @OneToMany(() => CareTaker, (careTaker) => careTaker.holidayhome)
-  careTaker!: CareTaker[]
+  @Column({
+    default: null
+  })
+  AdminNo!: string;
 
-  @OneToMany(() => Hall, (hall) => hall.holidayhome)
-  hall!: Hall[]
-
-  @OneToMany(() => Image, (image) => image.holidayhome)
-  image!: Image[]
-
-  @OneToMany(() => ContactNo, (contactNo) => contactNo.holidayhome)
-  contactNo!: ContactNo[]
-
-  @OneToMany(() => Unit, (unit) => unit.holidayhome)
-  unit!: Unit[]
-
-  @OneToMany(() => Room, (room) => room.holidayhome)
-  room!: Room[]
-
-  @OneToMany(() => Rental, (room) => room.holidayhome)
-  rental!: Rental[]
-
-  @ManyToOne(() => LocationAdmin, (locationadmin) => locationadmin.holidayhome)
-  @JoinColumn({ name: "AdminNo" })
-  locationadmin!: LocationAdmin
 }

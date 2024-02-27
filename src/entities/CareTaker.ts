@@ -31,9 +31,10 @@ export class CareTaker extends BaseEntity {
     })
     Image!: string;
 
-    @ManyToOne(() => HolidayHome, (holidayhome) => holidayhome.careTaker)
-    @JoinColumn({ name: "HolidayHomeId" })
-    holidayhome!: HolidayHome
+    @Column()
+    HolidayHomeId!: string;
+
+
 
 
 

@@ -6,26 +6,33 @@ export class Image extends BaseEntity {
     ImageId!: string;
 
     @Column({
-        type: "clob"
+        type: "clob",
+        default: null
     })
     MainImage!: string;
 
     @Column({
-        type: "clob"
+        type: "clob",
+        default: null
     })
     Image1!: string;
 
     @Column({
-        type: "clob"
+        type: "clob",
+        default: null
     })
     Image2!: string;
 
     @Column({
-        type: "clob"
+        type: "clob",
+        default: null
     })
     Image3!: string;
 
-    @ManyToOne(() => HolidayHome, (holidayhome) => holidayhome.image)
-    holidayhome!: HolidayHome;
+    @Column()
+    HolidayHomeId!: string;
+
+
+
 
 }
