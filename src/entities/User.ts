@@ -36,6 +36,11 @@ export class HomlyUser extends BaseEntity {
   })
   blacklisted!:boolean;
 
+  @Column({
+    nullable:true,
+  })
+  lastLogin!: Date;
+
   @CreateDateColumn({
     nullable: false,
   })
