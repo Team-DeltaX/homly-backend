@@ -530,10 +530,22 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+// change facility name
+
 // add user interested facilities
 const addUserIntersted = async(req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
-  const { fac1, fac2, fac3 } = req.body;
+  let { fac1, fac2, fac3 } = req.body;
+
+  if(fac1 === "value for money"){
+    fac1 = "value_for_money";
+  }
+  if(fac2 === "value for money"){
+    fac2 = "value_for_money";
+  }
+  if(fac3 === "value for money"){
+    fac3 = "value_for_money";
+  }
 
   // update table
   if(serviceNo){
