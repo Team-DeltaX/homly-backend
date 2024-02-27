@@ -24,6 +24,7 @@ import {
   HomlyUser,
   UserEmailVerification,
   UserOTPVerification,
+  UserInteresed,
 } from "../entities/User";
 
 import { Employee } from "../entities/Empolyee";
@@ -529,6 +530,28 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+// add user interested facilities
+const addUserIntersted = async(req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  const { fac1, fac2, fac3 } = req.body;
+
+  // update table
+  if(serviceNo){
+    const interested = UserInteresed.create({
+      service_number: serviceNo,
+      interested_1: fac1,
+      interested_2: fac2,
+      interested_3: fac3,
+      isFirstTime: true,
+    })
+    await interested.save();
+  }
+
+
+
+  console.log(serviceNo, fac1, fac2, fac3);
+}
+
 
 
 export {
@@ -543,4 +566,5 @@ export {
   resetPassword,
   updateUserDetails,
   updateUserPassword,
+  addUserIntersted,
 };
