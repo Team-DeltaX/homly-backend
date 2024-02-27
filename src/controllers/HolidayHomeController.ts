@@ -8,6 +8,7 @@ import { Room } from '../entities/Room';
 import { Hall } from '../entities/Hall';
 import { Image } from '../entities/Image';
 import { SelectedRooms } from '../entities/SelectedRooms';
+import { Rental } from '../entities/Rental';
 
 const getHolidayHomes = async (req: Request, res: Response) => {
 
@@ -59,6 +60,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
         // console.log(allValues.homeBreakDown);
         // console.log(allValues.roomArray);
         // console.log(allValues.unitArray);
+        console.log(allValues.hallArray);
         // console.log(allValues);
 
 
@@ -97,7 +99,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
         //     Address: allValues.caretaker1.caretakerAddress,
         //     Description: allValues.caretaker1.caretakerDescription,
         //     // HolidayHomeId: "2",
-        // HolidayHomeId: holidayHome.HolidayHomeId
+        //     HolidayHomeId: holidayHome.HolidayHomeId
 
         // })
 
@@ -105,7 +107,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
         // const contactNo1 = ContactNo.create({
         //     ContactNo: allValues.holidayHomeDetails.contactNo1,
-        //     // HolidayHomeId: holidayHome.HolidayHomeId
+        //     HolidayHomeId: holidayHome.HolidayHomeId
         //     // HolidayHomeId: "6"
 
         // })
@@ -115,7 +117,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
         // if (allValues.holidayHomeDetails.contactNo2 !== "") {
         //     const contactNo2 = ContactNo.create({
         //         ContactNo: allValues.holidayHomeDetails.contactNo2,
-        //         // HolidayHomeId: holidayHome.HolidayHomeId
+        //         HolidayHomeId: holidayHome.HolidayHomeId
         //         // HolidayHomeId: "4"
 
         //     })
@@ -129,84 +131,127 @@ const createHolidayHome = async (req: Request, res: Response) => {
         //     Image1: allValues.images.image1,
         //     Image2: allValues.images.image2,
         //     Image3: allValues.images.image3,
-        //     // HolidayHomeId: holidayHome.HolidayHomeId
-        //     HolidayHomeId: "4"
+        //     HolidayHomeId: holidayHome.HolidayHomeId
+        //     // HolidayHomeId: "4"
         // })
 
         // await image.save();
 
 
 
-        for (let i = 0; i < allValues.roomArray.length; i++) {
-            const room = Room.create({
-                roomCode: allValues.roomArray[i].roomCode,
-                roomAc: allValues.roomArray[i].roomAc,
-                RoomType: allValues.roomArray[i].RoomType,
-                NoOfBeds: allValues.roomArray[i].NoOfBeds,
-                NoOfAdults: allValues.roomArray[i].NoOfAdults,
-                NoOfChildren: allValues.roomArray[i].NoOfChildren,
-                groupByUnit: allValues.roomArray[i].groupByUnit,
-                roomRemarks: allValues.roomArray[i].roomRemarks,
-                roomRental: allValues.roomArray[i].roomRental,
-                // HolidayHomeId: holidayHome.HolidayHomeId
-                HolidayHomeId: "4",
+        // for (let i = 0; i < allValues.roomArray.length; i++) {
 
+        //     console.log(allValues.roomArray[i].rentalArray);
+        //     for (let j = 0; j < allValues.roomArray[i].rentalArray.length; j++) {
+        //         const rental = Rental.create({
+        //             Month: allValues.roomArray[i].rentalArray[j].district,
+        //             WeekRental: allValues.roomArray[i].rentalArray[j].weekDays,
+        //             WeekEndRental: allValues.roomArray[i].rentalArray[j].weekEnds,
+        //             HolidayHomeId: holidayHome.HolidayHomeId,
+        //             // HolidayHomeId: "4",
+        //             HRUId: allValues.roomArray[i].roomCode
+        //         })
 
-            })
+        //         await rental.save();
 
-            await room.save();
-        }
+        //     }
 
-        // console.log(allValues.hallArray);
+        //     const room = Room.create({
+        //         roomCode: allValues.roomArray[i].roomCode,
+        //         roomAc: allValues.roomArray[i].roomAc,
+        //         RoomType: allValues.roomArray[i].RoomType,
+        //         NoOfBeds: allValues.roomArray[i].NoOfBeds,
+        //         NoOfAdults: allValues.roomArray[i].NoOfAdults,
+        //         NoOfChildren: allValues.roomArray[i].NoOfChildren,
+        //         groupByUnit: allValues.roomArray[i].groupByUnit,
+        //         roomRemarks: allValues.roomArray[i].roomRemarks,
+        //         roomRental: allValues.roomArray[i].roomRental,
+        //         HolidayHomeId: holidayHome.HolidayHomeId,
+        //         // HolidayHomeId: "4",
 
-        for (let i = 0; i < allValues.unitArray.length; i++) {
-
-            console.log(allValues.unitArray[i].selectedRooms);
-            for (let j = 0; j < allValues.unitArray[i].selectedRooms.length; j++) {
-                const selectedRoom = SelectedRooms.create({
-                    roomCode: allValues.unitArray[i].selectedRooms[j].roomCode,
-                    unitCode: allValues.unitArray[i].unitCode,
-                    HolidayHomeId: "4",
-                })
-                await selectedRoom.save();
-            }
-
-
-            const unit = Unit.create({
-                unitCode: allValues.unitArray[i].unitCode,
-                unitRental: allValues.unitArray[i].unitRental,
-                unitAc: allValues.unitArray[i].unitAc,
-                floorLevel: allValues.unitArray[i].floorLevel,
-                unitRemark: allValues.unitArray[i].unitRemark,
-                roomAttached: allValues.unitArray[i].roomAttached,
-                HolidayHomeId: "4",
-
-                // HolidayHomeId: holidayHome.HolidayHomeId
-
-
-
-            })
-
-            await unit.save();
-        }
-
-
-        // for (let i = 0; i < allValues.hallArray.length; i++) {
-        //     const hall = Hall.create({
-        //         hallCode: allValues.hallArray[i].hallCode,
-        //         hallAc: allValues.hallArray[i].hallAc,
-        //         floorLevel: allValues.hallArray[i].floorLevel,
-        //         hallNoOfAdults: allValues.hallArray[i].hallNoOfAdults,
-        //         hallNoOfChildren: allValues.hallArray[i].hallNoOfChildren,
-        //         hallRemark: allValues.hallArray[i].hallRemark,
-        //         hallRental: allValues.hallArray[i].hallRental,
-        //         HolidayHomeId: "4",
-        //         // HolidayHomeId: holidayHome.HolidayHomeId
 
         //     })
 
-        //     await hall.save();
+        //     await room.save();
         // }
+
+        // // console.log(allValues.hallArray);
+
+        // for (let i = 0; i < allValues.unitArray.length; i++) {
+
+        //     for (let k = 0; k < allValues.unitArray[i].unitRentalArray.length; k++) {
+        //         const rental = Rental.create({
+        //             Month: allValues.unitArray[i].unitRentalArray[k].district,
+        //             WeekRental: allValues.unitArray[i].unitRentalArray[k].weekDays,
+        //             WeekEndRental: allValues.unitArray[i].unitRentalArray[k].weekEnds,
+        //             // HolidayHomeId: "4",
+        //             HolidayHomeId: holidayHome.HolidayHomeId,
+        //             HRUId: allValues.unitArray[i].unitCode
+        //         })
+
+        //         await rental.save();
+        //     }
+
+        //     for (let j = 0; j < allValues.unitArray[i].selectedRooms.length; j++) {
+        //         const selectedRoom = SelectedRooms.create({
+        //             roomCode: allValues.unitArray[i].selectedRooms[j].roomCode,
+        //             unitCode: allValues.unitArray[i].unitCode,
+        //             // HolidayHomeId: "4",
+        //             HolidayHomeId: holidayHome.HolidayHomeId
+        //         })
+        //         await selectedRoom.save();
+        //     }
+
+
+        //     const unit = Unit.create({
+        //         unitCode: allValues.unitArray[i].unitCode,
+        //         unitRental: allValues.unitArray[i].unitRental,
+        //         unitAc: allValues.unitArray[i].unitAc,
+        //         floorLevel: allValues.unitArray[i].floorLevel,
+        //         unitRemark: allValues.unitArray[i].unitRemark,
+        //         roomAttached: allValues.unitArray[i].roomAttached,
+        //         // HolidayHomeId: "4",
+        //         HolidayHomeId: holidayHome.HolidayHomeId
+
+
+
+        //     })
+
+        //     await unit.save();
+        // }
+
+
+        for (let i = 0; i < allValues.hallArray.length; i++) {
+            console.log(allValues.hallArray);
+            console.log(allValues.hallArray[i].hallRentalArray);
+            for (let j = 0; j < allValues.hallArray[i].hallRentalArray.length; j++) {
+                const rental = Rental.create({
+                    Month: allValues.hallArray[i].hallRentalArray[j].district,
+                    WeekRental: allValues.hallArray[i].hallRentalArray[j].weekDays,
+                    WeekEndRental: allValues.hallArray[i].hallRentalArray[j].weekEnds,
+                    HolidayHomeId: "4",
+                    // HolidayHomeId: holidayHome.HolidayHomeId,
+                    HRUId: allValues.hallArray[i].hallCode
+                })
+
+                await rental.save();
+
+            }
+            const hall = Hall.create({
+                hallCode: allValues.hallArray[i].hallCode,
+                hallAc: allValues.hallArray[i].hallAc,
+                floorLevel: allValues.hallArray[i].floorLevel,
+                hallNoOfAdults: allValues.hallArray[i].hallNoOfAdults,
+                hallNoOfChildren: allValues.hallArray[i].hallNoOfChildren,
+                hallRemark: allValues.hallArray[i].hallRemark,
+                hallRental: allValues.hallArray[i].hallRental,
+                HolidayHomeId: "4",
+                // HolidayHomeId: holidayHome.HolidayHomeId
+
+            })
+
+            await hall.save();
+        }
 
 
 

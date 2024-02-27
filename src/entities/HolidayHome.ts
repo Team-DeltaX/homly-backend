@@ -23,7 +23,9 @@ export class HolidayHome extends BaseEntity {
   @Column()
   District!: string;
 
-  @Column()
+  @Column({
+    length: 1000
+  })
   Description!: string;
 
   @Column()

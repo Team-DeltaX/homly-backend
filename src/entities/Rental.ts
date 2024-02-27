@@ -3,7 +3,7 @@ import { HolidayHome } from "./HolidayHome";
 
 @Entity()
 export class Rental extends BaseEntity {
-    @Column()
+    @PrimaryColumn()
     Month!: String
 
     @Column({
