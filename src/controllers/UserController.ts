@@ -11,6 +11,8 @@ dotenv.config();
 // import jwt
 import jwt from "jsonwebtoken";
 
+
+
 // import html email template
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -26,6 +28,7 @@ import {
 } from "../entities/User";
 
 import { Employee } from "../entities/Empolyee";
+
 
 // create token
 const maxAge = 60*60;
@@ -276,8 +279,15 @@ const userLogin = async (req: Request, res: Response) => {
   // res.cookie("nameAruna","aruna",{httpOnly:true}).status(200).json({ message: "Login Successful", success: false });
   if (user && user.verified) {
     if (!user.blacklisted) {
-      bcrypt.compare(password, user.password).then((result) => {
+      bcrypt.compare(password, user.password).then(async (result) => {
         if (result) {
+          await AppDataSource.manager.update(
+            HomlyUser,
+            { service_number: serviceNo },
+            {
+              lastLogin: new Date(),
+            }
+          );
           const token = createToken(serviceNo);
           res.cookie("jwt",token,{httpOnly:true,maxAge:maxAge*1000});
           res.status(200).json({ message: "Login Successful", success: true });
@@ -516,6 +526,8 @@ const updateUserPassword = async (req: Request, res: Response) => {
     res.status(200).json({ message: "User not found", success: false });
   }
 };
+
+
 
 export {
   allEmployees,
