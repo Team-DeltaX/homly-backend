@@ -1,5 +1,6 @@
 import { BaseEntity, Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { HolidayHome } from "./HolidayHome";
+import { SelectedRooms } from "./SelectedRooms";
 // import { Room } from "./Room";
 
 @Entity()
@@ -28,6 +29,7 @@ export class Unit extends BaseEntity {
 
     @PrimaryColumn()
     HolidayHomeId!: string;
+
 
 
 }

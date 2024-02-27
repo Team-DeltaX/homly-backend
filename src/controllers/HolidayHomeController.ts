@@ -34,7 +34,7 @@ const getHolidayHomesDetails = async (req: Request, res: Response) => {
     const contactNo = await AppDataSource.manager
         .findBy(ContactNo, { HolidayHomeId });
 
-    const unit = await AppDataSource.manager
+    const units = await AppDataSource.manager
         .findBy(Unit, { HolidayHomeId });
 
     const room = await AppDataSource.manager
@@ -46,8 +46,24 @@ const getHolidayHomesDetails = async (req: Request, res: Response) => {
     const caretaker = await AppDataSource.manager
         .findBy(CareTaker, { HolidayHomeId });
 
-    res.json({ homeDetails: holidayHome, contactNo: contactNo, unit: unit, room: room, hall: hall, caretaker: caretaker });
+    res.json({ homeDetails: holidayHome, contactNo: contactNo, unit: units, room: room, hall: hall, caretaker: caretaker });
 };
+
+const getSelectedRooms = async (req: Request, res: Response) => {
+    const { HolidayHomeId, unitCode } = req.params;
+    const selectedRoom = await AppDataSource.manager
+        .findBy(SelectedRooms, { HolidayHomeId, unitCode });
+
+    res.json({ selectedRoom: selectedRoom });
+}
+
+const getRoom = async (req: Request, res: Response) => {
+    const { HolidayHomeId, roomCode } = req.params;
+    const room = await AppDataSource.manager
+        .findOneBy(Room, { HolidayHomeId, roomCode });
+
+    res.json({ room: room });
+}
 
 
 const createHolidayHome = async (req: Request, res: Response) => {
@@ -264,4 +280,4 @@ const createHolidayHome = async (req: Request, res: Response) => {
 };
 
 
-export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome }
+export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom }

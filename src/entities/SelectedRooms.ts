@@ -1,6 +1,7 @@
 import { BaseEntity, Entity, Column, PrimaryColumn } from "typeorm";
 import { HolidayHome } from "./HolidayHome";
 
+
 @Entity()
 export class SelectedRooms extends BaseEntity {
     @PrimaryColumn({
@@ -13,4 +14,6 @@ export class SelectedRooms extends BaseEntity {
 
     @PrimaryColumn()
     roomCode!: string;
+
+
 }
