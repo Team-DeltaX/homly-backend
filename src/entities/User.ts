@@ -115,5 +115,5 @@ export class UserInteresed extends BaseEntity {
   @Column({
     default: false,
   })
-  isFirstTime!: boolean;
+  updated!: boolean;
 }

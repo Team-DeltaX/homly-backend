@@ -542,14 +542,26 @@ const addUserIntersted = async(req: Request, res: Response) => {
       interested_1: fac1,
       interested_2: fac2,
       interested_3: fac3,
-      isFirstTime: true,
+      updated: true,
     })
-    await interested.save();
+    await interested.save().then(() => {
+      res.status(200).json({message: "Successfully add your insterested", success: true});
+    })
+    console.log("updated db")
   }
 
-
-
   console.log(serviceNo, fac1, fac2, fac3);
+}
+
+const getUserIntersted = async(req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  await AppDataSource.manager.findOneBy(UserInteresed, {
+    service_number: serviceNo,
+  }).then((result) => {
+    res.status(200).json(result);
+  }).catch((err) => {
+    res.status(404).json({message: "Error", success: false});
+  });
 }
 
 
@@ -567,4 +579,5 @@ export {
   updateUserDetails,
   updateUserPassword,
   addUserIntersted,
+  getUserIntersted,
 };

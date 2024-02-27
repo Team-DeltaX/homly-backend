@@ -31,6 +31,7 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     );
   } else {
     console.log("No token");
+    // res.redirect("http://localhost:3000/");
     res.status(401).json({ message: "Unauthorized", autherized: false });
   }
 };
