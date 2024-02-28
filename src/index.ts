@@ -35,10 +35,9 @@ import { reg_users } from "./routes/RegUserRouters";
 import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
 import { requireAuth } from "./middleware/authMiddleware";
-
+import { BlacklistRouter } from "./routes/BlacklistRouter";
 
 import dotenv from "dotenv";
-// import { BlacklistRouter } from "./routes/BlacklistRouter";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
