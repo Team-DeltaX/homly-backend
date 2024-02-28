@@ -506,13 +506,25 @@ const otpVerification = async (req: Request, res: Response) => {
 const resetPassword = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
   console.log("reset password", serviceNo, password);
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
+
+  const user = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(HomlyUser, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne();
+  // const user = await AppDataSource.manager.findOneBy(HomlyUser, {
+  //   service_number: serviceNo,
+  // });
   if (user && user.verified) {
-    const otp = await AppDataSource.manager.findOneBy(UserOTPVerification, {
-      service_number: serviceNo,
-    });
+    // const otp = await AppDataSource.manager.findOneBy(UserOTPVerification, {
+    //   service_number: serviceNo,
+    // });
+
+    const otp = await AppDataSource.createQueryBuilder()
+      .select("otp")
+      .from(UserOTPVerification, "otp")
+      .where("otp.service_number = :id", { id: serviceNo })
+      .getOne();
 
     if (otp?.verified) {
       const saltRounds = 10;
