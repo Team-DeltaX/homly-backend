@@ -559,39 +559,18 @@ const userById = async (req: Request, res: Response) => {
     console.log("get user by service number", err);
     res.status(501).json({ message: "Server Error", success: false });
   }
-  // AppDataSource.manager
-  //   .findOneBy(HomlyUser, { service_number: serviceNo })
-  //   .then((user) => {
-  //     AppDataSource.manager
-  //       .findOneBy(Employee, { service_number: serviceNo })
-  //       .then((employee) => {
-  //         res.status(200).json({
-  //           serviceNo: serviceNo,
-  //           name: employee?.name,
-  //           nic: employee?.nic,
-  //           work: employee?.work_place,
-  //           address: employee?.address,
-  //           contactNo: user?.contact_number,
-  //           email: user?.email,
-  //           image: user?.image,
-  //         });
-  //       })
-  //       .catch(() => {
-  //         res.status(404).json({ message: "Error", success: false });
-  //       });
-  //   })
-  //   .catch(() => {
-  //     res.status(404).json({ message: "User not found", success: false });
-  //   });
 };
 
 // update user details
 const updateUserDetails = async (req: Request, res: Response) => {
   const { serviceNo, email, contactNo, image } = req.body;
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
   try {
+    const user = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(HomlyUser, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+      
     if (user && user.verified) {
       await AppDataSource.manager.update(
         HomlyUser,
