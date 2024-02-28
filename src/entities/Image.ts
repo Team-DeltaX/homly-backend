@@ -1,8 +1,10 @@
+
 import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, BaseEntity, ManyToOne } from "typeorm";
+
 import { HolidayHome } from "./HolidayHome";
 @Entity()
 export class Image extends BaseEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     ImageId!: string;
 
     @Column({

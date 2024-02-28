@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryColumn, Column,  CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
 import { CareTaker } from "./CareTaker";
 import { Hall } from "./Hall";
 import { Image } from "./Image";
@@ -9,7 +9,7 @@ import { LocationAdmin } from "./LocationAdmin";
 import { Rental } from "./Rental";
 @Entity()
 export class HolidayHome extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   HolidayHomeId!: string;
 
   @Column({
