@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne,CreateDateColumn, BaseEntity} from 'typeorm';
 import { Userdel } from './Userdel';
+import { HomlyUser } from './User';
 
 
 @Entity()
@@ -19,9 +20,9 @@ export class BlackListedUser extends BaseEntity{
   })
   Date!: Date;
 
-  // @OneToOne(() => Userdel)
-  //   @JoinColumn()
-  //   ServiceNo!:Userdel
+  // @OneToOne(() => HomlyUser)
+  // @JoinColumn()
+  // ServiceNo!:HomlyUser;
   @Column()
   ServiceNo!:String;
     
