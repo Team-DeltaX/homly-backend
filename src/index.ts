@@ -23,21 +23,21 @@ import {
   HomlyUser,
   UserEmailVerification,
   UserOTPVerification,
-  // UserInteresed,
+  UserInteresed,
 } from "./entities/User";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
-// import { UserFeedback } from "./entities/Feedback";
+import { UserFeedback } from "./entities/Feedback";
 
 // routes
 import { homly_user } from "./routes/UserRouters";
 import { reg_users } from "./routes/RegUserRouters";
 import { admin_router } from "./routes/AdminRouters";
-// import { homly_review } from "./routes/Review";
-// import { requireAuth } from "./middleware/authMiddleware";
+import { homly_review } from "./routes/Review";
+import { requireAuth } from "./middleware/authMiddleware";
+import { BlacklistRouter } from "./routes/BlacklistRouter";
 
 import dotenv from "dotenv";
-import { BlacklistRouter } from "./routes/BlacklistRouter";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -53,7 +53,7 @@ export const AppDataSource = new DataSource({
     HomlyAdmin,
     Employee,
     HomlyUser,
-    // UserInteresed,
+    UserInteresed,
     UserEmailVerification,
     UserOTPVerification,
     Complaints,
@@ -69,7 +69,7 @@ export const AppDataSource = new DataSource({
     LocationAdmin,
     Rental,
     SpecailReservation,
-    // UserFeedback,
+    UserFeedback,
   ],
   synchronize: true,
   logging: false,
@@ -78,24 +78,24 @@ export const AppDataSource = new DataSource({
 // app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
-const corsOptions = {
-  origin: "http://localhost:3000",
+const corsOptions ={
+  origin: 'http://localhost:3000',
   credentials: true,
-  optionSuccessStatus: 200,
-};
+  optionSuccessStatus: 200
+}
 app.use(cors(corsOptions));
 
 AppDataSource.initialize()
   .then(() => {
     // use requireAuth middleware to users/auth all paths
-    // app.use("/users/auth/*", requireAuth);
-    app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
-    app.use("/admin/auth/locationadmin/reservations", SpecialReservationRouter);
-    app.use("/admin/auth/locationadmin", LocationAdminRoute);
-    app.use("/users", homly_user);
-    app.use("/users", reg_users);
-    // app.use("/users", homly_review);
-    app.use("/admin", admin_router);
+    app.use('/users/auth/*', requireAuth);
+    app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
+    app.use('/admin/auth/locationadmin/reservations',SpecialReservationRouter)
+    app.use('/admin/auth/locationadmin',LocationAdminRoute)
+    app.use('/users',homly_user);
+    app.use('/users',reg_users);
+    app.use('/users',homly_review);
+    app.use('/admin',admin_router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
