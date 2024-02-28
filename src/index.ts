@@ -15,7 +15,6 @@ import { ContactNo } from "./entities/ContactNo";
 import { LocationAdmin } from "./entities/LocationAdmin";
 import { HolidayHomeRouter } from "./routes/HolidayHome";
 import { Rental } from "./entities/Rental";
-import { Userdel } from "./entities/Userdel";
 import { Complaints } from "./entities/Complaint";
 import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
@@ -57,7 +56,6 @@ export const AppDataSource = new DataSource({
     // UserInteresed,
     UserEmailVerification,
     UserOTPVerification,
-    Userdel,
     Complaints,
     BlackListedUser,
     BlackListHistory,

@@ -1,6 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne,CreateDateColumn, BaseEntity} from 'typeorm';
-import { Userdel } from './Userdel';
-
 
 @Entity()
 export class BlackListedUser extends BaseEntity{
