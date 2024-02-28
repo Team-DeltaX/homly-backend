@@ -460,9 +460,16 @@ const forgetPasswordDetails = async (req: Request, res: Response) => {
 // get otp and validate
 const otpVerification = async (req: Request, res: Response) => {
   const { serviceNo, otp } = req.body;
-  const userOTP = await AppDataSource.manager.findOneBy(UserOTPVerification, {
-    service_number: serviceNo,
-  });
+
+  const userOTP = await AppDataSource.createQueryBuilder()
+    .select("otp")
+    .from(UserOTPVerification, "otp")
+    .where("otp.service_number = :id", { id: serviceNo })
+    .getOne();
+
+  // const userOTP = await AppDataSource.manager.findOneBy(UserOTPVerification, {
+  //   service_number: serviceNo,
+  // });
 
   if (userOTP) {
     const expiresAt = userOTP.expires_at;
