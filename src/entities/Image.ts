@@ -1,4 +1,6 @@
-import { Entity,Column, PrimaryColumn,BaseEntity, ManyToOne} from "typeorm";
+
+import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, BaseEntity, ManyToOne } from "typeorm";
+
 import { HolidayHome } from "./HolidayHome";
 @Entity()
 export class Image extends BaseEntity {
@@ -6,11 +8,33 @@ export class Image extends BaseEntity {
     ImageId!: string;
 
     @Column({
-        type: "clob"
+        type: "clob",
+        default: null
     })
-    ImageCode!: string;
+    MainImage!: string;
 
-    @ManyToOne(()=>HolidayHome, (holidayhome) => holidayhome.image)
-    holidayhome!: HolidayHome;
+    @Column({
+        type: "clob",
+        default: null
+    })
+    Image1!: string;
+
+    @Column({
+        type: "clob",
+        default: null
+    })
+    Image2!: string;
+
+    @Column({
+        type: "clob",
+        default: null
+    })
+    Image3!: string;
+
+    @Column()
+    HolidayHomeId!: string;
+
+
+
 
 }
