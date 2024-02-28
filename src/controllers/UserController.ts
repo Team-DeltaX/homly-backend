@@ -11,7 +11,6 @@ dotenv.config();
 // import jwt
 import jwt from "jsonwebtoken";
 
-
 // import html email template
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -29,15 +28,14 @@ import {
 
 import { Employee } from "../entities/Empolyee";
 
-
 // create token
-const maxAge = 60*60;
-const createToken = (serviceNo:String) =>{
+const maxAge = 60 * 60;
+const createToken = (serviceNo: String) => {
   const secretCode = process.env.JWT_SECRET;
-  return jwt.sign({serviceNo},secretCode! ,{
-    expiresIn: maxAge
+  return jwt.sign({ serviceNo }, secretCode!, {
+    expiresIn: maxAge,
   });
-}
+};
 
 // send verification email
 const sendVerificationEmail = (
@@ -79,17 +77,177 @@ const sendVerificationEmail = (
     });
 };
 
+
+
+const userExist = async (ServiceNo: string) => {
+  const usersWithSameNo = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(HomlyUser, "user")
+    .where("user.service_number = :id", { id: ServiceNo })
+    .getOne();
+
+  if (usersWithSameNo && usersWithSameNo.verified) {
+    return false;
+  } else {
+    return true;
+  }
+};
+// get all employees
+const allEmployees = async (req: Request, res: Response) => {
+  const employees = await AppDataSource.manager.find(Employee);
+
+  res.json({ employees: employees });
+};
+
+// get all users
+const allUsers = async (req: Request, res: Response) => {
+  const users = await AppDataSource.manager.find(HomlyUser);
+  res.json(users);
+};
+
+// get user by service number
+const userById = async (req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  AppDataSource.manager
+    .findOneBy(HomlyUser, { service_number: serviceNo })
+    .then((user) => {
+      AppDataSource.manager
+        .findOneBy(Employee, { service_number: serviceNo })
+        .then((employee) => {
+          res.status(200).json({
+            serviceNo: serviceNo,
+            name: employee?.name,
+            nic: employee?.nic,
+            work: employee?.work_place,
+            address: employee?.address,
+            contactNo: user?.contact_number,
+            email: user?.email,
+            image: user?.image,
+          });
+        })
+        .catch(() => {
+          res.status(404).json({ message: "Error", success: false });
+        });
+    })
+    .catch(() => {
+      res.status(404).json({ message: "User not found", success: false });
+    });
+};
+
+// user registration
+const userRegistration = async (req: Request, res: Response) => {
+  const { ServiceNo, Password, Email, ContactNo, image } = req.body;
+  await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(Employee, "user")
+    .where("user.service_number = :id", { id: ServiceNo })
+    .getOne()
+    .then(async (employee) => {
+      if (employee) {
+        console.log(employee);
+        if (await userExist(ServiceNo)) {
+          sendVerificationEmail(Email, ServiceNo, employee.name);
+          // bcrypt password
+          const saltRounds = 10;
+          bcrypt
+            .hash(Password, saltRounds)
+            .then(async (hash) => {
+              const user = HomlyUser.create({
+                service_number: ServiceNo,
+                password: hash,
+                email: Email,
+                contact_number: ContactNo,
+                image,
+              });
+              await user.save();
+              return res.status(201).json({
+                message:
+                  "Check your emails,We will send you a verification link",
+                success: true,
+              });
+            })
+            .catch((err) => {
+              return res
+                .status(404)
+                .json({ message: "Error saving user", success: false });
+            });
+        } else {
+          return res
+            .status(201)
+            .json({ message: "User already exists!", success: false });
+        }
+      } else {
+        res
+          .status(202)
+          .json({ message: "Your are not an employee", success: false });
+      }
+    })
+    .catch((err) => {
+      res
+        .status(202)
+        .json({ message: "err Your are not an employee", success: false });
+    });
+
+  // await AppDataSource.manager
+  //   .findOneBy(Employee, {
+  //     service_number: ServiceNo,
+  //   })
+  //   .then(async (employee) => {
+  //     if (employee) {
+  //       if (await userExist(ServiceNo)) {
+  //         sendVerificationEmail(Email, ServiceNo, employee.name);
+  //         // bcrypt password
+  //         const saltRounds = 10;
+  //         bcrypt
+  //           .hash(Password, saltRounds)
+  //           .then(async (hash) => {
+  //             const user = HomlyUser.create({
+  //               service_number: ServiceNo,
+  //               password: hash,
+  //               email: Email,
+  //               contact_number: ContactNo,
+  //               image,
+  //             });
+  //             await user.save();
+  //             return res.status(201).json({
+  //               message:
+  //                 "Check your emails,We will send you a verification link",
+  //               success: true,
+  //             });
+  //           })
+  //           .catch((err) => {
+  //             return res
+  //               .status(404)
+  //               .json({ message: "Error saving user", success: false });
+  //           });
+  //       } else {
+  //         return res
+  //           .status(201)
+  //           .json({ message: "User already exists!", success: false });
+  //       }
+  //     } else {
+  //       res
+  //         .status(202)
+  //         .json({ message: "Your are not an employee", success: false });
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     res
+  //       .status(202)
+  //       .json({ message: "Your are not an employee", success: false });
+  //   });
+};
+
 // verify email
 // url with verification code and service number
 const emailVerification = async (req: Request, res: Response) => {
   let message, verified; // send details to frontend
   const { serviceNo, verificationCode } = req.params;
-  const userVerification = await AppDataSource.manager.findOneBy(
-    UserEmailVerification,
-    {
-      service_number: serviceNo,
-    }
-  );
+  const userVerification = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(UserEmailVerification, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne()
 
   if (userVerification) {
     const expiresAt = userVerification?.expires_at; // Add null check here
@@ -142,9 +300,16 @@ const emailVerification = async (req: Request, res: Response) => {
         });
     }
   } else {
-    const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-      service_number: serviceNo,
-    });
+    const user =await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(HomlyUser, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne()
+    
+    
+    // await AppDataSource.manager.findOneBy(HomlyUser, {
+    //   service_number: serviceNo,
+    // });
 
     if (user && user.verified) {
       // res.status(200).json({ message: "User already verified", success: true });
@@ -162,112 +327,6 @@ const emailVerification = async (req: Request, res: Response) => {
       );
     }
   }
-};
-
-const userExist = async (ServiceNo: string) => {
-  const usersWithSameNo = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: ServiceNo,
-  });
-
-  if (usersWithSameNo && usersWithSameNo.verified) {
-    return false;
-  } else {
-    return true;
-  }
-};
-// get all employees
-const allEmployees = async (req: Request, res: Response) => {
-  const employees = await AppDataSource.manager.find(Employee);
-  
-  res.json({ employees: employees });
-};
-
-// get all users
-const allUsers = async (req: Request, res: Response) => {
-  const users = await AppDataSource.manager.find(HomlyUser);
-  res.json(users);
-};
-
-// get user by service number
-const userById = async (req: Request, res: Response) => {
-  const  serviceNo  = req.cookies.serviceNo;
-  AppDataSource.manager
-    .findOneBy(HomlyUser, { service_number: serviceNo })
-    .then((user) => {
-      AppDataSource.manager
-        .findOneBy(Employee, { service_number: serviceNo })
-        .then((employee) => {
-          res.status(200).json({
-            serviceNo: serviceNo,
-            name: employee?.name,
-            nic: employee?.nic,
-            work: employee?.work_place,
-            address: employee?.address,
-            contactNo: user?.contact_number,
-            email: user?.email,
-            image: user?.image,
-          });
-        })
-        .catch(() => {
-          res.status(404).json({ message: "Error", success: false });
-        });
-    })
-    .catch(() => {
-      res.status(404).json({ message: "User not found", success: false });
-    });
-};
-
-// user registration
-const userRegistration = async (req: Request, res: Response) => {
-  const { ServiceNo, Password, Email, ContactNo, image } = req.body;
-  await AppDataSource.manager
-    .findOneBy(Employee, {
-      service_number: ServiceNo,
-    })
-    .then(async (employee) => {
-      if (employee) {
-        if (await userExist(ServiceNo)) {
-          sendVerificationEmail(Email, ServiceNo, employee.name);
-          // bcrypt password
-          const saltRounds = 10;
-          bcrypt
-            .hash(Password, saltRounds)
-            .then(async (hash) => {
-              const user = HomlyUser.create({
-                service_number: ServiceNo,
-                password: hash,
-                email: Email,
-                contact_number: ContactNo,
-                image,
-              });
-              await user.save();
-              return res.status(201).json({
-                message:
-                  "Check your emails,We will send you a verification link",
-                success: true,
-              });
-            })
-            .catch((err) => {
-              return res
-                .status(404)
-                .json({ message: "Error saving user", success: false });
-            });
-        } else {
-          return res
-            .status(201)
-            .json({ message: "User already exists!", success: false });
-        }
-      } else {
-        res
-          .status(202)
-          .json({ message: "Your are not an employee", success: false });
-      }
-    })
-    .catch((err) => {
-      res
-        .status(202)
-        .json({ message: "Your are not an employee", success: false });
-    });
 };
 
 // user login
@@ -290,8 +349,11 @@ const userLogin = async (req: Request, res: Response) => {
           const token = createToken(serviceNo);
           // set 2 cookies
 
-          res.cookie("serviceNo",serviceNo,{httpOnly:true,maxAge:maxAge*1000});
-          res.cookie("jwt",token,{httpOnly:true,maxAge:maxAge*1000});
+          res.cookie("serviceNo", serviceNo, {
+            httpOnly: true,
+            maxAge: maxAge * 1000,
+          });
+          res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
 
           res.status(200).json({ message: "Login Successful", success: true });
         } else {
@@ -358,27 +420,25 @@ const forgetPasswordDetails = async (req: Request, res: Response) => {
   const employee = await AppDataSource.manager.findOneBy(Employee, {
     service_number: serviceNo,
   });
-  
+
   if (user && user.verified) {
     if (!user.blacklisted) {
       if (user.email === email) {
         sendOTP(email, serviceNo, employee!.name);
 
-        res
-          .status(200)
-          .json({
-            message: "Check your email,We will send OTP",
-            success: true,
-          });
+        res.status(200).json({
+          message: "Check your email,We will send OTP",
+          success: true,
+        });
       } else {
         res
           .status(200)
           .json({ message: "Invalid Service Number or Email", success: false });
       }
-    }else{
+    } else {
       res
-      .status(200)
-      .json({ message: "You are a Blacklisted User", success: false });
+        .status(200)
+        .json({ message: "You are a Blacklisted User", success: false });
     }
   } else {
     res.status(200).json({ message: "User not found", success: false });
@@ -533,50 +593,53 @@ const updateUserPassword = async (req: Request, res: Response) => {
 // change facility name
 
 // add user interested facilities
-const addUserIntersted = async(req: Request, res: Response) => {
+const addUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
   let { fac1, fac2, fac3 } = req.body;
 
-  if(fac1 === "value for money"){
+  if (fac1 === "value for money") {
     fac1 = "value_for_money";
   }
-  if(fac2 === "value for money"){
+  if (fac2 === "value for money") {
     fac2 = "value_for_money";
   }
-  if(fac3 === "value for money"){
+  if (fac3 === "value for money") {
     fac3 = "value_for_money";
   }
 
   // update table
-  if(serviceNo){
+  if (serviceNo) {
     const interested = UserInteresed.create({
       service_number: serviceNo,
       interested_1: fac1,
       interested_2: fac2,
       interested_3: fac3,
       updated: true,
-    })
+    });
     await interested.save().then(() => {
-      res.status(200).json({message: "Successfully add your insterested", success: true});
-    })
-    console.log("updated db")
+      res
+        .status(200)
+        .json({ message: "Successfully add your insterested", success: true });
+    });
+    console.log("updated db");
   }
 
   console.log(serviceNo, fac1, fac2, fac3);
-}
+};
 
-const getUserIntersted = async(req: Request, res: Response) => {
+const getUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
-  await AppDataSource.manager.findOneBy(UserInteresed, {
-    service_number: serviceNo,
-  }).then((result) => {
-    res.status(200).json(result);
-  }).catch((err) => {
-    res.status(404).json({message: "Error", success: false});
-  });
-}
-
-
+  await AppDataSource.manager
+    .findOneBy(UserInteresed, {
+      service_number: serviceNo,
+    })
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((err) => {
+      res.status(404).json({ message: "Error", success: false });
+    });
+};
 
 export {
   allEmployees,
