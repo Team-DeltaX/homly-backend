@@ -324,6 +324,8 @@ export const addtoblacklist = async (req: Request, res: Response) => {
   try{
     const serviceno = req.body.ServiceNo;
   const reason = req.body.Reason;
+  console.log(`service no is ${serviceno}`)
+  console.log(`ressonis ${reason}`)
 
   await HomlyUser.update({service_number:serviceno}, { blacklisted:true})
 
@@ -380,7 +382,7 @@ export const checkuserexist=async(req:Request,res:Response)=>{
         ServiceNo: serviceno,
       },
     });
-    console.log(count)
+    // console.log(count)
     if(count>0){ res.status(200).json({exist:true})
   }else{
     res.status(200).json({exist:false})
