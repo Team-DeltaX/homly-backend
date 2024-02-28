@@ -4,9 +4,9 @@ const BlacklistRouter = express.Router();
 
 
 
-BlacklistRouter.post('/blacklist',addtoblacklist);
-BlacklistRouter.get('/blacklistusers',getblacklistedusers);
-BlacklistRouter.get('/isexist/:serviceno',checkuserexist);
+BlacklistRouter.post('/auth/blacklist',addtoblacklist);
+BlacklistRouter.get('/auth/blacklist',getblacklistedusers);
+BlacklistRouter.get('/auth/isexist/:serviceno',checkuserexist);
 
 
 

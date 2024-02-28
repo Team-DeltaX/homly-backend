@@ -37,8 +37,10 @@ transporter.verify(function (error, success) {
 });
 
 export const AddAdmin = async (req: Request, res: Response) => {
+  const count =await AppDataSource.manager.count(HomlyAdmin)
+  const AdminNo=`HomlyLocAdmin${count+1}`
   const {
-    AdminNo,
+   
     UserName,
 
     ContactNo,
@@ -47,6 +49,8 @@ export const AddAdmin = async (req: Request, res: Response) => {
     // Disabled,
     Sub,
   } = req.body;
+
+
 
   const Role = "LocationAdmin";
 
@@ -61,6 +65,7 @@ export const AddAdmin = async (req: Request, res: Response) => {
   bcrypt
     .hash(Password, saltRound)
     .then((hashedPassword) => {
+
       const addadmin = HomlyAdmin.create({
         AdminNo,
         UserName,
@@ -144,6 +149,8 @@ export const getall = async (req: Request, res: Response) => {
   const admins = await AppDataSource.manager.find(HomlyAdmin);
   try {
     const admins = await AppDataSource.manager.find(HomlyAdmin);
+   
+   
     res.status(200).json(admins);
   } catch (error) {
     console.log(error);
@@ -249,6 +256,8 @@ export const sendMail = (req: Request, res: Response) => {
 export const getcomplaints = async (req: Request, res: Response) => {
   // const admins = await AppDataSource.manager.find(HomlyAdmin);
   try {
+    
+    
     const complaints = await AppDataSource.manager.find(Complaints);
     res.status(200).json(complaints);
   } catch (error) {
@@ -322,7 +331,7 @@ export const getprevcomplaints = async (req: Request, res: Response) => {
 
 export const addtoblacklist = async (req: Request, res: Response) => {
   try{
-    const serviceno = req.body.ServiceNo;
+  const serviceno = req.body.ServiceNo;
   const reason = req.body.Reason;
   console.log(`service no is ${serviceno}`)
   console.log(`ressonis ${reason}`)
@@ -331,12 +340,22 @@ export const addtoblacklist = async (req: Request, res: Response) => {
 
 
 
- const UserDetails = await HomlyUser.findOne({
-    where: {
-      service_number: serviceno,
-    },
-  });
-  const Email = String(UserDetails?.email);
+//  const UserDetails = await HomlyUser.findOne({
+//     where: {
+//       service_number: serviceno,
+//     },
+//   });
+//   console.log(UserDetails)
+//   const Email = String(UserDetails?.email);
+
+  const UserDetails= await AppDataSource
+    .getRepository(HomlyUser)
+    .createQueryBuilder("user")
+    .where( {  service_number: serviceno})
+    .getOne()
+    console.log(UserDetails)
+    const Email = String(UserDetails?.email);
+  
 
   const addtoblacklist = BlackListedUser.create({
     BlackListReason: reason,
