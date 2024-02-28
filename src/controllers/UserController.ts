@@ -77,8 +77,6 @@ const sendVerificationEmail = (
     });
 };
 
-
-
 const userExist = async (ServiceNo: string) => {
   const usersWithSameNo = await AppDataSource.createQueryBuilder()
     .select("user")
@@ -247,7 +245,7 @@ const emailVerification = async (req: Request, res: Response) => {
     .select("user")
     .from(UserEmailVerification, "user")
     .where("user.service_number = :id", { id: serviceNo })
-    .getOne()
+    .getOne();
 
   if (userVerification) {
     const expiresAt = userVerification?.expires_at; // Add null check here
@@ -300,13 +298,12 @@ const emailVerification = async (req: Request, res: Response) => {
         });
     }
   } else {
-    const user =await AppDataSource.createQueryBuilder()
-    .select("user")
-    .from(HomlyUser, "user")
-    .where("user.service_number = :id", { id: serviceNo })
-    .getOne()
-    
-    
+    const user = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(HomlyUser, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+
     // await AppDataSource.manager.findOneBy(HomlyUser, {
     //   service_number: serviceNo,
     // });
@@ -332,9 +329,15 @@ const emailVerification = async (req: Request, res: Response) => {
 // user login
 const userLogin = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
+  const user = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(HomlyUser, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne();
+
+  // await AppDataSource.manager.findOneBy(HomlyUser, {
+  //   service_number: serviceNo,
+  // });
   if (user && user.verified) {
     if (!user.blacklisted) {
       bcrypt.compare(password, user.password).then(async (result) => {
