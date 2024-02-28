@@ -91,3 +91,29 @@ export class UserOTPVerification extends BaseEntity {
 
 
 }
+
+@Entity()
+export class UserInteresed extends BaseEntity {
+  @PrimaryColumn()
+  service_number!: string;
+
+  @Column({
+    nullable: true,
+  })
+  interested_1!: string;
+
+  @Column({
+    nullable: true,
+  })
+  interested_2!: string;
+
+  @Column({
+    nullable: true,
+  })
+  interested_3!: string;
+
+  @Column({
+    default: false,
+  })
+  updated!: boolean;
+}

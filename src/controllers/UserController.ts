@@ -24,6 +24,7 @@ import {
   HomlyUser,
   UserEmailVerification,
   UserOTPVerification,
+  UserInteresed,
 } from "../entities/User";
 
 import { Employee } from "../entities/Empolyee";
@@ -529,6 +530,52 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+// change facility name
+
+// add user interested facilities
+const addUserIntersted = async(req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  let { fac1, fac2, fac3 } = req.body;
+
+  if(fac1 === "value for money"){
+    fac1 = "value_for_money";
+  }
+  if(fac2 === "value for money"){
+    fac2 = "value_for_money";
+  }
+  if(fac3 === "value for money"){
+    fac3 = "value_for_money";
+  }
+
+  // update table
+  if(serviceNo){
+    const interested = UserInteresed.create({
+      service_number: serviceNo,
+      interested_1: fac1,
+      interested_2: fac2,
+      interested_3: fac3,
+      updated: true,
+    })
+    await interested.save().then(() => {
+      res.status(200).json({message: "Successfully add your insterested", success: true});
+    })
+    console.log("updated db")
+  }
+
+  console.log(serviceNo, fac1, fac2, fac3);
+}
+
+const getUserIntersted = async(req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  await AppDataSource.manager.findOneBy(UserInteresed, {
+    service_number: serviceNo,
+  }).then((result) => {
+    res.status(200).json(result);
+  }).catch((err) => {
+    res.status(404).json({message: "Error", success: false});
+  });
+}
+
 
 
 export {
@@ -543,4 +590,6 @@ export {
   resetPassword,
   updateUserDetails,
   updateUserPassword,
+  addUserIntersted,
+  getUserIntersted,
 };

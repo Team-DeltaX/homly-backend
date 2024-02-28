@@ -23,11 +23,11 @@ import {
   HomlyUser,
   UserEmailVerification,
   UserOTPVerification,
-  // UserInteresed,
+  UserInteresed,
 } from "./entities/User";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
-// import { UserFeedback } from "./entities/Feedback";
+import { UserFeedback } from "./entities/Feedback";
 
 // routes
 import { homly_user } from "./routes/UserRouters";
@@ -35,10 +35,9 @@ import { reg_users } from "./routes/RegUserRouters";
 import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
 import { requireAuth } from "./middleware/authMiddleware";
-
+import { BlacklistRouter } from "./routes/BlacklistRouter";
 
 import dotenv from "dotenv";
-import { BlacklistRouter } from "./routes/BlacklistRouter";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -54,7 +53,7 @@ export const AppDataSource = new DataSource({
     HomlyAdmin,
     Employee,
     HomlyUser,
-    // UserInteresed,
+    UserInteresed,
     UserEmailVerification,
     UserOTPVerification,
     Complaints,
@@ -70,7 +69,7 @@ export const AppDataSource = new DataSource({
     LocationAdmin,
     Rental,
     SpecailReservation,
-    // UserFeedback,
+    UserFeedback,
   ],
   synchronize: true,
   logging: false,
