@@ -570,7 +570,7 @@ const updateUserDetails = async (req: Request, res: Response) => {
       .from(HomlyUser, "user")
       .where("user.service_number = :id", { id: serviceNo })
       .getOne();
-      
+
     if (user && user.verified) {
       await AppDataSource.manager.update(
         HomlyUser,
@@ -594,41 +594,52 @@ const updateUserDetails = async (req: Request, res: Response) => {
 };
 // update user password
 const updateUserPassword = async (req: Request, res: Response) => {
-  const { serviceNo, oldPassword, newPassword } = req.body;
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
-  if (user && user.verified) {
-    bcrypt.compare(oldPassword, user.password).then(async (result) => {
-      if (result) {
-        const saltRounds = 10;
-        bcrypt
-          .hash(newPassword, saltRounds)
-          .then(async (hash) => {
-            await AppDataSource.manager.update(
-              HomlyUser,
-              { service_number: serviceNo },
-              {
-                password: hash,
-              }
-            );
-            res
-              .status(200)
-              .json({ message: "Password updated", success: true });
-          })
-          .catch((err) => {
-            res
-              .status(200)
-              .json({ message: "Error updating password", success: false });
-          });
-      } else {
-        res
-          .status(200)
-          .json({ message: "Incorrect old password", success: false });
-      }
-    });
-  } else {
-    res.status(200).json({ message: "User not found", success: false });
+  try {
+    const { serviceNo, oldPassword, newPassword } = req.body;
+    const user = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(HomlyUser, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+    if (user && user.verified) {
+      bcrypt.compare(oldPassword, user.password).then(async (result) => {
+        if (result) {
+          const saltRounds = 10;
+          bcrypt
+            .hash(newPassword, saltRounds)
+            .then(async (hash) => {
+              await AppDataSource.manager.update(
+                HomlyUser,
+                { service_number: serviceNo },
+                {
+                  password: hash,
+                }
+              );
+              res
+                .status(200)
+                .json({ message: "Password updated", success: true });
+            })
+            .catch((err) => {
+              res
+                .status(200)
+                .json({ message: "Error updating password", success: false });
+            });
+        } else {
+          res
+            .status(200)
+            .json({ message: "Incorrect old password", success: false });
+        }
+      }).catch((err) => {
+        res.status(200).json({ message: "Error updating password", success: false });
+      })
+    } else {
+      res.status(200).json({ message: "User not found", success: false });
+    }
+  } catch (error: any) {
+    console.log(error);
+    res
+      .status(200)
+      .json({ message: "Error updating user password", success: false });
   }
 };
 
