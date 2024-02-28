@@ -103,35 +103,6 @@ const allUsers = async (req: Request, res: Response) => {
   res.json(users);
 };
 
-// get user by service number
-const userById = async (req: Request, res: Response) => {
-  const serviceNo = req.cookies.serviceNo;
-  AppDataSource.manager
-    .findOneBy(HomlyUser, { service_number: serviceNo })
-    .then((user) => {
-      AppDataSource.manager
-        .findOneBy(Employee, { service_number: serviceNo })
-        .then((employee) => {
-          res.status(200).json({
-            serviceNo: serviceNo,
-            name: employee?.name,
-            nic: employee?.nic,
-            work: employee?.work_place,
-            address: employee?.address,
-            contactNo: user?.contact_number,
-            email: user?.email,
-            image: user?.image,
-          });
-        })
-        .catch(() => {
-          res.status(404).json({ message: "Error", success: false });
-        });
-    })
-    .catch(() => {
-      res.status(404).json({ message: "User not found", success: false });
-    });
-};
-
 // user registration
 const userRegistration = async (req: Request, res: Response) => {
   const { ServiceNo, Password, Email, ContactNo, image } = req.body;
@@ -551,6 +522,67 @@ const resetPassword = async (req: Request, res: Response) => {
   } else {
     res.status(200).json({ message: "User not found", success: false });
   }
+};
+
+// get user by service number
+const userById = async (req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  try {
+    const user = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(HomlyUser, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+
+    if (user) {
+      const employee = await AppDataSource.createQueryBuilder()
+        .select("user")
+        .from(Employee, "user")
+        .where("user.service_number = :id", { id: serviceNo })
+        .getOne();
+      if (employee) {
+        res.status(200).json({
+          serviceNo: serviceNo,
+          name: employee.name,
+          nic: employee.nic,
+          work: employee.work_place,
+          address: employee.address,
+          contactNo: user.contact_number,
+          email: user.email,
+          image: user.image,
+        });
+      }
+    } else {
+      res.status(200).json({ message: "User not found", success: false });
+    }
+  } catch (err: any) {
+    console.log("get user by service number", err);
+    res.status(501).json({ message: "Server Error", success: false });
+  }
+  // AppDataSource.manager
+  //   .findOneBy(HomlyUser, { service_number: serviceNo })
+  //   .then((user) => {
+  //     AppDataSource.manager
+  //       .findOneBy(Employee, { service_number: serviceNo })
+  //       .then((employee) => {
+  //         res.status(200).json({
+  //           serviceNo: serviceNo,
+  //           name: employee?.name,
+  //           nic: employee?.nic,
+  //           work: employee?.work_place,
+  //           address: employee?.address,
+  //           contactNo: user?.contact_number,
+  //           email: user?.email,
+  //           image: user?.image,
+  //         });
+  //       })
+  //       .catch(() => {
+  //         res.status(404).json({ message: "Error", success: false });
+  //       });
+  //   })
+  //   .catch(() => {
+  //     res.status(404).json({ message: "User not found", success: false });
+  //   });
 };
 
 // update user details
