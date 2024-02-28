@@ -667,7 +667,6 @@ const addUserIntersted = async (req: Request, res: Response) => {
       interested_1: fac1,
       interested_2: fac2,
       interested_3: fac3,
-      updated: true,
     });
     await interested.save().then(() => {
       res
@@ -682,22 +681,26 @@ const addUserIntersted = async (req: Request, res: Response) => {
 
 const getUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
-  try {
+  // res.status(200).json(serviceNo)
+  try{
     const userInterested = await AppDataSource.createQueryBuilder()
-      .select("user")
-      .from(UserInteresed, "user")
-      .where("user.service_number = :id", { id: serviceNo })
-      .getOne();
-    
-    if(userInterested){
-      res.status(200).json(userInterested);
-    }else{
-      res.status(404).json({ message: "Not added", success: false });
-    }
+        .select("user")
+        .from(UserInteresed, "user")
+        .where("user.service_number = :id", { id: serviceNo })
+        .getOne();
+
+      console.log(userInterested);
+
+      if(userInterested){
+        console.log(userInterested);
+        res.status(200).json({updated: true, userInterested:userInterested})
+      }else{
+        console.log("not found");
+        res.status(200).json({updated: false})
+      }
+
   }catch(err:any){
-    console.log(err);
     res.status(404).json({ message: "Error", success: false });
-  
   }
 };
 
