@@ -682,28 +682,35 @@ const addUserIntersted = async (req: Request, res: Response) => {
 
 const getUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
-  await AppDataSource.manager
-    .findOneBy(UserInteresed, {
-      service_number: serviceNo,
-    })
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      res.status(404).json({ message: "Error", success: false });
-    });
+  try {
+    const userInterested = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(UserInteresed, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+    
+    if(userInterested){
+      res.status(200).json(userInterested);
+    }else{
+      res.status(404).json({ message: "Not added", success: false });
+    }
+  }catch(err:any){
+    console.log(err);
+    res.status(404).json({ message: "Error", success: false });
+  
+  }
 };
 
 export {
   allEmployees,
   allUsers,
-  userById,
   userRegistration,
   emailVerification,
   userLogin,
   forgetPasswordDetails,
   otpVerification,
   resetPassword,
+  userById,
   updateUserDetails,
   updateUserPassword,
   addUserIntersted,
