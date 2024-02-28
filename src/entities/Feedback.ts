@@ -9,7 +9,7 @@ import {
 @Entity()
 export class UserFeedback extends BaseEntity {
   // two primary columns
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   feedback_id!: number;
 
   @PrimaryColumn()
