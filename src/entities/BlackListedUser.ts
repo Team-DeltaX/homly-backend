@@ -7,7 +7,7 @@ export class BlackListedUser extends BaseEntity{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   BlackListId!: String ;
 
   @Column()

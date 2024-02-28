@@ -7,7 +7,7 @@ export class BlackListHistory{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   BlackListHistoryId!: String ;
 
   @Column()
