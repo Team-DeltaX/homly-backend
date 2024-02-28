@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne,CreateDateColumn, BaseEntity} from 'typeorm';
+import { HomlyUser } from './User';
 
 import { HomlyUser } from './User';
 
@@ -8,8 +9,8 @@ export class BlackListedUser extends BaseEntity{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryColumn()
-  BlackListId!: String ;
+  @PrimaryGeneratedColumn('uuid')
+  BlackListId!: number ;
 
   @Column()
   BlackListReason!:String;
@@ -20,20 +21,6 @@ export class BlackListedUser extends BaseEntity{
   })
   Date!: Date;
 
-  // @OneToOne(() => HomlyUser)
-  // @JoinColumn()
-  // ServiceNo!:HomlyUser;
   @Column()
   ServiceNo!:String;
-    
-
-
-
-
- 
-
-
-
-
-
 }

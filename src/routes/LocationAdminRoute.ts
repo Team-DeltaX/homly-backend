@@ -4,15 +4,15 @@ const LocationAdminRoute = express.Router();
 
 
 
-LocationAdminRoute.post("/add", AddAdmin)
-LocationAdminRoute.get("/all", getall)
-LocationAdminRoute.put("/disable/:id", disableadmin)
-LocationAdminRoute.post("/resetpassword", sendMail)
-LocationAdminRoute.put("/",editadmindeatails )
-LocationAdminRoute.get("/complaints",getcomplaints )
-LocationAdminRoute.get("/user/:serviceno",get_user_from_user )
-LocationAdminRoute.get("/employee/:serviceno",get_user_from_employee )
-LocationAdminRoute.get("/complaint/:serviceno",getprevcomplaints )
+LocationAdminRoute.post("/auth/locationadmin/add", AddAdmin)
+LocationAdminRoute.get("/auth/locationadmin/all", getall)
+LocationAdminRoute.put("/auth/locationadmin/disable/:id", disableadmin)
+LocationAdminRoute.post("/auth/locationadmin/resetpassword", sendMail)
+LocationAdminRoute.put("/auth/locationadmin/",editadmindeatails )
+LocationAdminRoute.get("/auth/locationadmin/complaints",getcomplaints )
+LocationAdminRoute.get("/auth/locationadmin/user/:serviceno",get_user_from_user )
+LocationAdminRoute.get("/auth/locationadmin/employee/:serviceno",get_user_from_employee )
+LocationAdminRoute.get("/auth/locationadmin/complaint/:serviceno",getprevcomplaints )
 
 
 

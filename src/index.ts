@@ -93,7 +93,8 @@ AppDataSource.initialize()
     app.use('/users/auth/*', requireAuth);
     app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
     app.use('/admin/auth/locationadmin/reservations',SpecialReservationRouter)
-    app.use('/admin/auth/locationadmin',LocationAdminRoute)
+    app.use('/admin',LocationAdminRoute)
+    app.use('/admin',BlacklistRouter)
     app.use('/users',homly_user);
     app.use('/users',reg_users);
     app.use('/users',homly_review);
