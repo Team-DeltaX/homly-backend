@@ -62,7 +62,7 @@ const getRoom = async (req: Request, res: Response) => {
     const room = await AppDataSource.manager
         .findOneBy(Room, { HolidayHomeId, roomCode });
 
-    res.json({ room: room });
+    res.json({ room });
 }
 
 

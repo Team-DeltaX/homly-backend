@@ -7,7 +7,7 @@ const HolidayHomeRouter = express.Router();
 HolidayHomeRouter.get("/", getHolidayHomes);
 HolidayHomeRouter.get("/:HolidayHomeId", getHolidayHomesDetails);
 HolidayHomeRouter.get("/:HolidayHomeId/:unitCode", getSelectedRooms);
-HolidayHomeRouter.get("/:HolidayHomeId/:roomCode", getRoom);
+HolidayHomeRouter.get("/room/:HolidayHomeId/:roomCode", getRoom);
 HolidayHomeRouter.post("/", createHolidayHome);
 
 
