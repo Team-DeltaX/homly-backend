@@ -417,12 +417,21 @@ const sendOTP = (email: string, serviceNo: string, name: string) => {
 const forgetPasswordDetails = async (req: Request, res: Response) => {
   const { serviceNo, email } = req.body;
   console.log(serviceNo, email);
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
-  const employee = await AppDataSource.manager.findOneBy(Employee, {
-    service_number: serviceNo,
-  });
+  const user = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(HomlyUser, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne();
+
+  const employee = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(Employee, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne();
+
+  // const employee = await AppDataSource.manager.findOneBy(Employee, {
+  //   service_number: serviceNo,
+  // });
 
   if (user && user.verified) {
     if (!user.blacklisted) {
