@@ -49,8 +49,20 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
 
   // get interested
-  const interested = await AppDataSource.manager.find(UserInteresed, { 
-    service_number: serviceNo 
+  await AppDataSource.manager.findOneBy(UserInteresed, {
+    service_number: serviceNo,
+  }).then((res) => {
+    if (res) {
+      // get these interest rating from each holiday home
+      // AppDataSource.manager.find(UserFeedback,{
+
+      // })
+      // select 3 column from all data
+      // AppDataSource.manager.find(UserFeedback,{
+      //   select:[holi]
+      // });
+      
+    }
   });
 };
 
