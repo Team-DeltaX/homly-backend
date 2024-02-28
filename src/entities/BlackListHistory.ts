@@ -1,13 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne} from 'typeorm';
-import { Userdel } from './Userdel';
-
 
 @Entity()
 export class BlackListHistory{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   BlackListHistoryId!: String ;
 
   @Column()
@@ -22,9 +20,9 @@ export class BlackListHistory{
   @Column()
   RemoveReason!:String;
 
-  @ManyToOne(() => Userdel, (userdel) =>userdel.ServiceNo)
-  @JoinColumn({ name: 'ServiceNo' })
-    ServiceNoEmp!: Userdel
+  // @ManyToOne(() => Userdel, (userdel) =>userdel.ServiceNo)
+  // @JoinColumn({ name: 'ServiceNo' })
+  //   ServiceNoEmp!: Userdel
 
 
 
