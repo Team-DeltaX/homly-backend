@@ -1,5 +1,6 @@
 import { BaseEntity, Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { HolidayHome } from "./HolidayHome";
+import { SelectedRooms } from "./SelectedRooms";
 // import { Room } from "./Room";
 
 @Entity()
@@ -26,16 +27,9 @@ export class Unit extends BaseEntity {
     @Column()
     roomAttached!: Boolean;
 
-    // @OneToMany(()=>Room, (room) => room.unit)
-    // room!: Room[];
-
-
-    @ManyToOne(() => HolidayHome, (holidayhome) => holidayhome.unit)
-    @JoinColumn({ name: "HolidayHomeId" })
-    holidayhome!: HolidayHome;
-
     @PrimaryColumn()
     HolidayHomeId!: string;
+
 
 
 }

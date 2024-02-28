@@ -32,9 +32,6 @@ export class Hall extends BaseEntity {
     })
     hallRental!: Number;
 
-    @ManyToOne(() => HolidayHome, (holidayhome) => holidayhome.hall)
-    @JoinColumn({ name: "HolidayHomeId" })
-    holidayhome!: HolidayHome;
 
 
 

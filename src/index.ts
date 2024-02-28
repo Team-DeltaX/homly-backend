@@ -38,6 +38,7 @@ import { requireAuth } from "./middleware/authMiddleware";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 
 import dotenv from "dotenv";
+import { SelectedRooms } from "./entities/SelectedRooms";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -87,6 +88,7 @@ app.use(cors(corsOptions));
 
 AppDataSource.initialize()
   .then(() => {
+
     // use requireAuth middleware to users/auth all paths
     app.use('/users/auth/*', requireAuth);
     app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
@@ -98,6 +100,7 @@ AppDataSource.initialize()
     app.use('/admin',admin_router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
+
     });
   })
   .catch((error) => console.log(error));
