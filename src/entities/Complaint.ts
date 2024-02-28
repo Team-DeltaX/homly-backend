@@ -1,14 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn,CreateDateColumn} from 'typeorm';
-// import {LocationAdmin} from './Admin';
-import { Userdel } from './Userdel';
-
 
 @Entity()
 export class Complaints{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   ComplaintID!: String ;
 
   @Column()

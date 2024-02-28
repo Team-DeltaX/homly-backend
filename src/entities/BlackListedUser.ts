@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne,CreateDateColumn, BaseEntity} from 'typeorm';
-import { Userdel } from './Userdel';
+
 import { HomlyUser } from './User';
 
 
@@ -8,7 +8,7 @@ export class BlackListedUser extends BaseEntity{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   BlackListId!: String ;
 
   @Column()
