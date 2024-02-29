@@ -1,18 +1,22 @@
-import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne, CreateDateColumn, BaseEntity} from 'typeorm';
 
 @Entity()
-export class BlackListHistory{
+export class BlackListHistory extends BaseEntity{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryColumn()
+  @PrimaryColumn({
+    nullable: false,
+  })
   BlackListHistoryId!: String ;
 
   @Column()
   BlacklistedDate!:String;
 
-  @Column()
-  RemovedDate!:String;
+  @CreateDateColumn({
+    nullable: false,
+  })
+  RemovedDate!: Date;
 
   @Column()
   Addreason!:String;
@@ -20,17 +24,10 @@ export class BlackListHistory{
   @Column()
   RemoveReason!:String;
 
+  @Column()
+  ServiceNo!:String;
+
   // @ManyToOne(() => Userdel, (userdel) =>userdel.ServiceNo)
   // @JoinColumn({ name: 'ServiceNo' })
   //   ServiceNoEmp!: Userdel
-
-
-
-
- 
-
-
-
-
-
 }
