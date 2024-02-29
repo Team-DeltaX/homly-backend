@@ -1,4 +1,5 @@
 import express from "express";
+// import { getHolidayHomes } from "../controllers/HolidayHomeController";
 import { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental } from "../controllers/HolidayHomeController";
 
 
