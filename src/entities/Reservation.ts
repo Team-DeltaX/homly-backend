@@ -21,7 +21,4 @@ export class Reservation extends BaseEntity {
     @Column()
     NoOfChildren!: number;
 
-    @OneToMany(() => Employee, (employee) => employee.reservations)
-  @JoinColumn({ name: "service_number" })
-  locationadmin!: Employee
 }
