@@ -9,66 +9,114 @@ import { Hall } from '../entities/Hall';
 import { Image } from '../entities/Image';
 import { SelectedRooms } from '../entities/SelectedRooms';
 import { Rental } from '../entities/Rental';
+import { getManager } from 'typeorm';
 
 const getHolidayHomes = async (req: Request, res: Response) => {
 
     const pending = await AppDataSource.manager
-        .findBy(HolidayHome, { Approved: false })
+        .find(HolidayHome,
+            {
+                where:
+                    { Approved: false }
+            })
 
     const acitve = await AppDataSource.manager
-        .findBy(HolidayHome, { Status: 'active', Approved: true })
+        .find(HolidayHome,
+            {
+                where:
+                {
+                    Status: 'active',
+                    Approved: true
+                }
+            })
 
     const inactive = await AppDataSource.manager
-        .findBy(HolidayHome, { Status: 'inactive', Approved: true })
+        .find(HolidayHome,
+            {
+                where:
+                {
+                    Status: 'inactive',
+                    Approved: true
+                }
+            })
 
 
     res.json({ pending: pending, active: acitve, inactive: inactive });
 
 };
 
+
 const getHolidayHomesDetails = async (req: Request, res: Response) => {
     const { HolidayHomeId } = req.params;
-    const holidayHome = await AppDataSource.manager
-        .findOneBy(HolidayHome, { HolidayHomeId });
+    // const holidayHome = await AppDataSource.manager
+    //     .findOneBy(HolidayHome, { HolidayHomeId });
 
-    const contactNo = await AppDataSource.manager
-        .findBy(ContactNo, { HolidayHomeId });
+    // const contactNo = await AppDataSource.manager
+    //     .findBy(ContactNo, { HolidayHomeId });
 
-    const units = await AppDataSource.manager
-        .findBy(Unit, { HolidayHomeId });
+    // const units = await AppDataSource.manager
+    //     .findBy(Unit, { HolidayHomeId });
 
-    const room = await AppDataSource.manager
-        .findBy(Room, { HolidayHomeId });
+    // const room = await AppDataSource.manager
+    //     .findBy(Room, { HolidayHomeId });
 
-    const hall = await AppDataSource.manager
-        .findBy(Hall, { HolidayHomeId });
+    // const hall = await AppDataSource.manager
+    //     .findBy(Hall, { HolidayHomeId });
 
-    const caretaker = await AppDataSource.manager
-        .findBy(CareTaker, { HolidayHomeId });
+    // const caretaker = await AppDataSource.manager
+    //     .findBy(CareTaker, { HolidayHomeId });
 
-    res.json({ homeDetails: holidayHome, contactNo: contactNo, unit: units, room: room, hall: hall, caretaker: caretaker });
+    const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+        where: { HolidayHomeId }
+    });
+
+    const contactNo = await AppDataSource.manager.find(ContactNo, {
+        where: { HolidayHomeId }
+    });
+
+    const units = await AppDataSource.manager.find(Unit, {
+        where: { HolidayHomeId }
+    });
+
+    const rooms = await AppDataSource.manager.find(Room, {
+        where: { HolidayHomeId }
+    });
+
+    const halls = await AppDataSource.manager.find(Hall, {
+        where: { HolidayHomeId }
+    });
+
+    const caretakers = await AppDataSource.manager.find(CareTaker, {
+        where: { HolidayHomeId }
+    });
+
+    res.json({ homeDetails: holidayHome, contactNo: contactNo, unit: units, room: rooms, hall: halls, caretaker: caretakers });
 };
 
 const getSelectedRooms = async (req: Request, res: Response) => {
     const { HolidayHomeId, unitCode } = req.params;
-    const selectedRoom = await AppDataSource.manager
-        .findBy(SelectedRooms, { HolidayHomeId, unitCode });
+    const selectedRoom = await AppDataSource.manager.find(SelectedRooms, {
+        where: { HolidayHomeId, unitCode }
+    });
 
     res.json({ selectedRoom: selectedRoom });
 }
 
 const getRoom = async (req: Request, res: Response) => {
     const { HolidayHomeId, roomCode } = req.params;
-    const room = await AppDataSource.manager
-        .findOneBy(Room, { HolidayHomeId, roomCode });
+    const room = await AppDataSource.manager.find(Room, {
+        where: { HolidayHomeId, roomCode }
+    });
+
 
     res.json({ room });
 }
 
 const getRoomRental = async (req: Request, res: Response) => {
     const { HolidayHomeId, HRUId } = req.params;
-    const roomRental = await AppDataSource.manager
-        .findBy(Rental, { HolidayHomeId, HRUId });
+    const roomRental = await AppDataSource.manager.find(Rental, {
+        where: { HolidayHomeId, HRUId }
+    });
 
     res.json({ roomRental });
 }
@@ -77,6 +125,7 @@ const getRoomRental = async (req: Request, res: Response) => {
 const createHolidayHome = async (req: Request, res: Response) => {
     try {
         const { allValues } = req.body;
+        console.log(allValues);
         // console.log(allValues.holidayHomeDetails);
         // console.log(allValues.images);
         // console.log(allValues.caretaker1);
@@ -84,12 +133,14 @@ const createHolidayHome = async (req: Request, res: Response) => {
         // console.log(allValues.homeBreakDown);
         // console.log(allValues.roomArray);
         // console.log(allValues.unitArray);
-        console.log(allValues.hallArray);
+        // console.log(allValues.hallArray);
         // console.log(allValues);
 
+        const holidayHomeId = Date.now().toString();
 
 
         const holidayHome = HolidayHome.create({
+            HolidayHomeId: holidayHomeId,
             Name: allValues.holidayHomeDetails.name,
             Address: allValues.holidayHomeDetails.address,
             Description: allValues.holidayHomeDetails.description,
@@ -115,8 +166,11 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
         await holidayHome.save();
 
+        const careatakerId = "ct" + Date.now().toString();
+
 
         const careTaker1 = CareTaker.create({
+            CareTakerId: careatakerId,
             Name: allValues.caretaker1.caretakerName,
             ContactNo: allValues.caretaker1.caretakerContactNo,
             Status: allValues.caretaker1.caretakerStatus,
@@ -286,6 +340,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
+
 
 
 export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental }

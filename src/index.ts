@@ -79,7 +79,7 @@ export const AppDataSource = new DataSource({
 // app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
-const corsOptions ={
+const corsOptions = {
   origin: 'http://localhost:3000',
   credentials: true,
   optionSuccessStatus: 200
@@ -92,13 +92,13 @@ AppDataSource.initialize()
     // use requireAuth middleware to users/auth all paths
     app.use('/users/auth/*', requireAuth);
     app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
-    app.use('/admin/auth/locationadmin/reservations',SpecialReservationRouter)
-    app.use('/admin',LocationAdminRoute)
-    app.use('/admin',BlacklistRouter)
-    app.use('/users',homly_user);
-    app.use('/users',reg_users);
-    app.use('/users',homly_review);
-    app.use('/admin',admin_router);
+    app.use('/admin/auth/locationadmin/reservations', SpecialReservationRouter)
+    app.use('/admin', LocationAdminRoute)
+    app.use('/admin', BlacklistRouter)
+    app.use('/users', homly_user);
+    app.use('/users', reg_users);
+    app.use('/users', homly_review);
+    app.use('/admin', admin_router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
 
