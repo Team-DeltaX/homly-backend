@@ -5,7 +5,9 @@ export class BlackListHistory extends BaseEntity{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryColumn()
+  @PrimaryColumn({
+    nullable: false,
+  })
   BlackListHistoryId!: String ;
 
   @Column()

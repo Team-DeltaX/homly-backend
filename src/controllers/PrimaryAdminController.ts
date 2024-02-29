@@ -479,6 +479,7 @@ export const updatehomlyuser=async(req:Request,res:Response)=>{
   
 }
 export const addtoblacklisthistory = async (req: Request, res: Response) => {
+  const blhid=1
   const serviceno = req.body.ServiceNo;
   const addreson = req.body.AddReason;
   const Removereason = req.body.RemoveReason;
@@ -486,12 +487,15 @@ export const addtoblacklisthistory = async (req: Request, res: Response) => {
 
   try {
     const addtoblacklisthistory = BlackListHistory.create({
+      // BlackListHistoryId: "12",
       Addreason: addreson,
       ServiceNo: serviceno,
       BlacklistedDate: blacklisteddate,
       RemoveReason: Removereason,
     });
     addtoblacklisthistory.save();
+    res.status(200).json({message:'sucessfully added to blacklis history table'})
+    
   } catch (error) {
     res.status(404).json({ message: 'error in adding to blacklis history table' });
   }
