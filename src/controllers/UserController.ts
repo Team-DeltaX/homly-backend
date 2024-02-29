@@ -644,21 +644,33 @@ const updateUserPassword = async (req: Request, res: Response) => {
 };
 
 // change facility name
+const changeFacilityName = (facility: string) => {
+  switch (facility) {
+    case "food":
+      return "food_rating";
+    case "value for money":
+      return "value_for_money_rating";
+    case "staff":
+      return "staff_rating";
+    case "location":
+      return "location_rating";
+    case "wifi":
+      return "wifi_rating";
+    case "furniture":
+      return "furniture_rating";
+    default:
+      return facility;
+  }
+}
 
 // add user interested facilities
 const addUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
   let { fac1, fac2, fac3 } = req.body;
 
-  if (fac1 === "value for money") {
-    fac1 = "value_for_money";
-  }
-  if (fac2 === "value for money") {
-    fac2 = "value_for_money";
-  }
-  if (fac3 === "value for money") {
-    fac3 = "value_for_money";
-  }
+  fac1 =await changeFacilityName(fac1);
+  fac2 =await changeFacilityName(fac2);
+  fac3 =await changeFacilityName(fac3);
 
   // update table
   if (serviceNo) {
