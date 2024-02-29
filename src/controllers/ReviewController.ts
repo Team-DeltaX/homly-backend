@@ -1,7 +1,7 @@
 import { AppDataSource } from "../index";
 import { Request, Response } from "express";
 
-import { UserFeedback } from "../entities/Feedback";
+import { HolidayHome } from "../entities/HolidayHome";
 import { UserInteresed } from "../entities/User";
 
 // import natural
@@ -61,10 +61,21 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
     const inter2 = interested[0].interested_2;
     const inter3 = interested[0].interested_3;
 
-    const user = await AppDataSource.manager.find(UserFeedback, {
-      select: [inter1 as keyof UserFeedback, inter2 as keyof UserFeedback, inter3 as keyof UserFeedback],
+    const user = await AppDataSource.manager.find(HolidayHome, {
+      select: ["HolidayHomeId",inter1 as keyof HolidayHome, inter2 as keyof HolidayHome, inter3 as keyof HolidayHome],
     })
 
+    let rating = [];
+    let inter1_weight = 0.5;
+    let inter2_weight = 0.3;
+    let inter3_weight = 0.2;
+
+    // convert to json object
+    const interested_value= JSON.parse(JSON.stringify(user));
+
+    console.log(interested_value);
+
+    
     res.status(200).json({interested:interested, user:user});
     
   }
