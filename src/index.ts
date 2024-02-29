@@ -71,6 +71,7 @@ export const AppDataSource = new DataSource({
     Rental,
     SpecailReservation,
     UserFeedback,
+    SelectedRooms
   ],
   synchronize: true,
   logging: false,
