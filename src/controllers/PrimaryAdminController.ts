@@ -5,7 +5,7 @@ import { Complaints } from "../entities/Complaint";
 import { HomlyUser } from "../entities/User";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
-import { error } from "console";
+import { Console, error } from "console";
 import { v4 as uuid, v4 } from "uuid";
 import addadminemail from "../template/addadminemail";
 import sentEmail from "../services/sentEmal";
@@ -446,12 +446,15 @@ export const deletefromblacklisttable=async(req:Request,res:Response)=>{
   const serviceno=req.body.ServiceNo;
   try{
     await BlackListedUser.delete({ ServiceNo: serviceno })
-    res.status(404).json({message:'sucess fully removed from blacklist table'})
+    
+    res.status(200).json({message:'sucess fully removed from blacklist table'});
+  
 
 
   }catch(error){
     // console.log(`error in removing from blacklist ${error}`)
     res.status(404).json({message:'error in removing from blacklist table'})
+    
 
   }
 
@@ -474,6 +477,7 @@ export const updatehomlyuser=async(req:Request,res:Response)=>{
   }catch(error){
     console.log(`error in updating user unblacklist false ${error}`)
     res.status(404).json({message:'error in updaing unblacklisted'})
+
   }
 
   
@@ -493,8 +497,10 @@ export const addtoblacklisthistory = async (req: Request, res: Response) => {
       BlacklistedDate: blacklisteddate,
       RemoveReason: Removereason,
     });
-    addtoblacklisthistory.save();
+    await addtoblacklisthistory.save();
+    
     res.status(200).json({message:'sucessfully added to blacklis history table'})
+  
     
   } catch (error) {
     res.status(404).json({ message: 'error in adding to blacklis history table' });
