@@ -28,6 +28,7 @@ import {
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { UserFeedback } from "./entities/Feedback";
+import { SelectedRooms } from "./entities/SelectedRooms";
 
 // routes
 import { homly_user } from "./routes/UserRouters";
@@ -38,7 +39,6 @@ import { requireAuth } from "./middleware/authMiddleware";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 
 import dotenv from "dotenv";
-import { SelectedRooms } from "./entities/SelectedRooms";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;

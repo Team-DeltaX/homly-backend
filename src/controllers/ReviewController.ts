@@ -49,21 +49,26 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
 
   // get interested
-  await AppDataSource.manager.findOneBy(UserInteresed, {
-    service_number: serviceNo,
-  }).then((res) => {
-    if (res) {
-      // get these interest rating from each holiday home
-      // AppDataSource.manager.find(UserFeedback,{
-
-      // })
-      // select 3 column from all data
-      // AppDataSource.manager.find(UserFeedback,{
-      //   select:[holi]
-      // });
-      
-    }
+  const interested = await AppDataSource.manager.find(UserInteresed, {
+    where: {
+      service_number: serviceNo,
+    },
   });
+
+  if (interested) {
+    const service_number = interested[0].service_number;
+    const inter1 = interested[0].interested_1;
+    const inter2 = interested[0].interested_2;
+    const inter3 = interested[0].interested_3;
+
+    const user = await AppDataSource.manager.find(UserFeedback, {
+      select: [inter1 as keyof UserFeedback, inter2 as keyof UserFeedback, inter3 as keyof UserFeedback],
+    })
+
+    res.status(200).json({interested:interested, user:user});
+    
+  }
+
 };
 
-export { reviewSentiment };
+export { reviewSentiment, getHolidayHomesSorted };
