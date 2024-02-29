@@ -17,6 +17,7 @@ import { Userdel } from "./entities/Userdel";
 import { Complaints } from "./entities/Complaint";
 import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
+import { Reservation } from "./entities/Reservation";
 import { LocationAdminRoute } from "./routes/LocationAdminRoute";
 import { HomlyUser,UserEmailVerification,UserOTPVerification } from "./entities/User";
 import { Employee } from "./entities/Empolyee";
@@ -24,6 +25,7 @@ import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { homly_user } from "./routes/UserRouters";
 import { reg_users } from "./routes/RegUserRouters";
 import { admin_router } from "./routes/AdminRouters";
+
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -35,7 +37,7 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [HomlyAdmin,Employee,HomlyUser,UserEmailVerification,UserOTPVerification,Userdel,Complaints,BlackListedUser,BlackListHistory,Hall, CareTaker, HolidayHome, Image, Unit, Room, ContactNo, LocationAdmin, Rental, SpecailReservation],
+  entities: [HomlyAdmin,Employee,HomlyUser,UserEmailVerification,UserOTPVerification,Userdel,Complaints,BlackListedUser,BlackListHistory,Hall, CareTaker, HolidayHome, Image, Unit, Room, ContactNo, LocationAdmin, Rental, SpecailReservation, Reservation],
   synchronize: true,
   logging: false,
 

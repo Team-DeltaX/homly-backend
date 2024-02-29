@@ -7,13 +7,13 @@ export class Reservation extends BaseEntity {
     ReservationId!: string;
 
     @Column()
+    ServiceNO!: String ;
+
+    @Column()
     CheckinDate!: Date ;
   
     @Column()
     CheckoutDate!: Date ;
-
-    @Column()
-    Price!: number;
 
     @Column()
     NoOfAdults!: number;
@@ -21,7 +21,15 @@ export class Reservation extends BaseEntity {
     @Column()
     NoOfChildren!: number;
 
-    @OneToMany(() => Employee, (employee) => employee.reservations)
-  @JoinColumn({ name: "service_number" })
-  locationadmin!: Employee
+    @Column()
+    NoOfSingleRooms!: number;
+
+    @Column()
+    NoOfDoubleRooms!: number;
+
+    @Column()
+    NoOfTripleRooms!: number;
+
+    @Column()
+    Price!: number ;
 }
