@@ -507,4 +507,14 @@ export const addtoblacklisthistory = async (req: Request, res: Response) => {
   }
 };
 
+
+export const getblacklistedhistory=async(req:Request,res:Response)=>{
+  try{
+    const BlackListedHistory = await AppDataSource.manager.find(BlackListHistory);
+    res.status(200).json(BlackListedHistory);
+  }catch(eroor){
+    res.status(404).json({ message: 'error in getting blacklis history table' });
+  }
+}
+
 export { router };
