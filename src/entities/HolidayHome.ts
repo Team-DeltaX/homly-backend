@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column,  CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryColumn, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
 import { CareTaker } from "./CareTaker";
 import { Hall } from "./Hall";
 import { Image } from "./Image";
@@ -108,6 +108,36 @@ export class HolidayHome extends BaseEntity {
     default: null
   })
   Facilities!: string;
+
+  @Column({
+    default: null
+  })
+  food_rating!: number;
+
+  @Column({
+    default: null
+  })
+  value_for_money_rating!: number;
+
+  @Column({
+    default: null
+  })
+  staff_rating!: number;
+
+  @Column({
+    default: null
+  })
+  location_rating!: number;
+
+  @Column({
+    default: null
+  })
+  furniture_rating!: number;
+
+  @Column({
+    default: null
+  })
+  wifi_rating!: number;
 
   @CreateDateColumn()
   createdAt!: Date;
