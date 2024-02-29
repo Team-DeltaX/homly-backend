@@ -701,10 +701,7 @@ const getUserIntersted = async (req: Request, res: Response) => {
         .where("user.service_number = :id", { id: serviceNo })
         .getOne();
 
-      console.log(userInterested);
-
       if(userInterested){
-        console.log(userInterested);
         res.status(200).json({updated: true, userInterested:userInterested})
       }else{
         console.log("not found");
