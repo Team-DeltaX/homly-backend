@@ -19,6 +19,8 @@ import dotenv from "dotenv";
 import { Employee } from "../entities/Empolyee";
 import { BlackListedUser } from "../entities/BlackListedUser";
 import BlacklistNotifyEmail from "../template/BlacklistNotifyEmail";
+import BlacklistRemoveEmail from "../template/BlacklistRemoveEmail";
+import { BlackListHistory } from "../entities/BlackListHistory";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -413,5 +415,90 @@ export const checkuserexist=async(req:Request,res:Response)=>{
     }
   
 }
+
+
+export const removefromblacklist=async(req:Request,res:Response)=>{
+  const serviceno=req.body.ServiceNo;
+  const Email=req.body.Email;
+  // const Name =req.body.UserName;
+
+
+  try{
+    await BlackListedUser.delete({ ServiceNo: serviceno })
+    await AppDataSource.manager.update(
+      HomlyUser,
+      { service_number: serviceno },
+      { blacklisted: false });
+
+    sentEmail(Email,"Your Are Removed From BlackList",BlacklistRemoveEmail())  
+  }
+  catch(error){
+    console.log(`error in removing from blacklist ${error}`)
+  }
+
+
+
+}
+
+//functions related to remove from blacklist
+
+export const deletefromblacklisttable=async(req:Request,res:Response)=>{
+  const serviceno=req.body.ServiceNo;
+  try{
+    await BlackListedUser.delete({ ServiceNo: serviceno })
+    res.status(404).json({message:'sucess fully removed from blacklist table'})
+
+
+  }catch(error){
+    // console.log(`error in removing from blacklist ${error}`)
+    res.status(404).json({message:'error in removing from blacklist table'})
+
+  }
+
+}
+
+
+export const updatehomlyuser=async(req:Request,res:Response)=>{
+  const serviceno=req.body.ServiceNo;
+  const Email=req.body.Email;
+  try{
+    await AppDataSource.manager.update(
+      HomlyUser,
+      { service_number: serviceno },
+      { blacklisted: false });
+
+    sentEmail(Email,"Your Are Removed From BlackList",BlacklistRemoveEmail())  
+    res.status(200).json({message:'sucessfully updated as unblacklisted'})
+    
+    
+  }catch(error){
+    console.log(`error in updating user unblacklist false ${error}`)
+    res.status(404).json({message:'error in updaing unblacklisted'})
+  }
+
+  
+}
+export const addtoblacklisthistory = async (req: Request, res: Response) => {
+  const blhid=1
+  const serviceno = req.body.ServiceNo;
+  const addreson = req.body.AddReason;
+  const Removereason = req.body.RemoveReason;
+  const blacklisteddate = req.body.BlacklistedDate;
+
+  try {
+    const addtoblacklisthistory = BlackListHistory.create({
+      // BlackListHistoryId: "12",
+      Addreason: addreson,
+      ServiceNo: serviceno,
+      BlacklistedDate: blacklisteddate,
+      RemoveReason: Removereason,
+    });
+    addtoblacklisthistory.save();
+    res.status(200).json({message:'sucessfully added to blacklis history table'})
+    
+  } catch (error) {
+    res.status(404).json({ message: 'error in adding to blacklis history table' });
+  }
+};
 
 export { router };
