@@ -439,9 +439,10 @@ export const removefromblacklist=async(req:Request,res:Response)=>{
 
 
 }
+
 //functions related to remove from blacklist
 
-const deletefromblacklisttable=async(req:Request,res:Response)=>{
+export const deletefromblacklisttable=async(req:Request,res:Response)=>{
   const serviceno=req.body.ServiceNo;
   try{
     await BlackListedUser.delete({ ServiceNo: serviceno })
@@ -457,7 +458,7 @@ const deletefromblacklisttable=async(req:Request,res:Response)=>{
 }
 
 
-const updatehomlyuser=async(req:Request,res:Response)=>{
+export const updatehomlyuser=async(req:Request,res:Response)=>{
   const serviceno=req.body.ServiceNo;
   const Email=req.body.Email;
   try{
@@ -477,29 +478,23 @@ const updatehomlyuser=async(req:Request,res:Response)=>{
 
   
 }
-const addtoblacklisthistory=(req:Request,res:Response)=>{
-  const serviceno=req.body.ServiceNo;
-  const username=req.body.UserName;
-  const addreson=req.body.AddReason;
-  const Removereason=req.body.RemoveReason;
-  const blacklisteddate=req.body.BlacklistedDate;
-  
-  try{
+export const addtoblacklisthistory = async (req: Request, res: Response) => {
+  const serviceno = req.body.ServiceNo;
+  const addreson = req.body.AddReason;
+  const Removereason = req.body.RemoveReason;
+  const blacklisteddate = req.body.BlacklistedDate;
+
+  try {
     const addtoblacklisthistory = BlackListHistory.create({
-     Addreason:addreson,
+      Addreason: addreson,
       ServiceNo: serviceno,
-      BlacklistedDate:blacklisteddate,
-     
-      RemoveReason:Removereason,
-      RemovedDate:new Date()
-      
+      BlacklistedDate: blacklisteddate,
+      RemoveReason: Removereason,
     });
-    addtoblacklisthistory.save()
-
-
-  }catch(error){
-    res.status(404).json({message:'error in adding to blacklis history table'})
+    addtoblacklisthistory.save();
+  } catch (error) {
+    res.status(404).json({ message: 'error in adding to blacklis history table' });
   }
-}
+};
 
 export { router };
