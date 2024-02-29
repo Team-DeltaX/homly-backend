@@ -20,7 +20,7 @@ import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
 import { Reservation } from "./entities/Reservation";
 import { LocationAdminRoute } from "./routes/LocationAdminRoute";
-import {
+import { 
   HomlyUser,
   UserEmailVerification,
   UserOTPVerification,
@@ -53,7 +53,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
 
-  entities: [HomlyAdmin,Employee,HomlyUser,UserEmailVerification,UserOTPVerification,Complaints,BlackListedUser,BlackListHistory,Hall, CareTaker, HolidayHome, Image, Unit, Room, ContactNo, LocationAdmin, Rental, SpecailReservation, Reservation],  entities: [
+entities: [
     HomlyAdmin,
     Employee,
     HomlyUser,
