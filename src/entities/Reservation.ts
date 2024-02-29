@@ -2,7 +2,7 @@ import { Entity, PrimaryColumn, Column, PrimaryGeneratedColumn, CreateDateColumn
 import { Employee } from "./Empolyee"
 
 @Entity()
-export class HolidayHome extends BaseEntity {
+export class Reservation extends BaseEntity {
     @PrimaryGeneratedColumn()
     ReservationId!: string;
 
@@ -21,7 +21,7 @@ export class HolidayHome extends BaseEntity {
     @Column()
     NoOfChildren!: number;
 
-    @ManyToMany(() => Employee, (employee) => employee.holidayhome)
+    @OneToMany(() => Employee, (employee) => employee.reservations)
   @JoinColumn({ name: "service_number" })
   locationadmin!: Employee
 }
