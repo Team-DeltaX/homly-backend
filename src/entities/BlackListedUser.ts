@@ -1,33 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne} from 'typeorm';
-import { Userdel } from './Userdel';
+import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne,CreateDateColumn, BaseEntity} from 'typeorm';
+import { HomlyUser } from './User';
+
 
 
 @Entity()
-export class BlackListedUser{
+export class BlackListedUser extends BaseEntity{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryGeneratedColumn()
-  BlackListId!: String ;
+  @PrimaryGeneratedColumn('uuid')
+  BlackListId!: number ;
 
   @Column()
   BlackListReason!:String;
 
+  
+  @CreateDateColumn({
+    nullable: false,
+  })
+  Date!: Date;
+
   @Column()
-  Date!:String;
-
-  @OneToOne(() => Userdel)
-    @JoinColumn()
-    ServiceNo!:Userdel
-    
-
-
-
-
- 
-
-
-
-
-
+  ServiceNo!:String;
 }

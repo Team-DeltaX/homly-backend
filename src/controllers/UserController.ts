@@ -8,6 +8,9 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
 
+// import jwt
+import jwt from "jsonwebtoken";
+
 // import html email template
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -20,9 +23,19 @@ import {
   HomlyUser,
   UserEmailVerification,
   UserOTPVerification,
+  UserInteresed,
 } from "../entities/User";
 
 import { Employee } from "../entities/Empolyee";
+
+// create token
+const maxAge = 60 * 60;
+const createToken = (serviceNo: String) => {
+  const secretCode = process.env.JWT_SECRET;
+  return jwt.sign({ serviceNo }, secretCode!, {
+    expiresIn: maxAge,
+  });
+};
 
 // send verification email
 const sendVerificationEmail = (
@@ -64,17 +77,146 @@ const sendVerificationEmail = (
     });
 };
 
+const userExist = async (ServiceNo: string) => {
+  const usersWithSameNo = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(HomlyUser, "user")
+    .where("user.service_number = :id", { id: ServiceNo })
+    .getOne();
+
+  if (usersWithSameNo && usersWithSameNo.verified) {
+    return false;
+  } else {
+    return true;
+  }
+};
+// get all employees
+const allEmployees = async (req: Request, res: Response) => {
+  const employees = await AppDataSource.manager.find(Employee);
+
+  res.json({ employees: employees });
+};
+
+// get all users
+const allUsers = async (req: Request, res: Response) => {
+  const users = await AppDataSource.manager.find(HomlyUser);
+  res.json(users);
+};
+
+// user registration
+const userRegistration = async (req: Request, res: Response) => {
+  const { ServiceNo, Password, Email, ContactNo, image } = req.body;
+  await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(Employee, "user")
+    .where("user.service_number = :id", { id: ServiceNo })
+    .getOne()
+    .then(async (employee) => {
+      if (employee) {
+        console.log(employee);
+        if (await userExist(ServiceNo)) {
+          sendVerificationEmail(Email, ServiceNo, employee.name);
+          // bcrypt password
+          const saltRounds = 10;
+          bcrypt
+            .hash(Password, saltRounds)
+            .then(async (hash) => {
+              const user = HomlyUser.create({
+                service_number: ServiceNo,
+                password: hash,
+                email: Email,
+                contact_number: ContactNo,
+                image,
+              });
+              await user.save();
+              return res.status(201).json({
+                message:
+                  "Check your emails,We will send you a verification link",
+                success: true,
+              });
+            })
+            .catch((err) => {
+              return res
+                .status(404)
+                .json({ message: "Error saving user", success: false });
+            });
+        } else {
+          return res
+            .status(201)
+            .json({ message: "User already exists!", success: false });
+        }
+      } else {
+        res
+          .status(202)
+          .json({ message: "Your are not an employee", success: false });
+      }
+    })
+    .catch((err) => {
+      res
+        .status(202)
+        .json({ message: "err Your are not an employee", success: false });
+    });
+
+  // await AppDataSource.manager
+  //   .findOneBy(Employee, {
+  //     service_number: ServiceNo,
+  //   })
+  //   .then(async (employee) => {
+  //     if (employee) {
+  //       if (await userExist(ServiceNo)) {
+  //         sendVerificationEmail(Email, ServiceNo, employee.name);
+  //         // bcrypt password
+  //         const saltRounds = 10;
+  //         bcrypt
+  //           .hash(Password, saltRounds)
+  //           .then(async (hash) => {
+  //             const user = HomlyUser.create({
+  //               service_number: ServiceNo,
+  //               password: hash,
+  //               email: Email,
+  //               contact_number: ContactNo,
+  //               image,
+  //             });
+  //             await user.save();
+  //             return res.status(201).json({
+  //               message:
+  //                 "Check your emails,We will send you a verification link",
+  //               success: true,
+  //             });
+  //           })
+  //           .catch((err) => {
+  //             return res
+  //               .status(404)
+  //               .json({ message: "Error saving user", success: false });
+  //           });
+  //       } else {
+  //         return res
+  //           .status(201)
+  //           .json({ message: "User already exists!", success: false });
+  //       }
+  //     } else {
+  //       res
+  //         .status(202)
+  //         .json({ message: "Your are not an employee", success: false });
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     res
+  //       .status(202)
+  //       .json({ message: "Your are not an employee", success: false });
+  //   });
+};
+
 // verify email
 // url with verification code and service number
 const emailVerification = async (req: Request, res: Response) => {
   let message, verified; // send details to frontend
   const { serviceNo, verificationCode } = req.params;
-  const userVerification = await AppDataSource.manager.findOneBy(
-    UserEmailVerification,
-    {
-      service_number: serviceNo,
-    }
-  );
+  const userVerification = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(UserEmailVerification, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne();
 
   if (userVerification) {
     const expiresAt = userVerification?.expires_at; // Add null check here
@@ -127,9 +269,15 @@ const emailVerification = async (req: Request, res: Response) => {
         });
     }
   } else {
-    const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-      service_number: serviceNo,
-    });
+    const user = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(HomlyUser, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+
+    // await AppDataSource.manager.findOneBy(HomlyUser, {
+    //   service_number: serviceNo,
+    // });
 
     if (user && user.verified) {
       // res.status(200).json({ message: "User already verified", success: true });
@@ -149,121 +297,38 @@ const emailVerification = async (req: Request, res: Response) => {
   }
 };
 
-const userExist = async (ServiceNo: string) => {
-  const usersWithSameNo = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: ServiceNo,
-  });
-
-  if (usersWithSameNo && usersWithSameNo.verified) {
-    return false;
-  } else {
-    return true;
-  }
-};
-// get all employees
-const allEmployees = async (req: Request, res: Response) => {
-  const employees = await AppDataSource.manager.find(Employee);
-  res.json({ employees: employees });
-};
-
-// get all users
-const allUsers = async (req: Request, res: Response) => {
-  const users = await AppDataSource.manager.find(HomlyUser);
-  res.json(users);
-};
-
-// get user by service number
-const userById = async (req: Request, res: Response) => {
-  const { serviceNo } = req.params;
-  AppDataSource.manager
-    .findOneBy(HomlyUser, { service_number: serviceNo })
-    .then((user) => {
-      AppDataSource.manager
-        .findOneBy(Employee, { service_number: serviceNo })
-        .then((employee) => {
-          res.status(200).json({
-            name: employee?.name,
-            nic: employee?.nic,
-            work: employee?.work_place,
-            address: employee?.address,
-            contactNo: user?.contact_number,
-            email: user?.email,
-            image: user?.image,
-          });
-        })
-        .catch(() => {
-          res.status(404).json({ message: "Error", success: false });
-        });
-      // res.status(200).json(user);
-    })
-    .catch(() => {
-      res.status(404).json({ message: "User not found", success: false });
-    });
-};
-
-// user registration
-const userRegistration = async (req: Request, res: Response) => {
-  const { ServiceNo, Password, Email, ContactNo, image } = req.body;
-  await AppDataSource.manager
-    .findOneBy(Employee, {
-      service_number: ServiceNo,
-    })
-    .then(async (employee) => {
-      if (employee) {
-        if (await userExist(ServiceNo)) {
-          sendVerificationEmail(Email, ServiceNo, employee.name);
-          // bcrypt password
-          const saltRounds = 10;
-          bcrypt
-            .hash(Password, saltRounds)
-            .then(async (hash) => {
-              const user = HomlyUser.create({
-                service_number: ServiceNo,
-                password: hash,
-                email: Email,
-                contact_number: ContactNo,
-                image,
-              });
-              await user.save();
-              return res.status(201).json({
-                message:
-                  "Check your emails,We will send you a verification link",
-                success: true,
-              });
-            })
-            .catch((err) => {
-              return res
-                .status(404)
-                .json({ message: "Error saving user", success: false });
-            });
-        } else {
-          return res
-            .status(201)
-            .json({ message: "User already exists!", success: false });
-        }
-      } else {
-        res
-          .status(202)
-          .json({ message: "Your are not an employee", success: false });
-      }
-    })
-    .catch((err) => {
-      res
-        .status(202)
-        .json({ message: "Your are not an employee", success: false });
-    });
-};
-
 // user login
 const userLogin = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
+  const user = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(HomlyUser, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne();
+
+  // await AppDataSource.manager.findOneBy(HomlyUser, {
+  //   service_number: serviceNo,
+  // });
   if (user && user.verified) {
     if (!user.blacklisted) {
-      bcrypt.compare(password, user.password).then((result) => {
+      bcrypt.compare(password, user.password).then(async (result) => {
         if (result) {
+          await AppDataSource.manager.update(
+            HomlyUser,
+            { service_number: serviceNo },
+            {
+              lastLogin: new Date(),
+            }
+          );
+          const token = createToken(serviceNo);
+          // set 2 cookies
+
+          res.cookie("serviceNo", serviceNo, {
+            httpOnly: true,
+            maxAge: maxAge * 1000,
+          });
+          res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+
           res.status(200).json({ message: "Login Successful", success: true });
         } else {
           res.status(200).json({
@@ -323,33 +388,40 @@ const sendOTP = (email: string, serviceNo: string, name: string) => {
 const forgetPasswordDetails = async (req: Request, res: Response) => {
   const { serviceNo, email } = req.body;
   console.log(serviceNo, email);
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
-  const employee = await AppDataSource.manager.findOneBy(Employee, {
-    service_number: serviceNo,
-  });
-  
+  const user = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(HomlyUser, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne();
+
+  const employee = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(Employee, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne();
+
+  // const employee = await AppDataSource.manager.findOneBy(Employee, {
+  //   service_number: serviceNo,
+  // });
+
   if (user && user.verified) {
     if (!user.blacklisted) {
       if (user.email === email) {
         sendOTP(email, serviceNo, employee!.name);
 
-        res
-          .status(200)
-          .json({
-            message: "Check your email,We will send OTP",
-            success: true,
-          });
+        res.status(200).json({
+          message: "Check your email,We will send OTP",
+          success: true,
+        });
       } else {
         res
           .status(200)
           .json({ message: "Invalid Service Number or Email", success: false });
       }
-    }else{
+    } else {
       res
-      .status(200)
-      .json({ message: "You are a Blacklisted User", success: false });
+        .status(200)
+        .json({ message: "You are a Blacklisted User", success: false });
     }
   } else {
     res.status(200).json({ message: "User not found", success: false });
@@ -359,9 +431,16 @@ const forgetPasswordDetails = async (req: Request, res: Response) => {
 // get otp and validate
 const otpVerification = async (req: Request, res: Response) => {
   const { serviceNo, otp } = req.body;
-  const userOTP = await AppDataSource.manager.findOneBy(UserOTPVerification, {
-    service_number: serviceNo,
-  });
+
+  const userOTP = await AppDataSource.createQueryBuilder()
+    .select("otp")
+    .from(UserOTPVerification, "otp")
+    .where("otp.service_number = :id", { id: serviceNo })
+    .getOne();
+
+  // const userOTP = await AppDataSource.manager.findOneBy(UserOTPVerification, {
+  //   service_number: serviceNo,
+  // });
 
   if (userOTP) {
     const expiresAt = userOTP.expires_at;
@@ -398,13 +477,25 @@ const otpVerification = async (req: Request, res: Response) => {
 const resetPassword = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
   console.log("reset password", serviceNo, password);
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
+
+  const user = await AppDataSource.createQueryBuilder()
+    .select("user")
+    .from(HomlyUser, "user")
+    .where("user.service_number = :id", { id: serviceNo })
+    .getOne();
+  // const user = await AppDataSource.manager.findOneBy(HomlyUser, {
+  //   service_number: serviceNo,
+  // });
   if (user && user.verified) {
-    const otp = await AppDataSource.manager.findOneBy(UserOTPVerification, {
-      service_number: serviceNo,
-    });
+    // const otp = await AppDataSource.manager.findOneBy(UserOTPVerification, {
+    //   service_number: serviceNo,
+    // });
+
+    const otp = await AppDataSource.createQueryBuilder()
+      .select("otp")
+      .from(UserOTPVerification, "otp")
+      .where("otp.service_number = :id", { id: serviceNo })
+      .getOne();
 
     if (otp?.verified) {
       const saltRounds = 10;
@@ -433,13 +524,53 @@ const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
+// get user by service number
+const userById = async (req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  try {
+    const user = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(HomlyUser, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+
+    if (user) {
+      const employee = await AppDataSource.createQueryBuilder()
+        .select("user")
+        .from(Employee, "user")
+        .where("user.service_number = :id", { id: serviceNo })
+        .getOne();
+      if (employee) {
+        res.status(200).json({
+          serviceNo: serviceNo,
+          name: employee.name,
+          nic: employee.nic,
+          work: employee.work_place,
+          address: employee.address,
+          contactNo: user.contact_number,
+          email: user.email,
+          image: user.image,
+        });
+      }
+    } else {
+      res.status(200).json({ message: "User not found", success: false });
+    }
+  } catch (err: any) {
+    console.log("get user by service number", err);
+    res.status(501).json({ message: "Server Error", success: false });
+  }
+};
+
 // update user details
 const updateUserDetails = async (req: Request, res: Response) => {
   const { serviceNo, email, contactNo, image } = req.body;
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
   try {
+    const user = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(HomlyUser, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+
     if (user && user.verified) {
       await AppDataSource.manager.update(
         HomlyUser,
@@ -463,54 +594,128 @@ const updateUserDetails = async (req: Request, res: Response) => {
 };
 // update user password
 const updateUserPassword = async (req: Request, res: Response) => {
-  const { serviceNo, oldPassword, newPassword } = req.body;
-  const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-    service_number: serviceNo,
-  });
-  if (user && user.verified) {
-    bcrypt.compare(oldPassword, user.password).then(async (result) => {
-      if (result) {
-        const saltRounds = 10;
-        bcrypt
-          .hash(newPassword, saltRounds)
-          .then(async (hash) => {
-            await AppDataSource.manager.update(
-              HomlyUser,
-              { service_number: serviceNo },
-              {
-                password: hash,
-              }
-            );
-            res
-              .status(200)
-              .json({ message: "Password updated", success: true });
-          })
-          .catch((err) => {
-            res
-              .status(200)
-              .json({ message: "Error updating password", success: false });
-          });
-      } else {
-        res
-          .status(200)
-          .json({ message: "Incorrect old password", success: false });
-      }
+  try {
+    const { serviceNo, oldPassword, newPassword } = req.body;
+    const user = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(HomlyUser, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+    if (user && user.verified) {
+      bcrypt.compare(oldPassword, user.password).then(async (result) => {
+        if (result) {
+          const saltRounds = 10;
+          bcrypt
+            .hash(newPassword, saltRounds)
+            .then(async (hash) => {
+              await AppDataSource.manager.update(
+                HomlyUser,
+                { service_number: serviceNo },
+                {
+                  password: hash,
+                }
+              );
+              res
+                .status(200)
+                .json({ message: "Password updated", success: true });
+            })
+            .catch((err) => {
+              res
+                .status(200)
+                .json({ message: "Error updating password", success: false });
+            });
+        } else {
+          res
+            .status(200)
+            .json({ message: "Incorrect old password", success: false });
+        }
+      }).catch((err) => {
+        res.status(200).json({ message: "Error updating password", success: false });
+      })
+    } else {
+      res.status(200).json({ message: "User not found", success: false });
+    }
+  } catch (error: any) {
+    console.log(error);
+    res
+      .status(200)
+      .json({ message: "Error updating user password", success: false });
+  }
+};
+
+// change facility name
+
+// add user interested facilities
+const addUserIntersted = async (req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  let { fac1, fac2, fac3 } = req.body;
+
+  if (fac1 === "value for money") {
+    fac1 = "value_for_money";
+  }
+  if (fac2 === "value for money") {
+    fac2 = "value_for_money";
+  }
+  if (fac3 === "value for money") {
+    fac3 = "value_for_money";
+  }
+
+  // update table
+  if (serviceNo) {
+    const interested = UserInteresed.create({
+      service_number: serviceNo,
+      interested_1: fac1,
+      interested_2: fac2,
+      interested_3: fac3,
     });
-  } else {
-    res.status(200).json({ message: "User not found", success: false });
+    await interested.save().then(() => {
+      res
+        .status(200)
+        .json({ message: "Successfully add your insterested", success: true });
+    });
+    console.log("updated db");
+  }
+
+  console.log(serviceNo, fac1, fac2, fac3);
+};
+
+const getUserIntersted = async (req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  // res.status(200).json(serviceNo)
+  try{
+    const userInterested = await AppDataSource.createQueryBuilder()
+        .select("user")
+        .from(UserInteresed, "user")
+        .where("user.service_number = :id", { id: serviceNo })
+        .getOne();
+
+      console.log(userInterested);
+
+      if(userInterested){
+        console.log(userInterested);
+        res.status(200).json({updated: true, userInterested:userInterested})
+      }else{
+        console.log("not found");
+        res.status(200).json({updated: false})
+      }
+
+  }catch(err:any){
+    res.status(404).json({ message: "Error", success: false });
   }
 };
 
 export {
   allEmployees,
   allUsers,
-  userById,
   userRegistration,
   emailVerification,
   userLogin,
   forgetPasswordDetails,
   otpVerification,
   resetPassword,
+  userById,
   updateUserDetails,
   updateUserPassword,
+  addUserIntersted,
+  getUserIntersted,
 };

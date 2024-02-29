@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryColumn, Column,  CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
 import { CareTaker } from "./CareTaker";
 import { Hall } from "./Hall";
 import { Image } from "./Image";
@@ -9,7 +9,7 @@ import { LocationAdmin } from "./LocationAdmin";
 import { Rental } from "./Rental";
 @Entity()
 export class HolidayHome extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   HolidayHomeId!: string;
 
   @Column({
@@ -23,7 +23,9 @@ export class HolidayHome extends BaseEntity {
   @Column()
   District!: string;
 
-  @Column()
+  @Column({
+    length: 1000
+  })
   Description!: string;
 
   @Column()
@@ -34,21 +36,23 @@ export class HolidayHome extends BaseEntity {
 
   @Column(
     {
-      type: "numeric"
+      type: "numeric",
     }
   )
   TotalRental!: number;
 
   @Column(
     {
-      type: "numeric"
+      type: "numeric",
+      default: 0
     }
   )
   ServiceCharge!: number;
 
   @Column(
     {
-      type: "numeric"
+      type: "numeric",
+      default: 0
     }
   )
   OtherCharge!: number;
@@ -93,6 +97,16 @@ export class HolidayHome extends BaseEntity {
   @Column({
     default: null
   })
+  Pool!: String;
+
+  @Column({
+    default: null
+  })
+  Bar!: String;
+
+  @Column({
+    default: null
+  })
   Facilities!: string;
 
   @CreateDateColumn()
@@ -101,28 +115,9 @@ export class HolidayHome extends BaseEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @OneToMany(() => CareTaker, (careTaker) => careTaker.holidayhome)
-  careTaker!: CareTaker[]
+  @Column({
+    default: null
+  })
+  AdminNo!: string;
 
-  @OneToMany(() => Hall, (hall) => hall.holidayhome)
-  hall!: Hall[]
-
-  @OneToMany(() => Image, (image) => image.holidayhome)
-  image!: Image[]
-
-  @OneToMany(() => ContactNo, (contactNo) => contactNo.holidayhome)
-  contactNo!: ContactNo[]
-
-  @OneToMany(() => Unit, (unit) => unit.holidayhome)
-  unit!: Unit[]
-
-  @OneToMany(() => Room, (room) => room.holidayhome)
-  room!: Room[]
-
-  @OneToMany(() => Rental, (room) => room.holidayhome)
-  rental!: Rental[]
-
-  @ManyToOne(() => LocationAdmin, (locationadmin) => locationadmin.holidayhome)
-  @JoinColumn({ name: "AdminNo" })
-  locationadmin!: LocationAdmin
 }
