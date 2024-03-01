@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne,CreateDateColumn, BaseEntity} from 'typeorm';
-import { HomlyUser } from './User';
 
 
 

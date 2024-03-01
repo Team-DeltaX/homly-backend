@@ -112,8 +112,4 @@ export class UserInteresed extends BaseEntity {
   })
   interested_3!: string;
 
-  @Column({
-    default: false,
-  })
-  updated!: boolean;
 }
