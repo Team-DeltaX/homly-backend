@@ -16,11 +16,4 @@ BlacklistRouter.get('/auth/blacklisthistory',getblacklistedhistory);
 
 
 
-
-
-
-
-
-
-
 export {BlacklistRouter}
