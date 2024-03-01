@@ -176,17 +176,34 @@ const createHolidayHome = async (req: Request, res: Response) => {
             Status: allValues.caretaker1.caretakerStatus,
             Address: allValues.caretaker1.caretakerAddress,
             Description: allValues.caretaker1.caretakerDescription,
-            // HolidayHomeId: "2",
-            HolidayHomeId: holidayHome.HolidayHomeId
+            HolidayHomeId: holidayHomeId,
+            // HolidayHomeId: holidayHome.HolidayHomeId
 
         })
 
+
         await careTaker1.save();
+
+        if (allValues.caretaker2.caretakerName !== "") {
+            const careTaker2 = CareTaker.create({
+                CareTakerId: careatakerId,
+                Name: allValues.caretaker2.caretakerName,
+                ContactNo: allValues.caretaker2.caretakerContactNo,
+                Status: allValues.caretaker2.caretakerStatus,
+                Address: allValues.caretaker2.caretakerAddress,
+                Description: allValues.caretaker2.caretakerDescription,
+                HolidayHomeId: holidayHomeId,
+                // HolidayHomeId: holidayHome.HolidayHomeId
+
+            })
+
+            await careTaker2.save();
+        }
 
         const contactNo1 = ContactNo.create({
             ContactNo: allValues.holidayHomeDetails.contactNo1,
-            HolidayHomeId: holidayHome.HolidayHomeId
-            // HolidayHomeId: "6"
+            // HolidayHomeId: holidayHome.HolidayHomeId
+            HolidayHomeId: holidayHomeId,
 
         })
 
@@ -195,25 +212,28 @@ const createHolidayHome = async (req: Request, res: Response) => {
         if (allValues.holidayHomeDetails.contactNo2 !== "") {
             const contactNo2 = ContactNo.create({
                 ContactNo: allValues.holidayHomeDetails.contactNo2,
-                HolidayHomeId: holidayHome.HolidayHomeId
-                // HolidayHomeId: "4"
+                // HolidayHomeId: holidayHome.HolidayHomeId
+                HolidayHomeId: holidayHomeId,
 
             })
 
             await contactNo2.save();
         }
 
+        // const imageId = "img" + Date.now().toString();
 
-        const image = Image.create({
-            MainImage: allValues.images.mainImage,
-            Image1: allValues.images.image1,
-            Image2: allValues.images.image2,
-            Image3: allValues.images.image3,
-            HolidayHomeId: holidayHome.HolidayHomeId
-            // HolidayHomeId: "4"
-        })
+        // const image = Image.create({
 
-        await image.save();
+        //     ImageId: imageId,
+        //     MainImage: allValues.images.mainImage,
+        //     Image1: allValues.images.image1,
+        //     Image2: allValues.images.image2,
+        //     Image3: allValues.images.image3,
+        //     // HolidayHomeId: holidayHome.HolidayHomeId
+        //     HolidayHomeId: holidayHomeId,
+        // })
+
+        // await image.save();
 
 
 
@@ -225,8 +245,8 @@ const createHolidayHome = async (req: Request, res: Response) => {
                     Month: allValues.roomArray[i].rentalArray[j].district,
                     WeekRental: allValues.roomArray[i].rentalArray[j].weekDays,
                     WeekEndRental: allValues.roomArray[i].rentalArray[j].weekEnds,
-                    HolidayHomeId: holidayHome.HolidayHomeId,
-                    // HolidayHomeId: "4",
+                    // HolidayHomeId: holidayHome.HolidayHomeId,
+                    HolidayHomeId: holidayHomeId,
                     HRUId: allValues.roomArray[i].roomCode
                 })
 
@@ -244,8 +264,8 @@ const createHolidayHome = async (req: Request, res: Response) => {
                 groupByUnit: allValues.roomArray[i].groupByUnit,
                 roomRemarks: allValues.roomArray[i].roomRemarks,
                 roomRental: allValues.roomArray[i].roomRental,
-                HolidayHomeId: holidayHome.HolidayHomeId,
-                // HolidayHomeId: "4",
+                // HolidayHomeId: holidayHome.HolidayHomeId,
+                HolidayHomeId: holidayHomeId,
 
 
             })
@@ -262,8 +282,8 @@ const createHolidayHome = async (req: Request, res: Response) => {
                     Month: allValues.unitArray[i].unitRentalArray[k].district,
                     WeekRental: allValues.unitArray[i].unitRentalArray[k].weekDays,
                     WeekEndRental: allValues.unitArray[i].unitRentalArray[k].weekEnds,
-                    // HolidayHomeId: "4",
-                    HolidayHomeId: holidayHome.HolidayHomeId,
+                    HolidayHomeId: holidayHomeId,
+                    // HolidayHomeId: holidayHome.HolidayHomeId,
                     HRUId: allValues.unitArray[i].unitCode
                 })
 
@@ -271,11 +291,12 @@ const createHolidayHome = async (req: Request, res: Response) => {
             }
 
             for (let j = 0; j < allValues.unitArray[i].selectedRooms.length; j++) {
+                console.log(allValues.unitArray[i].selectedRooms[j])
                 const selectedRoom = SelectedRooms.create({
                     roomCode: allValues.unitArray[i].selectedRooms[j].roomCode,
                     unitCode: allValues.unitArray[i].unitCode,
-                    // HolidayHomeId: "4",
-                    HolidayHomeId: holidayHome.HolidayHomeId
+                    HolidayHomeId: holidayHomeId,
+                    // HolidayHomeId: holidayHome.HolidayHomeId
                 })
                 await selectedRoom.save();
             }
@@ -288,8 +309,8 @@ const createHolidayHome = async (req: Request, res: Response) => {
                 floorLevel: allValues.unitArray[i].floorLevel,
                 unitRemark: allValues.unitArray[i].unitRemark,
                 roomAttached: allValues.unitArray[i].roomAttached,
-                // HolidayHomeId: "4",
-                HolidayHomeId: holidayHome.HolidayHomeId
+                HolidayHomeId: holidayHomeId,
+                // HolidayHomeId: holidayHome.HolidayHomeId
 
 
 
@@ -307,8 +328,8 @@ const createHolidayHome = async (req: Request, res: Response) => {
                     Month: allValues.hallArray[i].hallRentalArray[j].district,
                     WeekRental: allValues.hallArray[i].hallRentalArray[j].weekDays,
                     WeekEndRental: allValues.hallArray[i].hallRentalArray[j].weekEnds,
-                    // HolidayHomeId: "4",
-                    HolidayHomeId: holidayHome.HolidayHomeId,
+                    HolidayHomeId: holidayHomeId,
+                    // HolidayHomeId: holidayHome.HolidayHomeId,
                     HRUId: allValues.hallArray[i].hallCode
                 })
 
@@ -323,8 +344,8 @@ const createHolidayHome = async (req: Request, res: Response) => {
                 hallNoOfChildren: allValues.hallArray[i].hallNoOfChildren,
                 hallRemark: allValues.hallArray[i].hallRemark,
                 hallRental: allValues.hallArray[i].hallRental,
-                // HolidayHomeId: "4",
-                HolidayHomeId: holidayHome.HolidayHomeId
+                HolidayHomeId: holidayHomeId,
+                // HolidayHomeId: holidayHome.HolidayHomeId
 
             })
 
