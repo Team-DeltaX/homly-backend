@@ -1,7 +1,7 @@
 import { AppDataSource } from "../index";
 import { Request, Response } from "express";
 
-import { UserFeedback } from "../entities/Feedback";
+import { HolidayHome } from "../entities/HolidayHome";
 import { UserInteresed } from "../entities/User";
 
 // import natural
@@ -47,23 +47,109 @@ const reviewSentiment = async (req: Request, res: Response) => {
 // get all holiday homes and save max rating holiday home
 const getHolidayHomesSorted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
+  try {
+    // get interested
+    await AppDataSource.manager
+      .find(UserInteresed, {
+        where: {
+          service_number: serviceNo,
+        },
+      })
+      .then(async (interested) => {
+        if (interested) {
+          const inter1 = interested[0].interested_1;
+          const inter2 = interested[0].interested_2;
+          const inter3 = interested[0].interested_3;
 
-  // get interested
-  await AppDataSource.manager.findOneBy(UserInteresed, {
-    service_number: serviceNo,
-  }).then((res) => {
-    if (res) {
-      // get these interest rating from each holiday home
-      // AppDataSource.manager.find(UserFeedback,{
+          const user = await AppDataSource.manager.find(HolidayHome, {
+            select: [
+              "HolidayHomeId",
+              inter1 as keyof HolidayHome,
+              inter2 as keyof HolidayHome,
+              inter3 as keyof HolidayHome,
+              "Name",
+              "TotalRental",
+              "Address",
+            ],
+          });
 
-      // })
-      // select 3 column from all data
-      // AppDataSource.manager.find(UserFeedback,{
-      //   select:[holi]
-      // });
-      
-    }
-  });
+          let rating = [];
+          let inter1_weight = 0.5;
+          let inter2_weight = 0.3;
+          let inter3_weight = 0.2;
+
+          // convert to json object
+          const interested_value = JSON.parse(JSON.stringify(user));
+
+          // calculate new rating
+          for (let i = 0; i < interested_value.length; i++) {
+            let total = 0;
+            total += interested_value[i][inter1] * inter1_weight;
+            total += interested_value[i][inter2] * inter2_weight;
+            total += interested_value[i][inter3] * inter3_weight;
+            rating.push({ holiday_home: interested_value[i], rating: total });
+          }
+
+          // select maxmimum 5 rated holiday homes
+          rating.sort((a, b) => b.rating - a.rating);
+          const interested_hh = rating.slice(0, 6);
+
+          res.status(200).json({ interested_hh, interested: true });
+        }else{
+          res.status(200).json({interested: false});
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ message: "Internal Server error" });
+      });
+
+    // if (interested) {
+    //   // console.log(interested);
+    //   const inter1 = interested[0].interested_1;
+    //   const inter2 = interested[0].interested_2;
+    //   const inter3 = interested[0].interested_3;
+
+    //   const user = await AppDataSource.manager.find(HolidayHome, {
+    //     select: [
+    //       "HolidayHomeId",
+    //       inter1 as keyof HolidayHome,
+    //       inter2 as keyof HolidayHome,
+    //       inter3 as keyof HolidayHome,
+    //       "Name",
+    //       "TotalRental",
+    //       "Address",
+    //     ],
+    //   });
+
+    //   let rating = [];
+    //   let inter1_weight = 0.5;
+    //   let inter2_weight = 0.3;
+    //   let inter3_weight = 0.2;
+
+    //   // convert to json object
+    //   const interested_value = JSON.parse(JSON.stringify(user));
+
+    //   // calculate new rating
+    //   for (let i = 0; i < interested_value.length; i++) {
+    //     let total = 0;
+    //     total += interested_value[i][inter1] * inter1_weight;
+    //     total += interested_value[i][inter2] * inter2_weight;
+    //     total += interested_value[i][inter3] * inter3_weight;
+    //     rating.push({ holiday_home: interested_value[i], rating: total });
+    //   }
+
+    //   // select maxmimum 5 rated holiday homes
+    //   rating.sort((a, b) => b.rating - a.rating);
+    //   const interested_hh = rating.slice(0, 6);
+
+    //   res.status(200).json({interested_hh, interested: true});
+    // }else{
+    //   res.status(200).json({interested: false});
+    // }
+  } catch (err: any) {
+    console.log(err);
+    res.status(500).json({ message: "Internal Server error" });
+  }
 };
 
-export { reviewSentiment };
+export { reviewSentiment, getHolidayHomesSorted };

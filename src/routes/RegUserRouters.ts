@@ -9,6 +9,8 @@ import {
   getUserIntersted,
 } from "../controllers/UserController";
 
+import { getHolidayHomesSorted } from "../controllers/ReviewController";
+
 const reg_users = express.Router();
 
 reg_users.get("/auth/", allUsers);
@@ -17,5 +19,6 @@ reg_users.put("/auth/", updateUserDetails);
 reg_users.put("/auth/password", updateUserPassword);
 reg_users.post("/auth/interested", addUserIntersted);
 reg_users.get("/auth/test", getUserIntersted);
+reg_users.get("/holidayhomes/sort", getHolidayHomesSorted);
 
 export { reg_users };
