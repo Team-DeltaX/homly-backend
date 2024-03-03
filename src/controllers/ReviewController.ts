@@ -87,7 +87,22 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
             total += interested_value[i][inter1] * inter1_weight;
             total += interested_value[i][inter2] * inter2_weight;
             total += interested_value[i][inter3] * inter3_weight;
-            rating.push({ holiday_home: interested_value[i], rating: total });
+
+            const seperated = {
+              inter1: {
+                name: inter1,
+                value: interested_value[i][inter1],
+              },
+              inter2: {
+                name: inter2,
+                value: interested_value[i][inter2],
+              },
+              inter3: {
+                name: inter3,
+                value: interested_value[i][inter3],
+              },
+            };
+            rating.push({ holiday_home: interested_value[i], rating: total, seperated:seperated });
           }
 
           // select maxmimum 5 rated holiday homes
@@ -95,8 +110,8 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
           const interested_hh = rating.slice(0, 6);
 
           res.status(200).json({ interested_hh, interested: true });
-        }else{
-          res.status(200).json({interested: false});
+        } else {
+          res.status(200).json({ interested: false });
         }
       })
       .catch((err) => {

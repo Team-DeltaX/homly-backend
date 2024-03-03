@@ -19,6 +19,6 @@ reg_users.put("/auth/", updateUserDetails);
 reg_users.put("/auth/password", updateUserPassword);
 reg_users.post("/auth/interested", addUserIntersted);
 reg_users.get("/auth/test", getUserIntersted);
-reg_users.get("/holidayhomes/sort", getHolidayHomesSorted);
+reg_users.get("/auth/holidayhomes/sort", getHolidayHomesSorted);
 
 export { reg_users };
