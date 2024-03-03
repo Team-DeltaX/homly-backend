@@ -70,6 +70,7 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
               "Name",
               "TotalRental",
               "Address",
+              "overall_rating"
             ],
           });
 
