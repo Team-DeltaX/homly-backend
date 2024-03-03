@@ -72,6 +72,10 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
               "Address",
               "overall_rating"
             ],
+            where:{
+              Status: "Active",
+              Approved: true
+            }
           });
 
           let rating = [];
