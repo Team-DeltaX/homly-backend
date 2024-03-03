@@ -5,7 +5,7 @@ import { Complaints } from "../entities/Complaint";
 import { HomlyUser } from "../entities/User";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
-import { error } from "console";
+import { Console, error } from "console";
 import { v4 as uuid, v4 } from "uuid";
 import addadminemail from "../template/addadminemail";
 import sentEmail from "../services/sentEmal";
@@ -21,6 +21,7 @@ import { BlackListedUser } from "../entities/BlackListedUser";
 import BlacklistNotifyEmail from "../template/BlacklistNotifyEmail";
 import BlacklistRemoveEmail from "../template/BlacklistRemoveEmail";
 import { BlackListHistory } from "../entities/BlackListHistory";
+import { ReadStream } from "typeorm/platform/PlatformTools";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -446,12 +447,15 @@ export const deletefromblacklisttable=async(req:Request,res:Response)=>{
   const serviceno=req.body.ServiceNo;
   try{
     await BlackListedUser.delete({ ServiceNo: serviceno })
-    res.status(404).json({message:'sucess fully removed from blacklist table'})
+    
+    res.status(200).json({message:'sucess fully removed from blacklist table'});
+  
 
 
   }catch(error){
     // console.log(`error in removing from blacklist ${error}`)
     res.status(404).json({message:'error in removing from blacklist table'})
+    
 
   }
 
@@ -474,12 +478,13 @@ export const updatehomlyuser=async(req:Request,res:Response)=>{
   }catch(error){
     console.log(`error in updating user unblacklist false ${error}`)
     res.status(404).json({message:'error in updaing unblacklisted'})
+
   }
 
   
 }
 export const addtoblacklisthistory = async (req: Request, res: Response) => {
-  const blhid=1
+  
   const serviceno = req.body.ServiceNo;
   const addreson = req.body.AddReason;
   const Removereason = req.body.RemoveReason;
@@ -493,12 +498,41 @@ export const addtoblacklisthistory = async (req: Request, res: Response) => {
       BlacklistedDate: blacklisteddate,
       RemoveReason: Removereason,
     });
-    addtoblacklisthistory.save();
+    await addtoblacklisthistory.save();
+    
     res.status(200).json({message:'sucessfully added to blacklis history table'})
+  
     
   } catch (error) {
     res.status(404).json({ message: 'error in adding to blacklis history table' });
   }
 };
 
+
+export const getblacklistedhistory=async(req:Request,res:Response)=>{
+  try{
+    const BlackListedHistory = await AppDataSource.manager.find(BlackListHistory);
+    res.status(200).json(BlackListedHistory);
+  }catch(error){
+    res.status(404).json({ message: 'error in getting blacklis history table' });
+  }
+}
+
+
 export { router };
+
+
+export const markedcomplaints = async (req: Request, res: Response) => {
+  try {
+    const serviceno = req.body.ServiceNo;
+    await AppDataSource.manager.update(
+      Complaints,
+      { ServiceNo: serviceno },
+      { Marked: true }
+    );
+
+    res.status(200).json({ message: 'Successfully marked the complaint' });
+  } catch (error) {
+    res.status(404).json({ message: 'Error in marking the complaint as viewed!' });
+  }
+};
