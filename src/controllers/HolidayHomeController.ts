@@ -48,6 +48,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
 
 const getHolidayHomesDetails = async (req: Request, res: Response) => {
     const { HolidayHomeId } = req.params;
+
     // const holidayHome = await AppDataSource.manager
     //     .findOneBy(HolidayHome, { HolidayHomeId });
 

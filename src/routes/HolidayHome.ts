@@ -6,7 +6,7 @@ import { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelected
 const HolidayHomeRouter = express.Router();
 
 HolidayHomeRouter.get("/", getHolidayHomes);
-HolidayHomeRouter.get("/:HolidayHome:Id", getHolidayHomesDetails);
+HolidayHomeRouter.get("/:HolidayHomeId", getHolidayHomesDetails);
 HolidayHomeRouter.get("/:HolidayHomeId/:unitCode", getSelectedRooms);
 HolidayHomeRouter.get("/room/:HolidayHomeId/:roomCode", getRoom);
 HolidayHomeRouter.get("/rental/:HolidayHomeId/:HRUId", getRoomRental);
