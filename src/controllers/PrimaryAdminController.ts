@@ -553,6 +553,17 @@ export const getNotApprovedHomes=async(req:Request,res:Response)=>{
   }
 }
 
+export const approveHH=async(req:Request,res:Response)=>{
+  const id=req.body.id;
+  try{
+    await HolidayHome.update(id, { Approved:true })
+    res.status(200).json({ message: 'Successfully approved the home' });
+  }
+  catch(error){
+    res.status(404).json({ message: 'Error in approving the home!' });
+  }
+}
+
 
 
 export { router };
