@@ -564,6 +564,16 @@ export const approveHH=async(req:Request,res:Response)=>{
   }
 }
 
+export const rejectHH=async(req:Request,res:Response)=>{
+  const id=req.body.id;
+  try{
+    await HolidayHome.delete({  HolidayHomeId:id})
+    res.status(200).json({ message: 'Successfully rejected the home(deleted from HH table)' });
 
+
+  }catch(error){
+    res.status(404).json({ message: 'Error in rejecting the home!' });
+  }
+}
 
 export { router };
