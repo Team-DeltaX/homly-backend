@@ -1,9 +1,9 @@
 import express from "express";
-const router = express.Router();
 import { SpecailReservation } from "../entities/SpecialReservation";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 
+const router = express.Router();
 
 const AddSpecialResrvation = async (req: Request, res: Response) => {
   const {
@@ -54,6 +54,7 @@ const getSpecialReservation = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+
 
 
 export { getSpecialReservation,AddSpecialResrvation };

@@ -18,8 +18,9 @@ import { Rental } from "./entities/Rental";
 import { Complaints } from "./entities/Complaint";
 import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
+import { Reservation } from "./entities/Reservation";
 import { LocationAdminRoute } from "./routes/LocationAdminRoute";
-import {
+import { 
   HomlyUser,
   UserEmailVerification,
   UserOTPVerification,
@@ -38,7 +39,9 @@ import { homly_review } from "./routes/Review";
 import { requireAuth } from "./middleware/authMiddleware";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 
+
 import dotenv from "dotenv";
+import { ReservationRouter } from "./routes/ReservationRouter";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -50,7 +53,8 @@ export const AppDataSource = new DataSource({
   connectString: process.env.DB_CONNECTION_STRING,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  entities: [
+
+entities: [
     HomlyAdmin,
     Employee,
     HomlyUser,
@@ -66,6 +70,7 @@ export const AppDataSource = new DataSource({
     Image,
     Unit,
     Room,
+    Reservation,
     ContactNo,
     LocationAdmin,
     Rental,
@@ -73,6 +78,7 @@ export const AppDataSource = new DataSource({
     UserFeedback,
     SelectedRooms
   ],
+
   synchronize: true,
   logging: false,
 });
@@ -93,13 +99,14 @@ AppDataSource.initialize()
     // use requireAuth middleware to users/auth all paths
     app.use('/users/auth/*', requireAuth);
     app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
-    app.use('/admin/auth/locationadmin/reservations', SpecialReservationRouter)
+    app.use('/admin/auth/primaryadmin/reservations', SpecialReservationRouter)
     app.use('/admin', LocationAdminRoute)
     app.use('/admin', BlacklistRouter)
     app.use('/users', homly_user);
     app.use('/users', reg_users);
     app.use('/users', homly_review);
     app.use('/admin', admin_router);
+    app.use('/users/reservation', ReservationRouter);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
 

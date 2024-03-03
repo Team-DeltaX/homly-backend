@@ -6,7 +6,7 @@ export class SpecailReservation {
         throw new Error("Method not implemented.");
     }
   @PrimaryColumn()
-  SpecailReservationID!: String ;
+  SpecailReservationID!: string ;
 
   @Column()
   ServiceNo!: string;
