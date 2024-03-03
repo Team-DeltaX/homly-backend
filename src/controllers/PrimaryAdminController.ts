@@ -22,6 +22,7 @@ import BlacklistNotifyEmail from "../template/BlacklistNotifyEmail";
 import BlacklistRemoveEmail from "../template/BlacklistRemoveEmail";
 import { BlackListHistory } from "../entities/BlackListHistory";
 import { ReadStream } from "typeorm/platform/PlatformTools";
+import { HolidayHome } from "../entities/HolidayHome";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -519,7 +520,7 @@ export const getblacklistedhistory=async(req:Request,res:Response)=>{
 }
 
 
-export { router };
+
 
 
 export const markedcomplaints = async (req: Request, res: Response) => {
@@ -536,3 +537,22 @@ export const markedcomplaints = async (req: Request, res: Response) => {
     res.status(404).json({ message: 'Error in marking the complaint as viewed!' });
   }
 };
+
+export const getNotApprovedHomes=async(req:Request,res:Response)=>{
+  try{
+    const homes= await AppDataSource.manager.find(HolidayHome, {
+      where: {
+        Approved:false
+      },
+    });
+    
+    res.status(200).json(homes);
+  }
+  catch(error){
+    res.status(404).json({ message: 'Error in getting not approved homes!' });
+  }
+}
+
+
+
+export { router };
