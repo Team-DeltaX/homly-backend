@@ -25,7 +25,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
             {
                 where:
                 {
-                    Status: 'active',
+                    Status: 'Active',
                     Approved: true
                 }
             })
@@ -35,7 +35,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
             {
                 where:
                 {
-                    Status: 'inactive',
+                    Status: 'Inactive',
                     Approved: true
                 }
             })
@@ -125,7 +125,8 @@ const getRoomRental = async (req: Request, res: Response) => {
 
 const createHolidayHome = async (req: Request, res: Response) => {
     try {
-        const { allValues } = req.body;
+
+        const allValues = req.body;
         console.log(allValues);
         // console.log(allValues.holidayHomeDetails);
         // console.log(allValues.images);
