@@ -48,6 +48,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
 
 const getHolidayHomesDetails = async (req: Request, res: Response) => {
     const { HolidayHomeId } = req.params;
+
     // const holidayHome = await AppDataSource.manager
     //     .findOneBy(HolidayHome, { HolidayHomeId });
 
@@ -351,6 +352,9 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
             await hall.save();
         }
+        console.log("first")
+        const { holidayHomeDetails } = req.body;
+        console.log(holidayHomeDetails);
 
 
 
@@ -363,5 +367,21 @@ const createHolidayHome = async (req: Request, res: Response) => {
 };
 
 
+const updateHolidayHome = async (req: Request, res: Response) => {
+    try {
+        console.log("first")
+        const updatedValues = req.body;
+        console.log(updatedValues.holidayHomeDetails);
 
-export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental }
+        res.json({ message: "Holiday Home updated successfully" });
+
+    }
+    catch (error) {
+        console.error("Error processing request:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+
+};
+
+
+export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental, updateHolidayHome }
