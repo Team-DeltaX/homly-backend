@@ -484,7 +484,7 @@ export const updatehomlyuser=async(req:Request,res:Response)=>{
   
 }
 export const addtoblacklisthistory = async (req: Request, res: Response) => {
-  const blhid=1
+  
   const serviceno = req.body.ServiceNo;
   const addreson = req.body.AddReason;
   const Removereason = req.body.RemoveReason;
