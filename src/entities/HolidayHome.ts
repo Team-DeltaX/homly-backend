@@ -110,34 +110,39 @@ export class HolidayHome extends BaseEntity {
   Facilities!: string;
 
   @Column({
-    default: null
+    default: 0
   })
   food_rating!: number;
 
   @Column({
-    default: null
+    default: 0
   })
   value_for_money_rating!: number;
 
   @Column({
-    default: null
+    default: 0
   })
   staff_rating!: number;
 
   @Column({
-    default: null
+    default: 0
   })
   location_rating!: number;
 
   @Column({
-    default: null
+    default: 0
   })
   furniture_rating!: number;
 
   @Column({
-    default: null
+    default: 0
   })
   wifi_rating!: number;
+
+  @Column({
+    default: 0
+  })
+  overall_rating!: number;
 
   @CreateDateColumn()
   createdAt!: Date;
