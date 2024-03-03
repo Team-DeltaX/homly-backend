@@ -21,6 +21,7 @@ import { BlackListedUser } from "../entities/BlackListedUser";
 import BlacklistNotifyEmail from "../template/BlacklistNotifyEmail";
 import BlacklistRemoveEmail from "../template/BlacklistRemoveEmail";
 import { BlackListHistory } from "../entities/BlackListHistory";
+import { ReadStream } from "typeorm/platform/PlatformTools";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -512,9 +513,26 @@ export const getblacklistedhistory=async(req:Request,res:Response)=>{
   try{
     const BlackListedHistory = await AppDataSource.manager.find(BlackListHistory);
     res.status(200).json(BlackListedHistory);
-  }catch(eroor){
+  }catch(error){
     res.status(404).json({ message: 'error in getting blacklis history table' });
   }
 }
 
+
 export { router };
+
+
+export const markedcomplaints = async (req: Request, res: Response) => {
+  try {
+    const serviceno = req.body.ServiceNo;
+    await AppDataSource.manager.update(
+      Complaints,
+      { ServiceNo: serviceno },
+      { Marked: true }
+    );
+
+    res.status(200).json({ message: 'Successfully marked the complaint' });
+  } catch (error) {
+    res.status(404).json({ message: 'Error in marking the complaint as viewed!' });
+  }
+};
