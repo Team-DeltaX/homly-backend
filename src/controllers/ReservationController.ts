@@ -16,6 +16,7 @@ const AddResrvation = async (req: Request, res: Response) => {
     NoOfSingleRooms,
     NoOfDoubleRooms,
     NoOfTripleRooms,
+    NoOfHalls,
     Price,
   } = req.body;
 
@@ -27,6 +28,7 @@ const AddResrvation = async (req: Request, res: Response) => {
       .into(Reservation)
       .values([
         {
+          ReservationId:"10",
           ServiceNO,
           HolidayHome,
           CheckinDate,
@@ -36,6 +38,7 @@ const AddResrvation = async (req: Request, res: Response) => {
           NoOfSingleRooms,
           NoOfDoubleRooms,
           NoOfTripleRooms,
+          NoOfHalls,
           Price,
         },
       ])

@@ -38,5 +38,8 @@ export class Reservation extends BaseEntity {
     NoOfTripleRooms!: number;
 
     @Column()
+    NoOfHalls!: number;
+
+    @Column()
     Price!: number ;
 }
