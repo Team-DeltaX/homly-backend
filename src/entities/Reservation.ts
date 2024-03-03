@@ -3,7 +3,11 @@ import { Employee } from "./Empolyee"
 
 @Entity()
 export class Reservation extends BaseEntity {
-    @PrimaryGeneratedColumn()
+    Save() {
+    throw new Error("Method not implemented.");
+    }
+
+    @PrimaryColumn()
     ReservationId!: string;
 
     @Column()

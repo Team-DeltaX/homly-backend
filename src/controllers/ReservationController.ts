@@ -20,7 +20,7 @@ const AddResrvation = async (req: Request, res: Response) => {
   } = req.body;
 
   //   const locationadmin = LocationAdmin.create();
-
+  console.log(ServiceNO)
   try {
     await AppDataSource.createQueryBuilder()
       .insert()

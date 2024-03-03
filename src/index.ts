@@ -41,6 +41,7 @@ import { BlacklistRouter } from "./routes/BlacklistRouter";
 
 
 import dotenv from "dotenv";
+import { ReservationRouter } from "./routes/ReservationRouter";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -69,6 +70,7 @@ entities: [
     Image,
     Unit,
     Room,
+    Reservation,
     ContactNo,
     LocationAdmin,
     Rental,
@@ -97,13 +99,14 @@ AppDataSource.initialize()
     // use requireAuth middleware to users/auth all paths
     app.use('/users/auth/*', requireAuth);
     app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
-    app.use('/admin/auth/locationadmin/reservations', SpecialReservationRouter)
+    app.use('/admin/auth/primaryadmin/reservations', SpecialReservationRouter)
     app.use('/admin', LocationAdminRoute)
     app.use('/admin', BlacklistRouter)
     app.use('/users', homly_user);
     app.use('/users', reg_users);
     app.use('/users', homly_review);
     app.use('/admin', admin_router);
+    app.use('/users/reservation', ReservationRouter);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
 
