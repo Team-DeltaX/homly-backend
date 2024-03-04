@@ -1,16 +1,15 @@
-import express from "express";
+import express, { response } from "express";
 import { Reservation } from "../entities/Reservation";
 import { Employee } from "../entities/Empolyee";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
-import { getConnection } from 'typeorm';
+import { getConnection } from "typeorm";
 
 const router = express.Router();
 
 const AddResrvation = async (req: Request, res: Response) => {
   console.log(req.body);
   const {
-    
     ServiceNO,
     HolidayHome,
     CheckinDate,
@@ -25,7 +24,7 @@ const AddResrvation = async (req: Request, res: Response) => {
   } = req.body;
 
   //   const locationadmin = LocationAdmin.create();
-  console.log("arunaaa",ServiceNO)
+  console.log("arunaaa", ServiceNO);
   try {
     await AppDataSource.createQueryBuilder()
       .insert()
@@ -56,25 +55,52 @@ const AddResrvation = async (req: Request, res: Response) => {
 };
 
 const getReservation = async (req: Request, res: Response) => {
-  const Reservations = await AppDataSource.manager.find(Reservation);
-
   try {
-    const Reservations = await AppDataSource.manager.find(Reservation);
+    let Reservations = await AppDataSource.manager.find(Reservation);
 
-    // console.log(Reservation);
-    let reservationData: { Reservations: Reservation[]; empName: string; }[] = [];
-    for(let i=0; i<Reservations.length;i++){
-      if(Reservations[i].ServiceNO){
-        const service_no = Reservations[i].ServiceNO;
-        await AppDataSource.manager.find(Employee,{
-          where: {service_number:service_no }
-        }).then((res)=>{
-          console.log(res[i].name)
-          reservationData.push({
-            Reservations:Reservations,
-            empName:res[i].name
-          })
-        })
+    // reverse reservation
+    Reservations = Reservations.reverse();
+
+    console.log(Reservations, Reservations.length);
+    let reservationData: { Reservations: Reservation[]; empName: string }[] =
+      [];
+    if (Reservations) {
+      for (let i = 0; i < Reservations.length; i++) {
+        if (Reservations[i].ServiceNO) {
+          const service_no = Reservations[i].ServiceNO;
+          console.log(service_no);
+
+          await AppDataSource.manager
+            .find(Employee, {
+              where: { service_number: service_no },
+            })
+            .then((response) => {
+              console.log(response[0].name);
+              reservationData.push({
+                Reservations: Reservations,
+                empName: response[0].name,
+              });
+            })
+
+            .catch((err) => console.log(err));
+
+          // await AppDataSource.manager.find(Employee,{
+          //   where: {service_number:service_no }
+          // }).then((res)=>{
+          //   if(res){
+          //     console.log(res[i])
+          //   }
+          //   // if(res !== undefined){
+          //   //   console.log(res[i])
+          //   //   // reservationData.push({
+          //   //   //   Reservations:Reservations,
+          //   //   //   empName:res[i].name
+          //   //   // })
+
+          //   // }
+          //   console.log("i",i)
+          // }).catch(err => console.log(err));
+        }
       }
     }
     res.status(200).json(reservationData);
