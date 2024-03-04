@@ -11,10 +11,10 @@ export class Reservation extends BaseEntity {
     ReservationId!: string;
 
     @Column()
-    ServiceNO!: String ;
+    ServiceNO!: string ;
 
     @Column()
-    HolidayHome!: String ;
+    HolidayHome!: string ;
 
     @Column()
     CheckinDate!: Date ;
