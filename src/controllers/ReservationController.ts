@@ -4,6 +4,9 @@ import { Employee } from "../entities/Empolyee";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 import { getConnection } from "typeorm";
+import { getManager } from 'typeorm';
+import { HolidayHome } from '../entities/HolidayHome';
+
 
 const router = express.Router();
 
@@ -53,6 +56,18 @@ const AddResrvation = async (req: Request, res: Response) => {
   }
   console.log(ServiceNO, HolidayHome, CheckinDate, CheckoutDate);
 };
+const getHolidayHomeNames = async (req: Request, res: Response) => {
+  try {
+    const holidayHomes = await AppDataSource.manager.find(HolidayHome);
+    const holidayHomeNames = holidayHomes.map(home => home.Name);
+    res.status(200).json(holidayHomeNames);
+  } catch (error) {
+    console.log(`error is ${error}`);
+    res.status(500).json({ message: "Internal Server Error!" });
+  }
+};
+
+
 
 const getReservation = async (req: Request, res: Response) => {
   try {
@@ -125,4 +140,4 @@ const getReservation = async (req: Request, res: Response) => {
 //   return employee ? employee.name : undefined;
 // }
 
-export { getReservation, AddResrvation };
+export { getReservation, AddResrvation, getHolidayHomeNames };
