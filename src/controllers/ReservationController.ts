@@ -1,6 +1,7 @@
 import express, { response } from "express";
 import { Reservation } from "../entities/Reservation";
 import { Employee } from "../entities/Empolyee";
+import { Complaints } from "../entities/Complaint";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 import { getConnection } from "typeorm";
@@ -12,10 +13,39 @@ import { Room } from "../entities/Room";
 
 const router = express.Router();
 
+const AddComplaint = async (req: Request, res: Response) => {
+  console.log(req.body);
+  const{
+    ServiceNo,
+    AdminNo="2324",
+    ReservationNo,
+    Reason,
+    Marked=false,
+  } = req.body;
+  try {
+    await AppDataSource.createQueryBuilder()
+      .insert()
+      .into(Complaints)
+      .values([
+        {
+          ServiceNo,
+          AdminNo,
+          ReservationNo,
+          Reason,
+          Marked,
+        },
+      ])
+      .execute();
+    res.status(200).json({ message: "Complaint added successfully" });
+  } catch (error) {
+    console.log(`error is ${error}`);
+    res.status(500).json({ message: "Internal Server Error!" });
+  }
+}
+
 const AddResrvation = async (req: Request, res: Response) => {
   console.log(req.body);
   const {
-    ServiceNO,
     HolidayHome,
     CheckinDate,
     CheckoutDate,
@@ -25,6 +55,8 @@ const AddResrvation = async (req: Request, res: Response) => {
     NoOfHalls,
     Price,
   } = req.body;
+
+  const ServiceNO = req.cookies.serviceNo;
 
   //   const locationadmin = LocationAdmin.create();
   console.log("arunaaa", ServiceNO);
@@ -128,4 +160,4 @@ const getReservation = async (req: Request, res: Response) => {
 //   return employee ? employee.name : undefined;
 // }
 
-export { getReservation, AddResrvation, getHolidayHomeNames, getRooms };
+export { getReservation, AddResrvation, getHolidayHomeNames, getRooms, AddComplaint };
