@@ -29,13 +29,7 @@ export class Reservation extends BaseEntity {
     NoOfChildren!: number;
 
     @Column()
-    NoOfSingleRooms!: number;
-
-    @Column()
-    NoOfDoubleRooms!: number;
-
-    @Column()
-    NoOfTripleRooms!: number;
+    NoOfRooms!: number;
 
     @Column()
     NoOfHalls!: number;
