@@ -4,6 +4,11 @@ import { Employee } from "../entities/Empolyee";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 import { getConnection } from "typeorm";
+import { getManager } from 'typeorm';
+import { HolidayHome } from '../entities/HolidayHome';
+import { Room } from "../entities/Room";
+
+
 
 const router = express.Router();
 
@@ -16,9 +21,7 @@ const AddResrvation = async (req: Request, res: Response) => {
     CheckoutDate,
     NoOfAdults,
     NoOfChildren,
-    NoOfSingleRooms,
-    NoOfDoubleRooms,
-    NoOfTripleRooms,
+    NoOfRooms,
     NoOfHalls,
     Price,
   } = req.body;
@@ -37,9 +40,7 @@ const AddResrvation = async (req: Request, res: Response) => {
           CheckoutDate,
           NoOfAdults,
           NoOfChildren,
-          NoOfSingleRooms,
-          NoOfDoubleRooms,
-          NoOfTripleRooms,
+          NoOfRooms,
           NoOfHalls,
           Price,
         },
@@ -52,6 +53,26 @@ const AddResrvation = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal Server Error!" });
   }
   console.log(ServiceNO, HolidayHome, CheckinDate, CheckoutDate);
+};
+const getHolidayHomeNames = async (req: Request, res: Response) => {
+  try {
+    const holidayHomes = await AppDataSource.manager.find(HolidayHome);
+    const holidayHomeNames = holidayHomes.map(home => home.Name);
+    res.status(200).json(holidayHomeNames);
+  } catch (error) {
+    console.log(`error is ${error}`);
+    res.status(500).json({ message: "Internal Server Error!" });
+  }
+};
+
+const getRooms = async (req: Request, res: Response) => {
+  try {
+    const rooms = await AppDataSource.manager.find(Room);
+    res.status(200).json(rooms);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
 };
 
 const getReservation = async (req: Request, res: Response) => {
@@ -81,25 +102,7 @@ const getReservation = async (req: Request, res: Response) => {
                 empName: response[0].name,
               });
             })
-
             .catch((err) => console.log(err));
-
-          // await AppDataSource.manager.find(Employee,{
-          //   where: {service_number:service_no }
-          // }).then((res)=>{
-          //   if(res){
-          //     console.log(res[i])
-          //   }
-          //   // if(res !== undefined){
-          //   //   console.log(res[i])
-          //   //   // reservationData.push({
-          //   //   //   Reservations:Reservations,
-          //   //   //   empName:res[i].name
-          //   //   // })
-
-          //   // }
-          //   console.log("i",i)
-          // }).catch(err => console.log(err));
         }
       }
     }
@@ -125,4 +128,4 @@ const getReservation = async (req: Request, res: Response) => {
 //   return employee ? employee.name : undefined;
 // }
 
-export { getReservation, AddResrvation };
+export { getReservation, AddResrvation, getHolidayHomeNames, getRooms };
