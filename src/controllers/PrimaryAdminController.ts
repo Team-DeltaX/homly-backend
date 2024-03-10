@@ -576,4 +576,13 @@ export const rejectHH=async(req:Request,res:Response)=>{
   }
 }
 
-export { router };
+export const HHcount =async(req:Request,res:Response)=>{ 
+  try{
+    const count = await HolidayHome.count();
+    res.status(200).json({count:count});
+  }catch(error){
+    res.status(404).json({ message: 'Error in getting home count!' });
+  }
+}
+
+// export { router };
