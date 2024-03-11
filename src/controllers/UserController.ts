@@ -602,36 +602,41 @@ const updateUserPassword = async (req: Request, res: Response) => {
       .where("user.service_number = :id", { id: serviceNo })
       .getOne();
     if (user && user.verified) {
-      bcrypt.compare(oldPassword, user.password).then(async (result) => {
-        if (result) {
-          const saltRounds = 10;
-          bcrypt
-            .hash(newPassword, saltRounds)
-            .then(async (hash) => {
-              await AppDataSource.manager.update(
-                HomlyUser,
-                { service_number: serviceNo },
-                {
-                  password: hash,
-                }
-              );
-              res
-                .status(200)
-                .json({ message: "Password updated", success: true });
-            })
-            .catch((err) => {
-              res
-                .status(200)
-                .json({ message: "Error updating password", success: false });
-            });
-        } else {
+      bcrypt
+        .compare(oldPassword, user.password)
+        .then(async (result) => {
+          if (result) {
+            const saltRounds = 10;
+            bcrypt
+              .hash(newPassword, saltRounds)
+              .then(async (hash) => {
+                await AppDataSource.manager.update(
+                  HomlyUser,
+                  { service_number: serviceNo },
+                  {
+                    password: hash,
+                  }
+                );
+                res
+                  .status(200)
+                  .json({ message: "Password updated", success: true });
+              })
+              .catch((err) => {
+                res
+                  .status(200)
+                  .json({ message: "Error updating password", success: false });
+              });
+          } else {
+            res
+              .status(200)
+              .json({ message: "Incorrect old password", success: false });
+          }
+        })
+        .catch((err) => {
           res
             .status(200)
-            .json({ message: "Incorrect old password", success: false });
-        }
-      }).catch((err) => {
-        res.status(200).json({ message: "Error updating password", success: false });
-      })
+            .json({ message: "Error updating password", success: false });
+        });
     } else {
       res.status(200).json({ message: "User not found", success: false });
     }
@@ -661,16 +666,16 @@ const changeFacilityName = (facility: string) => {
     default:
       return facility;
   }
-}
+};
 
 // add user interested facilities
 const addUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
   let { fac1, fac2, fac3 } = req.body;
 
-  fac1 =await changeFacilityName(fac1);
-  fac2 =await changeFacilityName(fac2);
-  fac3 =await changeFacilityName(fac3);
+  fac1 = await changeFacilityName(fac1);
+  fac2 = await changeFacilityName(fac2);
+  fac3 = await changeFacilityName(fac3);
 
   // update table
   if (serviceNo) {
@@ -691,26 +696,85 @@ const addUserIntersted = async (req: Request, res: Response) => {
   console.log(serviceNo, fac1, fac2, fac3);
 };
 
+const changeFacilityNameReturn = (facility:string) => {
+  switch (facility) {
+    case "food_rating":
+      return "food";
+    case "value_for_money_rating":
+      return "value for money";
+    case "staff_rating":
+      return "staff";
+    case "location_rating":
+      return "location";
+    case "wifi_rating":
+      return "wifi";
+    case "furniture_rating":
+      return "furniture";
+    default:
+      return facility;
+  }
+};
+
 const getUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
   // res.status(200).json(serviceNo)
+  try {
+    const interested = await AppDataSource.createQueryBuilder()
+      .select("user")
+      .from(UserInteresed, "user")
+      .where("user.service_number = :id", { id: serviceNo })
+      .getOne();
+
+    if (interested) {
+      const userInterested = {
+        serviceNo: interested.service_number,
+        interested: [
+          changeFacilityNameReturn(interested.interested_1),
+          changeFacilityNameReturn(interested.interested_2),
+          changeFacilityNameReturn(interested.interested_3),
+        ],
+      };
+      res.status(200).json({ updated: true, userInterested: userInterested });
+    } else {
+      console.log("not found");
+      res.status(200).json({ updated: false });
+    }
+  } catch (err: any) {
+    res.status(404).json({ message: "Error", success: false });
+  }
+};
+
+const updateUserIntersted = async (req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+  let { fac1, fac2, fac3 } = req.body;
+
+  console.log(fac1, fac2, fac3)
+
   try{
-    const userInterested = await AppDataSource.createQueryBuilder()
-        .select("user")
-        .from(UserInteresed, "user")
-        .where("user.service_number = :id", { id: serviceNo })
-        .getOne();
 
-      if(userInterested){
-        res.status(200).json({updated: true, userInterested:userInterested})
-      }else{
-        console.log("not found");
-        res.status(200).json({updated: false})
-      }
-
+    fac1 = changeFacilityName(fac1);
+    fac2 = changeFacilityName(fac2);
+    fac3 = changeFacilityName(fac3);
+  
+    // update table
+    if (serviceNo) {
+      await AppDataSource.manager.update(
+        UserInteresed,
+        { service_number: serviceNo },
+        {
+          interested_1: fac1,
+          interested_2: fac2,
+          interested_3: fac3,
+        }
+      );
+      res
+        .status(200)
+        .json({ message: "Successfully update your insterested", success: true });
+    }
   }catch(err:any){
     res.status(404).json({ message: "Error", success: false });
   }
+
 };
 
 export {
@@ -727,4 +791,5 @@ export {
   updateUserPassword,
   addUserIntersted,
   getUserIntersted,
+  updateUserIntersted
 };

@@ -16,9 +16,6 @@ export class Complaints{
   // @JoinColumn({ name: 'ServiceNo' })
   //   ServiceNoEmp!: Userdel
 
-
-
-
   // @ManyToOne(() => LocationAdmin, (locationadmin) => locationadmin.Complaint)
   // @JoinColumn({ name: 'AdminNo' })
   //   AdminNo!: LocationAdmin
@@ -34,17 +31,11 @@ export class Complaints{
   created_at!: Date;
 
   @Column()
-  Reson!:String;
+  Reason!:String;
 
   @Column({
     default:false
   })
   Marked!:Boolean
-
-
-
-
-
-
 
 }
