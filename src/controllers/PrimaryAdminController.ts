@@ -423,39 +423,12 @@ export const checkuserexist=async(req:Request,res:Response)=>{
 export const getOngoingReservation = async (req: Request, res: Response) => {
   try {
     const currentDate = new Date();
-    let Reservations = await AppDataSource.manager.find(Reservation, {
-      where: {
+    const reservation = await AppDataSource.manager.find(Reservation, {
+    where: {
         CheckoutDate: MoreThan(currentDate),
-      },
-    });
-
-    // reverse reservation
-    Reservations = Reservations.reverse();
-
-    console.log(Reservations, Reservations.length);
-    let reservationData: { Reservations: Reservation[]; empName: string }[] = [];
-    if (Reservations) {
-      for (let i = 0; i < Reservations.length; i++) {
-        if (Reservations[i].ServiceNO) {
-          const service_no = Reservations[i].ServiceNO;
-          console.log(service_no);
-
-          await AppDataSource.manager
-            .find(Employee, {
-              where: { service_number: service_no },
-            })
-            .then((response) => {
-              console.log(response[0].name);
-              reservationData.push({
-                Reservations: Reservations,
-                empName: response[0].name,
-              });
-            })
-            .catch((err) => console.log(err));
-        }
       }
-    }
-    res.status(200).json(reservationData);
+    });
+    res.status(200).json(reservation);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
@@ -463,41 +436,26 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
 };
 
 export const getPastReservation = async (req: Request, res: Response) => {
+  // try {
+  //   //const currentDate = new Date();
+  //   const reservations = await AppDataSource.manager.find(Reservation, {
+  //     // where: {
+  //     //   CheckoutDate: LessThan(currentDate),
+  //     // },
+  //   res.status(200).json(reservations);
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  //   res.status(500).json({ error: "Internal Server Error!!" });
+  // }
   try {
     const currentDate = new Date();
-    let Reservations = await AppDataSource.manager.find(Reservation, {
-      where: {
+    const reservation = await AppDataSource.manager.find(Reservation, {
+    where: {
         CheckoutDate: LessThan(currentDate),
-      },
-    });
-
-    // reverse reservation
-    Reservations = Reservations
-
-    console.log(Reservations, Reservations.length);
-    let reservationData: { Reservations: Reservation[]; empName: string }[] = [];
-    if (Reservations) {
-      for (let i = 0; i < Reservations.length; i++) {
-        if (Reservations[i].ServiceNO) {
-          const service_no = Reservations[i].ServiceNO;
-          console.log(service_no);
-
-          await AppDataSource.manager
-            .find(Employee, {
-              where: { service_number: service_no },
-            })
-            .then((response) => {
-              console.log(response[0].name);
-              reservationData.push({
-                Reservations: Reservations,
-                empName: response[0].name,
-              });
-            })
-            .catch((err) => console.log(err));
-        }
       }
-    }
-    res.status(200).json(reservationData);
+    });
+    res.status(200).json(reservation);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
