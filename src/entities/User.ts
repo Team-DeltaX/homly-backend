@@ -36,6 +36,11 @@ export class HomlyUser extends BaseEntity {
   })
   blacklisted!:boolean;
 
+  @Column({
+    nullable:true,
+  })
+  lastLogin!: Date;
+
   @CreateDateColumn({
     nullable: false,
   })
@@ -84,5 +89,27 @@ export class UserOTPVerification extends BaseEntity {
   })
   expires_at!: Date;
 
+
+}
+
+@Entity()
+export class UserInteresed extends BaseEntity {
+  @PrimaryColumn()
+  service_number!: string;
+
+  @Column({
+    nullable: true,
+  })
+  interested_1!: string;
+
+  @Column({
+    nullable: true,
+  })
+  interested_2!: string;
+
+  @Column({
+    nullable: true,
+  })
+  interested_3!: string;
 
 }

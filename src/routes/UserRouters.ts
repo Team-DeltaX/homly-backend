@@ -12,4 +12,5 @@ homly_user.post("/forgetPassword",forgetPasswordDetails);
 homly_user.post("/forgetPassword/otp",otpVerification);
 homly_user.put("/forgetPassword/reset",resetPassword);
 
+
 export { homly_user };

@@ -3,11 +3,18 @@ import { Employee } from "./Empolyee"
 
 @Entity()
 export class Reservation extends BaseEntity {
-    @PrimaryGeneratedColumn()
+    Save() {
+    throw new Error("Method not implemented.");
+    }
+
+    @PrimaryColumn()
     ReservationId!: string;
 
     @Column()
-    ServiceNO!: String ;
+    ServiceNO!: string ;
+
+    @Column()
+    HolidayHome!: string ;
 
     @Column()
     CheckinDate!: Date ;
@@ -22,13 +29,10 @@ export class Reservation extends BaseEntity {
     NoOfChildren!: number;
 
     @Column()
-    NoOfSingleRooms!: number;
+    NoOfRooms!: number;
 
     @Column()
-    NoOfDoubleRooms!: number;
-
-    @Column()
-    NoOfTripleRooms!: number;
+    NoOfHalls!: number;
 
     @Column()
     Price!: number ;
