@@ -106,7 +106,7 @@ AppDataSource.initialize()
     app.use('/users', reg_users);
     app.use('/users', homly_review);
     app.use('/admin', admin_router);
-    app.use('/users/reservation', ReservationRouter);
+    app.use('/users', ReservationRouter);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
 

@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 import { HomlyAdmin } from "../entities/HomlyAdmin";
+import { Reservation } from "../entities/Reservation";
 import { Complaints } from "../entities/Complaint";
 import { HomlyUser } from "../entities/User";
 import { Request, Response } from "express";
@@ -22,6 +23,8 @@ import BlacklistNotifyEmail from "../template/BlacklistNotifyEmail";
 import BlacklistRemoveEmail from "../template/BlacklistRemoveEmail";
 import { BlackListHistory } from "../entities/BlackListHistory";
 import { ReadStream } from "typeorm/platform/PlatformTools";
+import { MoreThan } from "typeorm";
+import { LessThan } from "typeorm";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -417,6 +420,47 @@ export const checkuserexist=async(req:Request,res:Response)=>{
   
 }
 
+export const getOngoingReservation = async (req: Request, res: Response) => {
+  try {
+    const currentDate = new Date();
+    const reservation = await AppDataSource.manager.find(Reservation, {
+    where: {
+        CheckoutDate: MoreThan(currentDate),
+      }
+    });
+    res.status(200).json(reservation);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
+export const getPastReservation = async (req: Request, res: Response) => {
+  // try {
+  //   //const currentDate = new Date();
+  //   const reservations = await AppDataSource.manager.find(Reservation, {
+  //     // where: {
+  //     //   CheckoutDate: LessThan(currentDate),
+  //     // },
+  //   res.status(200).json(reservations);
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  //   res.status(500).json({ error: "Internal Server Error!!" });
+  // }
+  try {
+    const currentDate = new Date();
+    const reservation = await AppDataSource.manager.find(Reservation, {
+    where: {
+        CheckoutDate: LessThan(currentDate),
+      }
+    });
+    res.status(200).json(reservation);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
 
 export const removefromblacklist=async(req:Request,res:Response)=>{
   const serviceno=req.body.ServiceNo;
