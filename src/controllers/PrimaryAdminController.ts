@@ -23,6 +23,7 @@ import BlacklistRemoveEmail from "../template/BlacklistRemoveEmail";
 import { BlackListHistory } from "../entities/BlackListHistory";
 import { ReadStream } from "typeorm/platform/PlatformTools";
 import { HolidayHome } from "../entities/HolidayHome";
+import { Reservation } from "../entities/Reservation";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -585,4 +586,14 @@ export const HHcount =async(req:Request,res:Response)=>{
   }
 }
 
+export const Earning=async(req:Request,res:Response)=>{
+  try{
+    const sum = await Reservation.sum('Price',{});
+    res.status(200).json({ sum: sum });
+  }
+  catch(error){
+    console.log(error)
+    res.status(500).json({ message: 'Error in calculating earnings!' });
+  }
+}
 // export { router };

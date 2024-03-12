@@ -1,11 +1,12 @@
 import express from 'express'
-import { HHcount } from '../controllers/PrimaryAdminController';
+import { Earning, HHcount } from '../controllers/PrimaryAdminController';
 const PrimaryAdminDashboardRouter = express.Router();
 
 
 
 
 PrimaryAdminDashboardRouter.get('/auth/hhcount',HHcount)
+PrimaryAdminDashboardRouter.get('/auth/earning',Earning)
 
 
 
