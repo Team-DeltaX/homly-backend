@@ -31,6 +31,8 @@ import {
 
 import { Employee } from "../entities/Empolyee";
 
+import { HolidayHome } from "../entities/HolidayHome";
+
 import { Reservation } from "../entities/Reservation";
 
 // create token
@@ -822,7 +824,17 @@ const getUserPastReservation = async (req: Request, res: Response) => {
           CheckinDate: "ASC",
         },
       })
-      .then((reservations) => {
+      .then(async (reservations) => {
+        // let pastReservations = [];
+        // for (let i = 0; i < reservations.length; i++) {
+        //   await AppDataSource.manager
+        //   .find(HolidayHome, {
+        //     select: ["Address"],
+        //     where: {
+        //       // HolidayHomeId: reservations[i].
+        //     }
+        //   })
+        // }
         if (reservations) {
           res.status(200).json(reservations);
         } else {
