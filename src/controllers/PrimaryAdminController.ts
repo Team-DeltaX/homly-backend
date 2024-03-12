@@ -596,4 +596,16 @@ export const Earning=async(req:Request,res:Response)=>{
     res.status(500).json({ message: 'Error in calculating earnings!' });
   }
 }
+
+export const Active_InActive_HHcount=async(req:Request,res:Response)=>{
+  try{
+    const ac_count = await HolidayHome.countBy({ Status: "Active" })
+    const in_ac_count = await HolidayHome.countBy({ Status: "Inactive" })
+    res.status(200).json({Active:ac_count,Inactive:in_ac_count}  );
+
+  }catch(error){
+    res.status(500).json({ message: 'Error in calculating active home count!' });
+  }
+
+}
 // export { router };

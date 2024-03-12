@@ -1,5 +1,5 @@
 import express from 'express'
-import { Earning, HHcount } from '../controllers/PrimaryAdminController';
+import { Active_InActive_HHcount, Earning, HHcount } from '../controllers/PrimaryAdminController';
 const PrimaryAdminDashboardRouter = express.Router();
 
 
@@ -7,6 +7,8 @@ const PrimaryAdminDashboardRouter = express.Router();
 
 PrimaryAdminDashboardRouter.get('/auth/hhcount',HHcount)
 PrimaryAdminDashboardRouter.get('/auth/earning',Earning)
+PrimaryAdminDashboardRouter.get('/auth/hhstatus',Active_InActive_HHcount)
+
 
 
 
