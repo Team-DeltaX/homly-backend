@@ -1,5 +1,5 @@
 import express from "express";
-import {getSpecialReservation,AddSpecialResrvation} from "../controllers/SpecialReservaionController"
+import { getSpecialReservation, AddSpecialResrvation } from "../controllers/SpecialReservaionController"
 
 const SpecialReservationRouter = express.Router ();
 
