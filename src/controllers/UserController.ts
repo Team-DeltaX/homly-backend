@@ -64,8 +64,8 @@ const sendVerificationEmail = (
         service_number: serviceNo,
         verification_code: hashedVerificationCode,
         created_at: new Date(),
-        // expire after 1 minites
-        expires_at: new Date(Date.now() + 1 * 60000),
+        // expire after 10 minutes
+        expires_at: new Date(Date.now() + 10 * 60000),
       });
 
       userVerification
@@ -789,7 +789,7 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
       .find(Reservation, {
         where: {
           ServiceNO: serviceNo,
-          CheckinDate: MoreThanOrEqual(new Date()),
+          CheckoutDate: MoreThanOrEqual(new Date(Date.now() - 1 * 60000)),
         },
         order: {
           CheckinDate: "ASC",
@@ -818,10 +818,11 @@ const getUserPastReservation = async (req: Request, res: Response) => {
       .find(Reservation, {
         where: {
           ServiceNO: serviceNo,
-          CheckoutDate: LessThan(new Date()),
+          // get date before today + 1
+          CheckoutDate: LessThan(new Date(Date.now() - 1 * 60000)),
         },
         order: {
-          CheckinDate: "ASC",
+          CheckinDate: "DESC",
         },
       })
       .then(async (reservations) => {
