@@ -43,22 +43,6 @@ export class HolidayHome extends BaseEntity {
 
   @Column(
     {
-      type: "numeric",
-      default: 0
-    }
-  )
-  ServiceCharge!: number;
-
-  @Column(
-    {
-      type: "numeric",
-      default: 0
-    }
-  )
-  OtherCharge!: number;
-
-  @Column(
-    {
       default: 0
     }
   )
@@ -155,4 +139,38 @@ export class HolidayHome extends BaseEntity {
   })
   AdminNo!: string;
 
+}
+
+
+@Entity()
+export class RoomRentalSettings extends BaseEntity {
+
+  @PrimaryColumn()
+  RSId!: string;
+
+  @Column()
+  HolidayHomeId!: string;
+
+  @Column()
+  roomType!: string;
+
+  @Column()
+  rental!: string;
+
+}
+
+
+@Entity()
+export class RoomTypeSettings extends BaseEntity {
+  @PrimaryColumn()
+  RTId!: string;
+
+  @Column()
+  HolidayHomeId!: string;
+
+  @Column()
+  adults!: string;
+
+  @Column()
+  children!: string;
 }
