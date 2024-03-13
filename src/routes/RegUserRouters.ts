@@ -24,7 +24,7 @@ reg_users.put("/auth/password", updateUserPassword);
 reg_users.post("/auth/interested", addUserIntersted);
 reg_users.get("/auth/interested", getUserIntersted);
 reg_users.put("/auth/interested", updateUserIntersted);
-reg_users.get("/holidayhomes/sort/topRated", getTopRatedHolidayHomes);
+reg_users.get("/auth/holidayhomes/sort/topRated", getTopRatedHolidayHomes);
 reg_users.get("/auth/holidayhomes/sort", getHolidayHomesSorted);
 reg_users.get("/auth/userOngoingReservation", getUserOngoingReservation);
 reg_users.get("/auth/userPastReservation", getUserPastReservation);
