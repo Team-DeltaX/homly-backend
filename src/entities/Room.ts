@@ -27,7 +27,7 @@ export class Room extends BaseEntity {
     RoomType!: String;
 
     @Column()
-    NoOfBeds!: number;
+    FloorLevel!: String;
 
     @Column()
     NoOfAdults!: number;

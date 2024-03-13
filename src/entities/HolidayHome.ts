@@ -166,6 +166,9 @@ export class RoomTypeSettings extends BaseEntity {
   RTId!: string;
 
   @Column()
+  roomType!: string;
+
+  @Column()
   HolidayHomeId!: string;
 
   @Column()
