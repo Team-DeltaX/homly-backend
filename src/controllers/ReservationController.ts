@@ -53,7 +53,10 @@ const AddResrvation = async (req: Request, res: Response) => {
     NoOfChildren,
     NoOfRooms,
     NoOfHalls,
+    RoomPrice,
+    HallPrice,
     Price,
+    IsPaid,
   } = req.body;
 
   const ServiceNO = req.cookies.serviceNo;
@@ -74,7 +77,10 @@ const AddResrvation = async (req: Request, res: Response) => {
           NoOfChildren,
           NoOfRooms,
           NoOfHalls,
+          RoomPrice,
+          HallPrice,
           Price,
+          IsPaid,
         },
       ])
       .execute();
@@ -89,7 +95,7 @@ const AddResrvation = async (req: Request, res: Response) => {
 const getHolidayHomeNames = async (req: Request, res: Response) => {
   try {
     const holidayHomes = await AppDataSource.manager.find(HolidayHome);
-    const holidayHomeNames = holidayHomes.map(home => home.Name);
+    const holidayHomeNames = holidayHomes.map(home => ({ id: home.HolidayHomeId, name: home.Name }));
     res.status(200).json(holidayHomeNames);
   } catch (error) {
     console.log(`error is ${error}`);

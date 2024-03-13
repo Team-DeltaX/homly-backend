@@ -11,6 +11,9 @@ dotenv.config();
 // import jwt
 import jwt from "jsonwebtoken";
 
+// import less than equal from typeORM
+import { LessThan, MoreThanOrEqual } from "typeorm";
+
 // import html email template
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -27,6 +30,10 @@ import {
 } from "../entities/User";
 
 import { Employee } from "../entities/Empolyee";
+
+import { HolidayHome } from "../entities/HolidayHome";
+
+import { Reservation } from "../entities/Reservation";
 
 // create token
 const maxAge = 60 * 60;
@@ -57,8 +64,8 @@ const sendVerificationEmail = (
         service_number: serviceNo,
         verification_code: hashedVerificationCode,
         created_at: new Date(),
-        // expire after 1 minites
-        expires_at: new Date(Date.now() + 1 * 60000),
+        // expire after 10 minutes
+        expires_at: new Date(Date.now() + 10 * 60000),
       });
 
       userVerification
@@ -152,9 +159,7 @@ const userRegistration = async (req: Request, res: Response) => {
       }
     })
     .catch((err) => {
-      res
-        .status(202)
-        .json({ message: "err Your are not an employee", success: false });
+      res.status(202).json({ message: "err ", success: false });
     });
 
   // await AppDataSource.manager
@@ -696,7 +701,7 @@ const addUserIntersted = async (req: Request, res: Response) => {
   console.log(serviceNo, fac1, fac2, fac3);
 };
 
-const changeFacilityNameReturn = (facility:string) => {
+const changeFacilityNameReturn = (facility: string) => {
   switch (facility) {
     case "food_rating":
       return "food";
@@ -748,14 +753,13 @@ const updateUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
   let { fac1, fac2, fac3 } = req.body;
 
-  console.log(fac1, fac2, fac3)
+  console.log(fac1, fac2, fac3);
 
-  try{
-
+  try {
     fac1 = changeFacilityName(fac1);
     fac2 = changeFacilityName(fac2);
     fac3 = changeFacilityName(fac3);
-  
+
     // update table
     if (serviceNo) {
       await AppDataSource.manager.update(
@@ -767,14 +771,83 @@ const updateUserIntersted = async (req: Request, res: Response) => {
           interested_3: fac3,
         }
       );
-      res
-        .status(200)
-        .json({ message: "Successfully update your insterested", success: true });
+      res.status(200).json({
+        message: "Successfully update your insterested",
+        success: true,
+      });
     }
-  }catch(err:any){
+  } catch (err: any) {
     res.status(404).json({ message: "Error", success: false });
   }
+};
 
+const getUserOngoingReservation = async (req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+
+  try {
+    await AppDataSource.manager
+      .find(Reservation, {
+        where: {
+          ServiceNO: serviceNo,
+          CheckoutDate: MoreThanOrEqual(new Date(Date.now() - 1 * 60000)),
+        },
+        order: {
+          CheckinDate: "ASC",
+        },
+      })
+      .then((reservations) => {
+        if (reservations) {
+          res.status(200).json(reservations);
+        } else {
+          res.status(200).json({ message: "no reservations" });
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ message: "Internal Server error" });
+      });
+  } catch (err: any) {
+    console.log(err);
+  }
+};
+
+const getUserPastReservation = async (req: Request, res: Response) => {
+  const serviceNo = req.cookies.serviceNo;
+
+  try {
+    await AppDataSource.manager
+      .find(Reservation, {
+        where: {
+          ServiceNO: serviceNo,
+          // get date before today + 1
+          CheckoutDate: LessThan(new Date(Date.now() - 1 * 60000)),
+        },
+        order: {
+          CheckinDate: "DESC",
+        },
+      })
+      .then(async (reservations) => {
+        // let pastReservations = [];
+        // for (let i = 0; i < reservations.length; i++) {
+        //   await AppDataSource.manager
+        //   .find(HolidayHome, {
+        //     select: ["Address"],
+        //     where: {
+        //       // HolidayHomeId: reservations[i].
+        //     }
+        //   })
+        // }
+        if (reservations) {
+          res.status(200).json(reservations);
+        } else {
+          res.status(200).json({ message: "no reservations" });
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ message: "Internal Server error" });
+      });
+  } catch (err: any) {
+    console.log(err);
+  }
 };
 
 export {
@@ -791,5 +864,7 @@ export {
   updateUserPassword,
   addUserIntersted,
   getUserIntersted,
-  updateUserIntersted
+  updateUserIntersted,
+  getUserOngoingReservation,
+  getUserPastReservation,
 };
