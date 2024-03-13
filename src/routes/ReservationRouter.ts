@@ -1,5 +1,5 @@
 import express from "express";
-import {getReservation,AddResrvation,getHolidayHomeNames, getRooms, AddComplaint} from "../controllers/ReservationController"
+import {getReservation, AddResrvation, getHolidayHomeNames, getRooms, AddComplaint} from "../controllers/ReservationController"
 import {getOngoingReservation, getPastReservation} from "../controllers/PrimaryAdminController";
 
 const ReservationRouter = express.Router ();

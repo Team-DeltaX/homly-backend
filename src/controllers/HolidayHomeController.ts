@@ -25,7 +25,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
             {
                 where:
                 {
-                    Status: 'active',
+                    Status: 'Active',
                     Approved: true
                 }
             })
@@ -35,7 +35,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
             {
                 where:
                 {
-                    Status: 'inactive',
+                    Status: 'Inactive',
                     Approved: true
                 }
             })
@@ -48,24 +48,6 @@ const getHolidayHomes = async (req: Request, res: Response) => {
 
 const getHolidayHomesDetails = async (req: Request, res: Response) => {
     const { HolidayHomeId } = req.params;
-
-    // const holidayHome = await AppDataSource.manager
-    //     .findOneBy(HolidayHome, { HolidayHomeId });
-
-    // const contactNo = await AppDataSource.manager
-    //     .findBy(ContactNo, { HolidayHomeId });
-
-    // const units = await AppDataSource.manager
-    //     .findBy(Unit, { HolidayHomeId });
-
-    // const room = await AppDataSource.manager
-    //     .findBy(Room, { HolidayHomeId });
-
-    // const hall = await AppDataSource.manager
-    //     .findBy(Hall, { HolidayHomeId });
-
-    // const caretaker = await AppDataSource.manager
-    //     .findBy(CareTaker, { HolidayHomeId });
 
     const holidayHome = await AppDataSource.manager.find(HolidayHome, {
         where: { HolidayHomeId }
@@ -125,13 +107,14 @@ const getRoomRental = async (req: Request, res: Response) => {
 
 const createHolidayHome = async (req: Request, res: Response) => {
     try {
-        const { allValues } = req.body;
+
+        const allValues = req.body;
         console.log(allValues);
         // console.log(allValues.holidayHomeDetails);
         // console.log(allValues.images);
         // console.log(allValues.caretaker1);
         // console.log(allValues.caretaker2);
-        // console.log(allValues.homeBreakDown);
+        // console.log("hello", allValues.homeBreakDown);
         // console.log(allValues.roomArray);
         // console.log(allValues.unitArray);
         // console.log(allValues.hallArray);
@@ -147,20 +130,20 @@ const createHolidayHome = async (req: Request, res: Response) => {
             Description: allValues.holidayHomeDetails.description,
             Category: allValues.holidayHomeDetails.category,
             Status: allValues.holidayHomeDetails.status,
-            TotalRental: allValues.homeBreakDown.totalRental,
-            ServiceCharge: allValues.homeBreakDown.serviceCharges,
-            OtherCharge: allValues.homeBreakDown.otherCharges,
+            TotalRental: allValues.homeBreakDown.bdValue.totalRental,
+            ServiceCharge: allValues.homeBreakDown.bdValue.serviceCharges,
+            OtherCharge: allValues.homeBreakDown.bdValue.otherCharges,
             MaxNoOfAdults: allValues.homeBreakDown.adultsCount,
             MaxNoOfChildren: allValues.homeBreakDown.childCount,
             Approved: false,
-            Gym: allValues.homeBreakDown.gym,
-            Kitchen: allValues.homeBreakDown.kitchen,
-            Park: allValues.homeBreakDown.park,
-            Wifi: allValues.homeBreakDown.wifi,
-            Facilities: allValues.homeBreakDown.facilities,
+            Gym: allValues.homeBreakDown.bdValue.gym,
+            Kitchen: allValues.homeBreakDown.bdValue.kitchen,
+            Park: allValues.homeBreakDown.bdValue.park,
+            Wifi: allValues.homeBreakDown.bdValue.wifi,
+            Facilities: allValues.homeBreakDown.bdValue.facilities,
             District: allValues.holidayHomeDetails.district,
-            Pool: allValues.homeBreakDown.pool,
-            Bar: allValues.homeBreakDown.bar,
+            Pool: allValues.homeBreakDown.bdValue.pool,
+            Bar: allValues.homeBreakDown.bdValue.bar,
             AdminNo: "1",
 
         })
@@ -185,21 +168,21 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
         await careTaker1.save();
 
-        if (allValues.caretaker2.caretakerName !== "") {
-            const careTaker2 = CareTaker.create({
-                CareTakerId: careatakerId,
-                Name: allValues.caretaker2.caretakerName,
-                ContactNo: allValues.caretaker2.caretakerContactNo,
-                Status: allValues.caretaker2.caretakerStatus,
-                Address: allValues.caretaker2.caretakerAddress,
-                Description: allValues.caretaker2.caretakerDescription,
-                HolidayHomeId: holidayHomeId,
-                // HolidayHomeId: holidayHome.HolidayHomeId
+        // if (allValues.caretaker2.caretakerName !== "") {
+        //     const careTaker2 = CareTaker.create({
+        //         CareTakerId: careatakerId,
+        //         Name: allValues.caretaker2.caretakerName,
+        //         ContactNo: allValues.caretaker2.caretakerContactNo,
+        //         Status: allValues.caretaker2.caretakerStatus,
+        //         Address: allValues.caretaker2.caretakerAddress,
+        //         Description: allValues.caretaker2.caretakerDescription,
+        //         HolidayHomeId: holidayHomeId,
+        //         // HolidayHomeId: holidayHome.HolidayHomeId
 
-            })
+        //     })
 
-            await careTaker2.save();
-        }
+        //     await careTaker2.save();
+        // }
 
         const contactNo1 = ContactNo.create({
             ContactNo: allValues.holidayHomeDetails.contactNo1,
@@ -221,20 +204,20 @@ const createHolidayHome = async (req: Request, res: Response) => {
             await contactNo2.save();
         }
 
-        // const imageId = "img" + Date.now().toString();
+        // // const imageId = "img" + Date.now().toString();
 
-        // const image = Image.create({
+        // // const image = Image.create({
 
-        //     ImageId: imageId,
-        //     MainImage: allValues.images.mainImage,
-        //     Image1: allValues.images.image1,
-        //     Image2: allValues.images.image2,
-        //     Image3: allValues.images.image3,
-        //     // HolidayHomeId: holidayHome.HolidayHomeId
-        //     HolidayHomeId: holidayHomeId,
-        // })
+        // //     ImageId: imageId,
+        // //     MainImage: allValues.images.mainImage,
+        // //     Image1: allValues.images.image1,
+        // //     Image2: allValues.images.image2,
+        // //     Image3: allValues.images.image3,
+        // //     // HolidayHomeId: holidayHome.HolidayHomeId
+        // //     HolidayHomeId: holidayHomeId,
+        // // })
 
-        // await image.save();
+        // // await image.save();
 
 
 

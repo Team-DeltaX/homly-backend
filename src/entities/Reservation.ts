@@ -35,5 +35,20 @@ export class Reservation extends BaseEntity {
     NoOfHalls!: number;
 
     @Column()
+    RoomPrice!: number ;
+
+    @Column()
+    HallPrice!: number ;
+
+    @Column()
     Price!: number ;
+
+    @Column()
+    IsPaid!: boolean;
+
+    @CreateDateColumn()
+    createdAt!: Date;
+  
+    @UpdateDateColumn()
+    updatedAt!: Date;
 }

@@ -53,7 +53,10 @@ const AddResrvation = async (req: Request, res: Response) => {
     NoOfChildren,
     NoOfRooms,
     NoOfHalls,
+    RoomPrice,
+    HallPrice,
     Price,
+    IsPaid,
   } = req.body;
 
   const ServiceNO = req.cookies.serviceNo;
@@ -74,7 +77,10 @@ const AddResrvation = async (req: Request, res: Response) => {
           NoOfChildren,
           NoOfRooms,
           NoOfHalls,
+          RoomPrice,
+          HallPrice,
           Price,
+          IsPaid,
         },
       ])
       .execute();
@@ -89,7 +95,7 @@ const AddResrvation = async (req: Request, res: Response) => {
 const getHolidayHomeNames = async (req: Request, res: Response) => {
   try {
     const holidayHomes = await AppDataSource.manager.find(HolidayHome);
-    const holidayHomeNames = holidayHomes.map(home => home.Name);
+    const holidayHomeNames = holidayHomes.map(home => ({ id: home.HolidayHomeId, name: home.Name }));
     res.status(200).json(holidayHomeNames);
   } catch (error) {
     console.log(`error is ${error}`);
@@ -108,41 +114,51 @@ const getRooms = async (req: Request, res: Response) => {
 };
 
 const getReservation = async (req: Request, res: Response) => {
-  try {
-    let Reservations = await AppDataSource.manager.find(Reservation);
+//   try {
+//     let Reservations = await AppDataSource.manager.find(Reservation);
 
-    // reverse reservation
-    Reservations = Reservations.reverse();
+//     // reverse reservation
+//     Reservations = Reservations.reverse();
 
-    console.log(Reservations, Reservations.length);
-    let reservationData: { Reservations: Reservation[]; empName: string }[] =
-      [];
-    if (Reservations) {
-      for (let i = 0; i < Reservations.length; i++) {
-        if (Reservations[i].ServiceNO) {
-          const service_no = Reservations[i].ServiceNO;
-          console.log(service_no);
+//     console.log(Reservations, Reservations.length);
+//     let reservationData: { Reservations: Reservation[]; empName: string }[] =
+//       [];
+//     if (Reservations) {
+//       for (let i = 0; i < Reservations.length; i++) {
+//         if (Reservations[i].ServiceNO) {
+//           const service_no = Reservations[i].ServiceNO;
+//           console.log(service_no);
 
-          await AppDataSource.manager
-            .find(Employee, {
-              where: { service_number: service_no },
-            })
-            .then((response) => {
-              console.log(response[0].name);
-              reservationData.push({
-                Reservations: Reservations,
-                empName: response[0].name,
-              });
-            })
-            .catch((err) => console.log(err));
-        }
-      }
-    }
-    res.status(200).json(reservationData);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal Server Error!!" });
-  }
+//           await AppDataSource.manager
+//             .find(Employee, {
+//               where: { service_number: service_no },
+//             })
+//             .then((response) => {
+//               console.log(response[0].name);
+//               reservationData.push({
+//                 Reservations: Reservations,
+//                 empName: response[0].name,
+//               });
+//             })
+//             .catch((err) => console.log(err));
+//         }
+//       }
+//     }
+//     res.status(200).json(reservationData);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ error: "Internal Server Error!!" });
+//   }
+// };
+try {
+    
+    
+  const reservation = await AppDataSource.manager.find(Reservation);
+  res.status(200).json(reservation);
+} catch (error) {
+  console.log(error);
+  res.status(500).json({ error: "Internal Server Error!!" });
+}
 };
 
 // const getReciptName = async (req: Request, res: Response) => {
