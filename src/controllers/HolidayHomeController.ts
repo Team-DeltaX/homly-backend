@@ -314,7 +314,6 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
             const unit = Unit.create({
                 unitCode: allValues.unitArray[i].unitCode,
-                unitRental: allValues.unitArray[i].unitRental,
                 unitAc: allValues.unitArray[i].unitAc,
                 floorLevel: allValues.unitArray[i].floorLevel,
                 unitRemark: allValues.unitArray[i].unitRemark,

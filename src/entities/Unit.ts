@@ -8,10 +8,6 @@ export class Unit extends BaseEntity {
     @PrimaryColumn()
     unitCode!: String;
 
-    @Column({
-        type: "numeric"
-    })
-    unitRental!: number;
 
     @Column()
     unitAc!: String;
