@@ -795,9 +795,27 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
           CheckinDate: "ASC",
         },
       })
-      .then((reservations) => {
+      .then(async (reservations) => {
         if (reservations) {
-          res.status(200).json(reservations);
+          const ongoingReservations: any[] = [];
+          for (let i = 0; i < reservations.length; i++) {
+            await AppDataSource.manager
+              .find(HolidayHome, {
+                select: ["Name", "Address"],
+                where: {
+                  HolidayHomeId: reservations[i].HolidayHome,
+                },
+              })
+              .then((holidayHome) => {
+                const expireDate = new Date(reservations[i].updatedAt.getTime() + (3 * 24 * 60 * 60 * 1000));
+                ongoingReservations.push({
+                  reservation: reservations[i],
+                  holidayHome: holidayHome,
+                  expireDate: expireDate,
+                });
+              });
+          }
+          res.status(200).json(ongoingReservations);
         } else {
           res.status(200).json({ message: "no reservations" });
         }
@@ -844,15 +862,11 @@ const getUserPastReservation = async (req: Request, res: Response) => {
                 });
               });
           }
-          res.status(200).json(pastReservations  );
+          res.status(200).json(pastReservations);
+        } else {
+          res.status(200).json({ message: "no reservations" });
         }
-        res.status(200).json({ message: "no reservations" });
 
-        // if (reservations) {
-        //   res.status(200).json(reservations);
-        // } else {
-        //   res.status(200).json({ message: "no reservations" });
-        // }
       })
       .catch((err) => {
         res.status(500).json({ message: "Internal Server error" });
