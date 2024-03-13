@@ -26,7 +26,7 @@ import { ReadStream } from "typeorm/platform/PlatformTools";
 import { MoreThan } from "typeorm";
 import { LessThan } from "typeorm";
 import { HolidayHome } from "../entities/HolidayHome";
-import { Reservation } from "../entities/Reservation";
+// import { Reservation } from "../entities/Reservation";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
