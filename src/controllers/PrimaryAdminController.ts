@@ -632,8 +632,8 @@ export const HHcount =async(req:Request,res:Response)=>{
 
 export const Earning=async(req:Request,res:Response)=>{
   try{
-    const sum = await Reservation.sum('Price',{});
-    console.log(sum)
+    const sum = await Reservation.sum('Price',{IsPaid:true});
+    // console.log(sum)
     res.status(200).json({ sum: sum });
     
   }
@@ -654,4 +654,5 @@ export const Active_InActive_HHcount=async(req:Request,res:Response)=>{
   }
 
 }
+
 // export { router };
