@@ -827,21 +827,31 @@ const getUserPastReservation = async (req: Request, res: Response) => {
         },
       })
       .then(async (reservations) => {
-        // let pastReservations = [];
-        // for (let i = 0; i < reservations.length; i++) {
-        //   await AppDataSource.manager
-        //   .find(HolidayHome, {
-        //     select: ["Address"],
-        //     where: {
-        //       // HolidayHomeId: reservations[i].
-        //     }
-        //   })
-        // }
+        const pastReservations: any[] = [];
         if (reservations) {
-          res.status(200).json(reservations);
-        } else {
-          res.status(200).json({ message: "no reservations" });
+          for (let i = 0; i < reservations.length; i++) {
+            await AppDataSource.manager
+              .find(HolidayHome, {
+                select: ["Name", "Address"],
+                where: {
+                  HolidayHomeId: reservations[i].HolidayHome,
+                },
+              })
+              .then((holidayHome) => {
+                pastReservations.push({
+                  reservation: reservations[i],
+                  holidayHome: holidayHome,
+                });
+              });
+          }
+          res.status(200).json(pastReservations  );
         }
+
+        // if (reservations) {
+        //   res.status(200).json(reservations);
+        // } else {
+        //   res.status(200).json({ message: "no reservations" });
+        // }
       })
       .catch((err) => {
         res.status(500).json({ message: "Internal Server error" });
