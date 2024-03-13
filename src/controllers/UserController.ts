@@ -846,6 +846,7 @@ const getUserPastReservation = async (req: Request, res: Response) => {
           }
           res.status(200).json(pastReservations  );
         }
+        res.status(200).json({ message: "no reservations" });
 
         // if (reservations) {
         //   res.status(200).json(reservations);
