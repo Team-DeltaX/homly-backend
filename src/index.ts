@@ -8,6 +8,8 @@ import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
 import { HolidayHome } from "./entities/HolidayHome";
+import { RoomRentalSettings } from "./entities/HolidayHome";
+import { RoomTypeSettings } from "./entities/HolidayHome";
 import { Image } from "./entities/Image";
 import { Unit } from "./entities/Unit";
 import { Room } from "./entities/Room";
@@ -77,7 +79,9 @@ export const AppDataSource = new DataSource({
     Rental,
     SpecailReservation,
     UserFeedback,
-    SelectedRooms
+    SelectedRooms,
+    RoomRentalSettings,
+    RoomTypeSettings,
   ],
 
   synchronize: true,
