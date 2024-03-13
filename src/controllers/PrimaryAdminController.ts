@@ -26,6 +26,7 @@ import { ReadStream } from "typeorm/platform/PlatformTools";
 import { MoreThan } from "typeorm";
 import { LessThan } from "typeorm";
 import { HolidayHome } from "../entities/HolidayHome";
+import { Hall } from "../entities/Hall";
 // import { Reservation } from "../entities/Reservation";
 dotenv.config();
 
@@ -654,7 +655,7 @@ export const Active_InActive_HHcount=async(req:Request,res:Response)=>{
   }
 
 }
-export const getBookings=async(req:Request,res:Response)=>{
+export const getBookingscounts=async(req:Request,res:Response)=>{
   try{
     const paid_count = await Reservation.countBy({IsPaid:true} )
     const unpaid_count = await Reservation.countBy({IsPaid:false} )
@@ -665,5 +666,19 @@ export const getBookings=async(req:Request,res:Response)=>{
   }catch(error){
     res.status(500).json({ message: 'Error in getting bookings!' });
   }
+}
+
+export const gethallcount=async(req:Request,res:Response)=>{
+  try{
+    const hall_count = await Hall.countBy({} )
+    res.status(200).json({count:hall_count}  );
+
+
+
+  }
+  catch(error){
+    res.status(500).json({ message: 'Error in getting hall count!' });
+  }
+
 }
 // export { router };
