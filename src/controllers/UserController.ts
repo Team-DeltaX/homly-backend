@@ -820,6 +820,7 @@ const getUserPastReservation = async (req: Request, res: Response) => {
           ServiceNO: serviceNo,
           // get date before today + 1
           CheckoutDate: LessThan(new Date(Date.now() - 1 * 60000)),
+          IsPaid: true,
         },
         order: {
           CheckinDate: "DESC",
