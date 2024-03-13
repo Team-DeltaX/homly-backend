@@ -693,3 +693,13 @@ export const Roomincome = async (req: Request, res: Response) => {
   }
 };
 
+// export const get_income_in_date=async()=>{
+//   try{
+//     const date = new Date("2024-03-13"); // Convert string to Date
+//     const sum = await Reservation.sum("Price", { createdAt: date });
+//     return sum; // Return the sum
+//   }
+//   catch(error){
+//     console.log(error)
+//   }
+// }
