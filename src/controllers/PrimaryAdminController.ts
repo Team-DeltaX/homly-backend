@@ -25,6 +25,10 @@ import { BlackListHistory } from "../entities/BlackListHistory";
 import { ReadStream } from "typeorm/platform/PlatformTools";
 import { MoreThan } from "typeorm";
 import { LessThan } from "typeorm";
+import { HolidayHome } from "../entities/HolidayHome";
+import { Hall } from "../entities/Hall";
+import { Room } from "../entities/Room";
+// import { Reservation } from "../entities/Reservation";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -43,10 +47,9 @@ transporter.verify(function (error, success) {
 });
 
 export const AddAdmin = async (req: Request, res: Response) => {
-  const count =await AppDataSource.manager.count(HomlyAdmin)
-  const AdminNo=`HomlyLocAdmin${count+1}`
+  const count = await AppDataSource.manager.count(HomlyAdmin);
+  const AdminNo = `HomlyLocAdmin${count + 1}`;
   const {
-   
     UserName,
 
     ContactNo,
@@ -55,8 +58,6 @@ export const AddAdmin = async (req: Request, res: Response) => {
     // Disabled,
     Sub,
   } = req.body;
-
-
 
   const Role = "LocationAdmin";
 
@@ -71,7 +72,6 @@ export const AddAdmin = async (req: Request, res: Response) => {
   bcrypt
     .hash(Password, saltRound)
     .then((hashedPassword) => {
-
       const addadmin = HomlyAdmin.create({
         AdminNo,
         UserName,
@@ -155,8 +155,7 @@ export const getall = async (req: Request, res: Response) => {
   const admins = await AppDataSource.manager.find(HomlyAdmin);
   try {
     const admins = await AppDataSource.manager.find(HomlyAdmin);
-   
-   
+
     res.status(200).json(admins);
   } catch (error) {
     console.log(error);
@@ -262,8 +261,6 @@ export const sendMail = (req: Request, res: Response) => {
 export const getcomplaints = async (req: Request, res: Response) => {
   // const admins = await AppDataSource.manager.find(HomlyAdmin);
   try {
-    
-    
     const complaints = await AppDataSource.manager.find(Complaints);
     res.status(200).json(complaints);
   } catch (error) {
@@ -336,59 +333,60 @@ export const getprevcomplaints = async (req: Request, res: Response) => {
 };
 
 export const addtoblacklist = async (req: Request, res: Response) => {
-  try{
-  const serviceno = req.body.ServiceNo;
-  const reason = req.body.Reason;
-  console.log(`service no is ${serviceno}`)
-  console.log(`ressonis ${reason}`)
+  try {
+    const serviceno = req.body.ServiceNo;
+    const reason = req.body.Reason;
+    console.log(`service no is ${serviceno}`);
+    console.log(`ressonis ${reason}`);
 
-  await HomlyUser.update({service_number:serviceno}, { blacklisted:true})
+    await HomlyUser.update(
+      { service_number: serviceno },
+      { blacklisted: true }
+    );
 
+    //  const UserDetails = await HomlyUser.findOne({
+    //     where: {
+    //       service_number: serviceno,
+    //     },
+    //   });
+    //   console.log(UserDetails)
+    //   const Email = String(UserDetails?.email);
 
-
-//  const UserDetails = await HomlyUser.findOne({
-//     where: {
-//       service_number: serviceno,
-//     },
-//   });
-//   console.log(UserDetails)
-//   const Email = String(UserDetails?.email);
-
-  const UserDetails= await AppDataSource
-    .getRepository(HomlyUser)
-    .createQueryBuilder("user")
-    .where( {  service_number: serviceno})
-    .getOne()
-    console.log(UserDetails)
+    const UserDetails = await AppDataSource.getRepository(HomlyUser)
+      .createQueryBuilder("user")
+      .where({ service_number: serviceno })
+      .getOne();
+    console.log(UserDetails);
     const Email = String(UserDetails?.email);
-  
 
-  const addtoblacklist = BlackListedUser.create({
-    BlackListReason: reason,
-    ServiceNo: serviceno,
-  });
-  addtoblacklist
-    .save()
-    .then(() => {
-      sentEmail(
-        Email,
-        "You Are BlackListed From Homly",
-        BlacklistNotifyEmail()
-      );
-      res.status(200).json({ message: "User blacklisted successfully" });
-
-      // send email
-    })
-    .catch((error: Error) => {
-      console.log(`error is ${error}`);
-      res.status(500).json({ message: "Internal Server Error in Blacklist !(adding)" });
+    const addtoblacklist = BlackListedUser.create({
+      BlackListReason: reason,
+      ServiceNo: serviceno,
     });
-  }catch(error){
-    console.log(`error in  blacklisting (get details or update homly user table  ) ${error}`)
+    addtoblacklist
+      .save()
+      .then(() => {
+        sentEmail(
+          Email,
+          "You Are BlackListed From Homly",
+          BlacklistNotifyEmail()
+        );
+        res.status(200).json({ message: "User blacklisted successfully" });
+
+        // send email
+      })
+      .catch((error: Error) => {
+        console.log(`error is ${error}`);
+        res
+          .status(500)
+          .json({ message: "Internal Server Error in Blacklist !(adding)" });
+      });
+  } catch (error) {
+    console.log(
+      `error in  blacklisting (get details or update homly user table  ) ${error}`
+    );
   }
 };
-
-
 
 export const getblacklistedusers = async (req: Request, res: Response) => {
   // const admins = await AppDataSource.manager.find(HomlyAdmin);
@@ -397,36 +395,39 @@ export const getblacklistedusers = async (req: Request, res: Response) => {
     res.status(200).json(BlackListedUsers);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Internal Server Error!! in getting all blacklisted users " });
+    res
+      .status(500)
+      .json({
+        error: "Internal Server Error!! in getting all blacklisted users ",
+      });
   }
 };
-export const checkuserexist=async(req:Request,res:Response)=>{
-  try{const serviceno=req.params.serviceno;
+export const checkuserexist = async (req: Request, res: Response) => {
+  try {
+    const serviceno = req.params.serviceno;
     const count = await BlackListedUser.count({
       where: {
         ServiceNo: serviceno,
       },
     });
     // console.log(count)
-    if(count>0){ res.status(200).json({exist:true})
-  }else{
-    res.status(200).json({exist:false})
-}
-   
+    if (count > 0) {
+      res.status(200).json({ exist: true });
+    } else {
+      res.status(200).json({ exist: false });
     }
-    catch(error){
-      console.log('error in getting exist')
-    }
-  
-}
+  } catch (error) {
+    console.log("error in getting exist");
+  }
+};
 
 export const getOngoingReservation = async (req: Request, res: Response) => {
   try {
     const currentDate = new Date();
     const reservation = await AppDataSource.manager.find(Reservation, {
-    where: {
+      where: {
         CheckoutDate: MoreThan(currentDate),
-      }
+      },
     });
     res.status(200).json(reservation);
   } catch (error) {
@@ -451,9 +452,9 @@ export const getPastReservation = async (req: Request, res: Response) => {
   try {
     const currentDate = new Date();
     const reservation = await AppDataSource.manager.find(Reservation, {
-    where: {
+      where: {
         CheckoutDate: LessThan(currentDate),
-      }
+      },
     });
     res.status(200).json(reservation);
   } catch (error) {
@@ -462,73 +463,59 @@ export const getPastReservation = async (req: Request, res: Response) => {
   }
 };
 
-export const removefromblacklist=async(req:Request,res:Response)=>{
-  const serviceno=req.body.ServiceNo;
-  const Email=req.body.Email;
+export const removefromblacklist = async (req: Request, res: Response) => {
+  const serviceno = req.body.ServiceNo;
+  const Email = req.body.Email;
   // const Name =req.body.UserName;
 
-
-  try{
-    await BlackListedUser.delete({ ServiceNo: serviceno })
+  try {
+    await BlackListedUser.delete({ ServiceNo: serviceno });
     await AppDataSource.manager.update(
       HomlyUser,
       { service_number: serviceno },
-      { blacklisted: false });
+      { blacklisted: false }
+    );
 
-    sentEmail(Email,"Your Are Removed From BlackList",BlacklistRemoveEmail())  
+    sentEmail(Email, "Your Are Removed From BlackList", BlacklistRemoveEmail());
+  } catch (error) {
+    console.log(`error in removing from blacklist ${error}`);
   }
-  catch(error){
-    console.log(`error in removing from blacklist ${error}`)
-  }
-
-
-
-}
+};
 
 //functions related to remove from blacklist
 
-export const deletefromblacklisttable=async(req:Request,res:Response)=>{
-  const serviceno=req.body.ServiceNo;
-  try{
-    await BlackListedUser.delete({ ServiceNo: serviceno })
-    
-    res.status(200).json({message:'sucess fully removed from blacklist table'});
-  
+export const deletefromblacklisttable = async (req: Request, res: Response) => {
+  const serviceno = req.body.ServiceNo;
+  try {
+    await BlackListedUser.delete({ ServiceNo: serviceno });
 
-
-  }catch(error){
+    res
+      .status(200)
+      .json({ message: "sucess fully removed from blacklist table" });
+  } catch (error) {
     // console.log(`error in removing from blacklist ${error}`)
-    res.status(404).json({message:'error in removing from blacklist table'})
-    
-
+    res.status(404).json({ message: "error in removing from blacklist table" });
   }
+};
 
-}
-
-
-export const updatehomlyuser=async(req:Request,res:Response)=>{
-  const serviceno=req.body.ServiceNo;
-  const Email=req.body.Email;
-  try{
+export const updatehomlyuser = async (req: Request, res: Response) => {
+  const serviceno = req.body.ServiceNo;
+  const Email = req.body.Email;
+  try {
     await AppDataSource.manager.update(
       HomlyUser,
       { service_number: serviceno },
-      { blacklisted: false });
+      { blacklisted: false }
+    );
 
-    sentEmail(Email,"Your Are Removed From BlackList",BlacklistRemoveEmail())  
-    res.status(200).json({message:'sucessfully updated as unblacklisted'})
-    
-    
-  }catch(error){
-    console.log(`error in updating user unblacklist false ${error}`)
-    res.status(404).json({message:'error in updaing unblacklisted'})
-
+    sentEmail(Email, "Your Are Removed From BlackList", BlacklistRemoveEmail());
+    res.status(200).json({ message: "sucessfully updated as unblacklisted" });
+  } catch (error) {
+    console.log(`error in updating user unblacklist false ${error}`);
+    res.status(404).json({ message: "error in updaing unblacklisted" });
   }
-
-  
-}
+};
 export const addtoblacklisthistory = async (req: Request, res: Response) => {
-  
   const serviceno = req.body.ServiceNo;
   const addreson = req.body.AddReason;
   const Removereason = req.body.RemoveReason;
@@ -543,28 +530,29 @@ export const addtoblacklisthistory = async (req: Request, res: Response) => {
       RemoveReason: Removereason,
     });
     await addtoblacklisthistory.save();
-    
-    res.status(200).json({message:'sucessfully added to blacklis history table'})
-  
-    
+
+    res
+      .status(200)
+      .json({ message: "sucessfully added to blacklis history table" });
   } catch (error) {
-    res.status(404).json({ message: 'error in adding to blacklis history table' });
+    res
+      .status(404)
+      .json({ message: "error in adding to blacklis history table" });
   }
 };
 
-
-export const getblacklistedhistory=async(req:Request,res:Response)=>{
-  try{
-    const BlackListedHistory = await AppDataSource.manager.find(BlackListHistory);
+export const getblacklistedhistory = async (req: Request, res: Response) => {
+  try {
+    const BlackListedHistory = await AppDataSource.manager.find(
+      BlackListHistory
+    );
     res.status(200).json(BlackListedHistory);
-  }catch(error){
-    res.status(404).json({ message: 'error in getting blacklis history table' });
+  } catch (error) {
+    res
+      .status(404)
+      .json({ message: "error in getting blacklis history table" });
   }
-}
-
-
-export { router };
-
+};
 
 export const markedcomplaints = async (req: Request, res: Response) => {
   try {
@@ -575,8 +563,133 @@ export const markedcomplaints = async (req: Request, res: Response) => {
       { Marked: true }
     );
 
-    res.status(200).json({ message: 'Successfully marked the complaint' });
+    res.status(200).json({ message: "Successfully marked the complaint" });
   } catch (error) {
-    res.status(404).json({ message: 'Error in marking the complaint as viewed!' });
+    res
+      .status(404)
+      .json({ message: "Error in marking the complaint as viewed!" });
   }
 };
+
+export const getNotApprovedHomes = async (req: Request, res: Response) => {
+  try {
+    const homes = await AppDataSource.manager.find(HolidayHome, {
+      where: {
+        Approved: false,
+      },
+    });
+
+    res.status(200).json(homes);
+  } catch (error) {
+    res.status(404).json({ message: "Error in getting not approved homes!" });
+  }
+};
+
+export const approveHH = async (req: Request, res: Response) => {
+  const id = req.body.id;
+  try {
+    await HolidayHome.update(id, { Approved: true });
+    res.status(200).json({ message: "Successfully approved the home" });
+  } catch (error) {
+    res.status(404).json({ message: "Error in approving the home!" });
+  }
+};
+
+export const rejectHH = async (req: Request, res: Response) => {
+  const id = req.body.id;
+  try {
+    await HolidayHome.delete({ HolidayHomeId: id });
+    res
+      .status(200)
+      .json({
+        message: "Successfully rejected the home(deleted from HH table)",
+      });
+  } catch (error) {
+    res.status(404).json({ message: "Error in rejecting the home!" });
+  }
+};
+
+export const HHcount = async (req: Request, res: Response) => {
+  try {
+    const count = await HolidayHome.count();
+    res.status(200).json({ count: count });
+  } catch (error) {
+    res.status(404).json({ message: "Error in getting home count!" });
+  }
+};
+
+export const Earning = async (req: Request, res: Response) => {
+  try {
+    const sum = await Reservation.sum("Price", { IsPaid: true });
+    // console.log(sum)
+    res.status(200).json({ sum: sum });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error in calculating earnings!" });
+  }
+};
+
+export const Active_InActive_HHcount = async (req: Request, res: Response) => {
+  try {
+    const ac_count = await HolidayHome.countBy({ Status: "Active" });
+    const in_ac_count = await HolidayHome.countBy({ Status: "Inactive" });
+    res.status(200).json({ Active: ac_count, Inactive: in_ac_count });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error in calculating active home count!" });
+  }
+};
+export const getBookingscounts = async (req: Request, res: Response) => {
+  try {
+    const paid_count = await Reservation.countBy({ IsPaid: true });
+    const unpaid_count = await Reservation.countBy({ IsPaid: false });
+    res.status(200).json({ Paid: paid_count, Unpaid: unpaid_count });
+  } catch (error) {
+    res.status(500).json({ message: "Error in getting bookings!" });
+  }
+};
+
+export const gethallcount = async (req: Request, res: Response) => {
+  try {
+    const hall_count = await Hall.countBy({});
+    res.status(200).json({ count: hall_count });
+  } catch (error) {
+    res.status(500).json({ message: "Error in getting hall count!" });
+  }
+};
+
+
+export const getroomcount = async (req: Request, res: Response) => {
+  try {
+    const room_count = await Room.countBy({});
+    res.status(200).json({ count: room_count });
+  } catch (error) {
+    res.status(500).json({ message: "Error in getting hall count!" });
+  }
+};
+
+
+export const Hallincome = async (req: Request, res: Response) => {
+  try {
+    const sum = await Reservation.sum("HallPrice", { IsPaid: true });
+    // console.log(sum)
+    res.status(200).json({ hallincome: sum });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error in calculating hall income!" });
+  }
+};
+
+
+export const Roomincome = async (req: Request, res: Response) => {
+  try {
+    const sum = await Reservation.sum("RoomPrice", { IsPaid: true });
+    // console.log(sum)
+    res.status(200).json({ roomincome: sum });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error in room income!" });
+  }
+};
+
