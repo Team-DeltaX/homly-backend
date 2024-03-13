@@ -653,6 +653,26 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+// get top rated holiday homes
+const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
+  const holidayHomes = await AppDataSource.manager
+  .find(HolidayHome, {
+    select: ["HolidayHomeId", "Name", "Address","TotalRental","overall_rating"],
+    order: {
+      overall_rating: "DESC",
+    },
+    where: {
+      Approved: true,
+      Status: "Active",
+    }
+  });
+
+  const topRatedHolidayHomes = holidayHomes.slice(0, 5);
+  
+  // console.log(topRatedHolidayHomes);
+  res.status(200).json(topRatedHolidayHomes);
+}
+
 // change facility name
 const changeFacilityName = (facility: string) => {
   switch (facility) {
@@ -888,6 +908,7 @@ export {
   userById,
   updateUserDetails,
   updateUserPassword,
+  getTopRatedHolidayHomes,
   addUserIntersted,
   getUserIntersted,
   updateUserIntersted,
