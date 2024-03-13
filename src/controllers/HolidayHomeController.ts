@@ -126,84 +126,86 @@ const createHolidayHome = async (req: Request, res: Response) => {
         const holidayHomeId = Date.now().toString();
 
 
-        // const holidayHome = HolidayHome.create({
-        //     HolidayHomeId: holidayHomeId,
-        //     Name: allValues.holidayHomeDetails.name,
-        //     Address: allValues.holidayHomeDetails.address,
-        //     Description: allValues.holidayHomeDetails.description,
-        //     Category: allValues.holidayHomeDetails.category,
-        //     Status: allValues.holidayHomeDetails.status,
-        //     TotalRental: allValues.homeBreakDown.bdValue.totalRental,
-        //     MaxNoOfAdults: allValues.homeBreakDown.adultsCount,
-        //     MaxNoOfChildren: allValues.homeBreakDown.childCount,
-        //     Approved: false,
-        //     Gym: allValues.homeBreakDown.bdValue.gym,
-        //     Kitchen: allValues.homeBreakDown.bdValue.kitchen,
-        //     Park: allValues.homeBreakDown.bdValue.park,
-        //     Wifi: allValues.homeBreakDown.bdValue.wifi,
-        //     Facilities: allValues.homeBreakDown.bdValue.facilities,
-        //     District: allValues.holidayHomeDetails.district,
-        //     Pool: allValues.homeBreakDown.bdValue.pool,
-        //     Bar: allValues.homeBreakDown.bdValue.bar,
-        //     AdminNo: "1",
+        const holidayHome = HolidayHome.create({
+            HolidayHomeId: holidayHomeId,
+            Name: allValues.holidayHomeDetails.name,
+            Address: allValues.holidayHomeDetails.address,
+            Description: allValues.holidayHomeDetails.description,
+            Category: allValues.holidayHomeDetails.category,
+            Status: allValues.holidayHomeDetails.status,
+            TotalRental: allValues.homeBreakDown.bdValue.totalRental,
+            MaxNoOfAdults: allValues.homeBreakDown.adultsCount,
+            MaxNoOfChildren: allValues.homeBreakDown.childCount,
+            Approved: false,
+            Gym: allValues.homeBreakDown.bdValue.gym,
+            Kitchen: allValues.homeBreakDown.bdValue.kitchen,
+            Park: allValues.homeBreakDown.bdValue.park,
+            Wifi: allValues.homeBreakDown.bdValue.wifi,
+            Facilities: allValues.homeBreakDown.bdValue.facilities,
+            District: allValues.holidayHomeDetails.district,
+            Pool: allValues.homeBreakDown.bdValue.pool,
+            Bar: allValues.homeBreakDown.bdValue.bar,
+            AdminNo: "1",
 
-        // })
+        })
 
-        // await holidayHome.save();
+        await holidayHome.save();
 
-        // const careatakerId = "ct" + Date.now().toString();
-
-
-        // const careTaker1 = CareTaker.create({
-        //     CareTakerId: careatakerId,
-        //     Name: allValues.caretaker1.caretakerName,
-        //     ContactNo: allValues.caretaker1.caretakerContactNo,
-        //     Status: allValues.caretaker1.caretakerStatus,
-        //     Address: allValues.caretaker1.caretakerAddress,
-        //     Description: allValues.caretaker1.caretakerDescription,
-        //     HolidayHomeId: holidayHomeId,
-        //     // HolidayHomeId: holidayHome.HolidayHomeId
-
-        // })
+        const careatakerId = "ct" + Date.now().toString();
 
 
-        // await careTaker1.save();
+        const careTaker1 = CareTaker.create({
+            CareTakerId: careatakerId,
+            Name: allValues.caretaker1.caretakerName,
+            ContactNo: allValues.caretaker1.caretakerContactNo,
+            Status: allValues.caretaker1.caretakerStatus,
+            Address: allValues.caretaker1.caretakerAddress,
+            Description: allValues.caretaker1.caretakerDescription,
+            HolidayHomeId: holidayHomeId,
+            // HolidayHomeId: holidayHome.HolidayHomeId
 
-        // if (allValues.caretaker2.caretakerName !== "") {
-        //     const careTaker2 = CareTaker.create({
-        //         CareTakerId: careatakerId,
-        //         Name: allValues.caretaker2.caretakerName,
-        //         ContactNo: allValues.caretaker2.caretakerContactNo,
-        //         Status: allValues.caretaker2.caretakerStatus,
-        //         Address: allValues.caretaker2.caretakerAddress,
-        //         Description: allValues.caretaker2.caretakerDescription,
-        //         HolidayHomeId: holidayHomeId,
-        //         // HolidayHomeId: holidayHome.HolidayHomeId
+        })
 
-        //     })
 
-        //     await careTaker2.save();
-        // }
+        await careTaker1.save();
 
-        // const contactNo1 = ContactNo.create({
-        //     ContactNo: allValues.holidayHomeDetails.contactNo1,
-        //     // HolidayHomeId: holidayHome.HolidayHomeId
-        //     HolidayHomeId: holidayHomeId,
 
-        // })
+        if (allValues.caretaker2.caretakerName !== "") {
+            const careatakerId2 = "ct2" + Date.now().toString();
+            const careTaker2 = CareTaker.create({
+                CareTakerId: careatakerId2,
+                Name: allValues.caretaker2.caretakerName,
+                ContactNo: allValues.caretaker2.caretakerContactNo,
+                Status: allValues.caretaker2.caretakerStatus,
+                Address: allValues.caretaker2.caretakerAddress,
+                Description: allValues.caretaker2.caretakerDescription,
+                HolidayHomeId: holidayHomeId,
+                // HolidayHomeId: holidayHome.HolidayHomeId
 
-        // await contactNo1.save();
+            })
 
-        // if (allValues.holidayHomeDetails.contactNo2 !== "") {
-        //     const contactNo2 = ContactNo.create({
-        //         ContactNo: allValues.holidayHomeDetails.contactNo2,
-        //         // HolidayHomeId: holidayHome.HolidayHomeId
-        //         HolidayHomeId: holidayHomeId,
+            await careTaker2.save();
+        }
 
-        //     })
+        const contactNo1 = ContactNo.create({
+            ContactNo: allValues.holidayHomeDetails.contactNo1,
+            // HolidayHomeId: holidayHome.HolidayHomeId
+            HolidayHomeId: holidayHomeId,
 
-        //     await contactNo2.save();
-        // }
+        })
+
+        await contactNo1.save();
+
+        if (allValues.holidayHomeDetails.contactNo2 !== "") {
+            const contactNo2 = ContactNo.create({
+                ContactNo: allValues.holidayHomeDetails.contactNo2,
+                // HolidayHomeId: holidayHome.HolidayHomeId
+                HolidayHomeId: holidayHomeId,
+
+            })
+
+            await contactNo2.save();
+        }
 
         // // const imageId = "img" + Date.now().toString();
 
@@ -295,7 +297,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
             await room.save();
         }
 
-        // console.log(allValues.hallArray);
+        // // console.log(allValues.hallArray);
 
         for (let i = 0; i < allValues.unitArray.length; i++) {
 
@@ -361,8 +363,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
             await hall.save();
         }
         console.log("first")
-        const { holidayHomeDetails } = req.body;
-        console.log(holidayHomeDetails);
+
 
 
 
