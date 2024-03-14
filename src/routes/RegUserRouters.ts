@@ -10,7 +10,8 @@ import {
   getUserIntersted,
   updateUserIntersted,
   getUserOngoingReservation,
-  getUserPastReservation
+  getUserPastReservation,
+  getHolidayHomes,
 } from "../controllers/UserController";
 
 import { getHolidayHomesSorted } from "../controllers/ReviewController";
@@ -28,5 +29,6 @@ reg_users.get("/auth/holidayhomes/sort/topRated", getTopRatedHolidayHomes);
 reg_users.get("/auth/holidayhomes/sort", getHolidayHomesSorted);
 reg_users.get("/auth/userOngoingReservation", getUserOngoingReservation);
 reg_users.get("/auth/userPastReservation", getUserPastReservation);
+reg_users.get("/holidayhomes", getHolidayHomes);
 
 export { reg_users };

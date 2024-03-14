@@ -12,7 +12,7 @@ dotenv.config();
 import jwt from "jsonwebtoken";
 
 // import less than equal from typeORM
-import { LessThan, MoreThanOrEqual } from "typeorm";
+import { LessThan, MoreThanOrEqual, Like, And } from "typeorm";
 
 // import html email template
 import emailVerify from "../template/emailVerify";
@@ -896,6 +896,54 @@ const getUserPastReservation = async (req: Request, res: Response) => {
   }
 };
 
+// get holidayhomes
+const getHolidayHomes = async (req: Request, res: Response) => {
+  const search = req.body.search;
+  if(search){
+    // serach by district or name
+    
+    await AppDataSource.manager.find(HolidayHome, {
+      select: ["HolidayHomeId", "Name", "Address","District", "TotalRental", "overall_rating"],
+      where: [
+        { Name: Like(`${search.toString()}%`),Approved: true, Status: "Active" },
+        { District: Like(`${search.toString()}%`),Approved: true, Status: "Active" },
+        // { Approved: true, Status: "Active" }
+      ],
+      order: {
+        updatedAt: "DESC",
+      }
+    }).then((holidayHomes) => {
+      if(holidayHomes){
+      res.status(200).json(holidayHomes);
+      }else{
+        res.status(200).json({ message: "No holiday homes found" });
+      }
+    
+    }).catch((err) => {
+      res.status(500).json({ message: "Internal Server error" });
+    });
+
+  }else{
+     await AppDataSource.manager.find(HolidayHome, {
+      select: ["HolidayHomeId", "Name", "Address","District", "TotalRental", "overall_rating"],
+      where: {
+        Approved: true,
+        Status: "Active",
+      },
+      order: {
+        updatedAt: "DESC",
+      }
+    }).then((holidayHomes) => {
+      res.status(200).json(holidayHomes);
+    
+    }).catch((err) => {
+      res.status(500).json({ message: "Internal Server error" });
+    });
+  }
+
+
+}
+
 export {
   allEmployees,
   allUsers,
@@ -914,4 +962,5 @@ export {
   updateUserIntersted,
   getUserOngoingReservation,
   getUserPastReservation,
+  getHolidayHomes,
 };
