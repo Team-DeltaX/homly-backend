@@ -8,24 +8,25 @@ import bcrypt from "bcrypt";
 
 const adminLogin = async (req: Request, res: Response) => {
   const { adminId, password } = req.body;
+  console.log(adminId, password);
   await AppDataSource.manager
-    .findOneBy(HomlyAdmin, {
-      AdminNo: adminId,
+    .find(HomlyAdmin, {
+      where: { AdminNo: adminId },
     })
     .then((admin) => {
       if (admin) {
         bcrypt
-          .compare(password, admin.Password)
+          .compare(password, admin[0].Password)
           .then((result) => {
             if (result) {
-              if (admin.Role === "PrimaryAdmin") {
+              if (admin[0].Role === "PrimaryAdmin") {
                 res.status(200).json({
                   message: "Login Success",
                   success: true,
                   role: "PrimaryAdmin",
                 });
               } else {
-                if (admin.Verified) {
+                if (admin[0].Verified) {
                   res.status(200).json({
                     message: "Login Success",
                     success: true,
@@ -42,32 +43,28 @@ const adminLogin = async (req: Request, res: Response) => {
                 }
               }
             } else {
-              res
-                .status(200)
-                .json({
-                  message: "Invalid Username or Password",
-                  success: false,
-                });
+              res.status(200).json({
+                message: "Invalid Username or Password",
+                success: false,
+              });
             }
           })
           .catch((error) => {
             res.status(500).json({ message: "Internal Server Error" });
           });
       } else {
-        res
-          .status(200)
-          .json({ message: "You are not an Admin", success: false });
+        res.status(500).json({ message: "Internal Server Error" });
       }
     })
     .catch((error) => {
-      res.status(500).json({ message: "Internal Server Error" });
+      res.status(200).json({ message: "You are not an Admin", success: false });
     });
 };
 
 const changeDefaultPassword = async (req: Request, res: Response) => {
   const { adminId, password } = req.body;
   await AppDataSource.manager
-    .findOneBy(HomlyAdmin, { AdminNo: adminId })
+    .find(HomlyAdmin, { where: { AdminNo: adminId } })
     .then((admin) => {
       if (admin) {
         const saltRound = 10;
@@ -79,13 +76,18 @@ const changeDefaultPassword = async (req: Request, res: Response) => {
               { AdminNo: adminId },
               { Password: hash, Verified: true }
             );
-            res.status(200).json({ message: "Password Changed", success: true });
+            res
+              .status(200)
+              .json({ message: "Password Changed", success: true });
           })
           .catch((error) => {
             res.status(500).json({ message: "Internal Server Error" });
           });
       }
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "Internal Server Error" });
     });
 };
 
-export { adminLogin,changeDefaultPassword };
+export { adminLogin, changeDefaultPassword };
