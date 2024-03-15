@@ -715,3 +715,16 @@ export const get_income_in_date = async (req: Request, res: Response) => {
     console.log(error);
   }
 };
+
+export const getallHH=async(req:Request,res:Response)=>{
+  try{
+    const  HH=await HolidayHome.find({
+      select: {
+          Name: true,
+      }
+    })
+   res.status(200).json({HH})
+  }catch(error){
+    res.status(500).json({ message: "Error in getting all HH names " });
+  }
+}
