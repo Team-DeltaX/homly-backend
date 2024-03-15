@@ -395,11 +395,9 @@ export const getblacklistedusers = async (req: Request, res: Response) => {
     res.status(200).json(BlackListedUsers);
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        error: "Internal Server Error!! in getting all blacklisted users ",
-      });
+    res.status(500).json({
+      error: "Internal Server Error!! in getting all blacklisted users ",
+    });
   }
 };
 export const checkuserexist = async (req: Request, res: Response) => {
@@ -599,11 +597,9 @@ export const rejectHH = async (req: Request, res: Response) => {
   const id = req.body.id;
   try {
     await HolidayHome.delete({ HolidayHomeId: id });
-    res
-      .status(200)
-      .json({
-        message: "Successfully rejected the home(deleted from HH table)",
-      });
+    res.status(200).json({
+      message: "Successfully rejected the home(deleted from HH table)",
+    });
   } catch (error) {
     res.status(404).json({ message: "Error in rejecting the home!" });
   }
@@ -659,7 +655,6 @@ export const gethallcount = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getroomcount = async (req: Request, res: Response) => {
   try {
     const room_count = await Room.countBy({});
@@ -668,7 +663,6 @@ export const getroomcount = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error in getting hall count!" });
   }
 };
-
 
 export const Hallincome = async (req: Request, res: Response) => {
   try {
@@ -681,7 +675,6 @@ export const Hallincome = async (req: Request, res: Response) => {
   }
 };
 
-
 export const Roomincome = async (req: Request, res: Response) => {
   try {
     const sum = await Reservation.sum("RoomPrice", { IsPaid: true });
@@ -693,13 +686,32 @@ export const Roomincome = async (req: Request, res: Response) => {
   }
 };
 
-// export const get_income_in_date=async()=>{
-//   try{
-//     const date = new Date("2024-03-13"); // Convert string to Date
-//     const sum = await Reservation.sum("Price", { createdAt: date });
-//     return sum; // Return the sum
-//   }
-//   catch(error){
-//     console.log(error)
-//   }
-// }
+export const get_income_in_date = async (req: Request, res: Response) => {
+  const date = req.params.date;
+  // console.log(date);
+
+  try {
+    const reservations = await Reservation.find({
+      select: ["Price", "createdAt"],
+    });
+    const modifiedReservations = reservations.map((reservation) => ({
+      Price: reservation.Price,
+      createdAt: reservation.createdAt.toISOString().split("T")[0],
+    }));
+
+    const targetDate = date;
+
+    const reservationsForDate = modifiedReservations.filter(
+      (reservation) => reservation.createdAt === targetDate
+    );
+
+    let sumForDate = 0;
+    reservationsForDate.forEach((reservation) => {
+      sumForDate += reservation.Price;
+    });
+
+    res.status(200).json({ sumForDate });
+  } catch (error) {
+    console.log(error);
+  }
+};
