@@ -46,6 +46,11 @@ export class Reservation extends BaseEntity {
     @Column()
     IsPaid!: boolean;
 
+    @Column({
+        default: false
+    })
+    IsSpecial!: boolean;
+
     @CreateDateColumn()
     createdAt!: Date;
   
