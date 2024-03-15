@@ -4,6 +4,7 @@ import cors from "cors";
 import OracleDB from "oracledb";
 import { DataSource } from "typeorm";
 import { SpecailReservation } from "./entities/SpecialReservation";
+import { ReservedRooms } from "./entities/ReservedRooms";
 import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
@@ -82,6 +83,7 @@ export const AppDataSource = new DataSource({
     SelectedRooms,
     RoomRentalSettings,
     RoomTypeSettings,
+    ReservedRooms,
   ],
 
   synchronize: true,
