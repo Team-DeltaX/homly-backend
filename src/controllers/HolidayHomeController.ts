@@ -78,6 +78,14 @@ const getHolidayHomesDetails = async (req: Request, res: Response) => {
     res.json({ homeDetails: holidayHome, contactNo: contactNo, unit: units, room: rooms, hall: halls, caretaker: caretakers });
 };
 
+const getHolidayHomeNames = async (req: Request, res: Response) => {
+    const holidayHomeNames = await AppDataSource.manager.find(HolidayHome, {
+        select: ["Name"]
+    });
+    const names = holidayHomeNames.map((name) => name.Name);
+    res.json({ names });
+}
+
 const getSelectedRooms = async (req: Request, res: Response) => {
     const { HolidayHomeId, unitCode } = req.params;
     const selectedRoom = await AppDataSource.manager.find(SelectedRooms, {
@@ -169,9 +177,11 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
         // await careTaker1.save();
 
+
         // if (allValues.caretaker2.caretakerName !== "") {
+        //     const careatakerId2 = "ct2" + Date.now().toString();
         //     const careTaker2 = CareTaker.create({
-        //         CareTakerId: careatakerId,
+        //         CareTakerId: careatakerId2,
         //         Name: allValues.caretaker2.caretakerName,
         //         ContactNo: allValues.caretaker2.caretakerContactNo,
         //         Status: allValues.caretaker2.caretakerStatus,
@@ -295,7 +305,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
             await room.save();
         }
 
-        // console.log(allValues.hallArray);
+        // // console.log(allValues.hallArray);
 
         for (let i = 0; i < allValues.unitArray.length; i++) {
 
@@ -361,8 +371,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
             await hall.save();
         }
         console.log("first")
-        const { holidayHomeDetails } = req.body;
-        console.log(holidayHomeDetails);
+
 
 
 
@@ -392,4 +401,4 @@ const updateHolidayHome = async (req: Request, res: Response) => {
 };
 
 
-export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental, updateHolidayHome }
+export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental, updateHolidayHome, getHolidayHomeNames }
