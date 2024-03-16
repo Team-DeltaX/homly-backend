@@ -898,8 +898,9 @@ const getUserPastReservation = async (req: Request, res: Response) => {
 
 // get holidayhomes
 const getHolidayHomes = async (req: Request, res: Response) => {
-  const search = req.body.search;
-  if(search){
+  const search = req.query.search;
+  console.log(search);
+  if(search && search !== "all"){
     // serach by district or name
     
     await AppDataSource.manager.find(HolidayHome, {
