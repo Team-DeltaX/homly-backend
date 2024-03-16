@@ -7,7 +7,7 @@ export class ContactNo extends BaseEntity {
         unique: true,
         width: 10
     })
-    ContactNo!: number;
+    ContactNo!: string;
 
 
     @PrimaryColumn()
