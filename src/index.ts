@@ -4,6 +4,7 @@ import cors from "cors";
 import OracleDB from "oracledb";
 import { DataSource } from "typeorm";
 import { SpecailReservation } from "./entities/SpecialReservation";
+import { ReservedRooms } from "./entities/ReservedRooms";
 import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
@@ -44,6 +45,7 @@ import { BlacklistRouter } from "./routes/BlacklistRouter";
 
 import dotenv from "dotenv";
 import { ReservationRouter } from "./routes/ReservationRouter";
+import { PrimaryAdminDashboardRouter } from "./routes/ParimayAdminDashboardRouters";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -81,6 +83,7 @@ export const AppDataSource = new DataSource({
     SelectedRooms,
     RoomRentalSettings,
     RoomTypeSettings,
+    ReservedRooms,
   ],
 
   synchronize: true,
@@ -111,6 +114,7 @@ AppDataSource.initialize()
     app.use('/users', homly_review);
     app.use('/admin', admin_router);
     app.use('/users', ReservationRouter);
+    app.use('/admin', PrimaryAdminDashboardRouter)
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
 
