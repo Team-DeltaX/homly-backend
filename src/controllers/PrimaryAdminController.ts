@@ -28,6 +28,7 @@ import { LessThan } from "typeorm";
 import { HolidayHome } from "../entities/HolidayHome";
 import { Hall } from "../entities/Hall";
 import { Room } from "../entities/Room";
+import { ReservedRooms } from "../entities/ReservedRooms";
 // import { Reservation } from "../entities/Reservation";
 dotenv.config();
 
@@ -429,7 +430,19 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
         CheckoutDate: MoreThan(currentDate),
       },
     });
-    res.status(200).json(reservation);
+
+    let reservationDetails = [];
+    //get the reserved rooms
+    for(var i = 0; i < reservation.length; i++){
+      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
+        select: ["roomCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+      reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms});
+    }
+    res.status(200).json(reservationDetails);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
