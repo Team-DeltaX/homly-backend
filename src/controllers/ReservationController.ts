@@ -130,36 +130,94 @@ const AddResrvation = async (req: Request, res: Response) => {
   console.log(ServiceNO, HolidayHome, CheckinDate, CheckoutDate);
 };
 
-// const storeReservedRooms = async (req: Request, res: Response) => {
-//   try {
-//     const { ReservationId, roomCodes } = req.body;
+const AddSpecialResrvation = async (req: Request, res: Response) => {
+  console.log(req.body);
+  const {
+    ServiceNO,
+    HolidayHome,
+    CheckinDate,
+    CheckoutDate,
+    NoOfAdults,
+    NoOfChildren,
+    NoOfRooms,
+    NoOfHalls,
+    RoomPrice,
+    HallPrice,
+    Price,
+    IsPaid,
+    RoomCodes,
+  } = req.body;
 
-//     // Ensure roomCodes is an array
-//     if (!Array.isArray(roomCodes)) {
-//       return res.status(400).json({ error: 'Invalid data format. Expected an array of room codes.' });
-//     }
+  // const ServiceNO = req.cookies.serviceNo;
+  console.log("roomsss codesing ", RoomCodes);
+  //   const locationadmin = LocationAdmin.create();
+  console.log("arunaaa", ServiceNO);
 
-//     // Get the repository for the ReservedRooms entity
-//     const reservedRoomsRepository = getRepository(ReservedRooms);
+  // add roomcodes array to database
 
-//     // Iterate over roomCodes and save each reservation
-//     const createdReservations = roomCodes.map(async (roomCode: string) => {
-//       const reservedRoom = new ReservedRooms();
-//       reservedRoom.ReservationId = ReservationId;
-//       reservedRoom.roomCode = roomCode;
-//       return await reservedRoomsRepository.save(reservedRoom);
-//     });
+  try {
+    // generate unique auto incrementing reservation id
+    const reservationId = await AppDataSource.query(
+      `SELECT MAX("ReservationId") as maxval FROM "INOADMIN"."reservation"`
+    );
+    console.log("reservation id", reservationId[0].MAXVAL);
+    let maxvalue = reservationId[0].MAXVAL;
 
-//     // Wait for all reservations to be saved
-//     await Promise.all(createdReservations);
+    let reserveID;
+    if (maxvalue) {
+      // incremenet string maxvalue by 1
+      let num = maxvalue.split("-");
+      console.log(num[1]);
+      reserveID = "RES-" + (parseInt(num[1]) + 1);
+    } else {
+      reserveID = "RES-1";
+    }
 
-//     // Send a success response
-//     res.status(201).json({ message: 'Reserved rooms stored successfully.' });
-//   } catch (error) {
-//     console.error('Error storing reserved rooms:', error);
-//     res.status(500).json({ error: 'Internal Server Error!' });
-//   }
-// };
+
+    await AppDataSource.createQueryBuilder()
+      .insert()
+      .into(Reservation)
+      .values([
+        {
+          ReservationId: reserveID,
+          ServiceNO,
+          HolidayHome,
+          CheckinDate,
+          CheckoutDate,
+          NoOfAdults,
+          NoOfChildren,
+          NoOfRooms,
+          NoOfHalls,
+          RoomPrice,
+          HallPrice,
+          Price,
+          IsPaid,
+          IsSpecial: true,
+        },
+      ])
+
+      .execute();
+
+      // add room code array to reserved room table
+      for (var i = 0; i < RoomCodes.length; i++) {
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(ReservedRooms)
+          .values([
+            {
+              ReservationId: reserveID,
+              roomCode: RoomCodes[i],
+            },
+          ])
+          .execute();
+      }
+    res.status(200).json({ message: "Reservation added successfully" });
+  } catch (error) {
+    console.log(`error is ${error}`);
+    res.status(500).json({ message: "Internal Server Error!" });
+  }
+  console.log(ServiceNO, HolidayHome, CheckinDate, CheckoutDate);
+};
 
 const getHolidayHomeNames = async (req: Request, res: Response) => {
   try {
