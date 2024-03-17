@@ -12,7 +12,7 @@ dotenv.config();
 import jwt from "jsonwebtoken";
 
 // import less than equal from typeORM
-import { LessThan, MoreThanOrEqual } from "typeorm";
+import { LessThan, MoreThanOrEqual, Like, And } from "typeorm";
 
 // import html email template
 import emailVerify from "../template/emailVerify";
@@ -653,6 +653,26 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+// get top rated holiday homes
+const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
+  const holidayHomes = await AppDataSource.manager
+  .find(HolidayHome, {
+    select: ["HolidayHomeId", "Name", "Address","TotalRental","overall_rating"],
+    order: {
+      overall_rating: "DESC",
+    },
+    where: {
+      Approved: true,
+      Status: "Active",
+    }
+  });
+
+  const topRatedHolidayHomes = holidayHomes.slice(0, 5);
+  
+  // console.log(topRatedHolidayHomes);
+  res.status(200).json(topRatedHolidayHomes);
+}
+
 // change facility name
 const changeFacilityName = (facility: string) => {
   switch (facility) {
@@ -795,9 +815,27 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
           CheckinDate: "ASC",
         },
       })
-      .then((reservations) => {
+      .then(async (reservations) => {
         if (reservations) {
-          res.status(200).json(reservations);
+          const ongoingReservations: any[] = [];
+          for (let i = 0; i < reservations.length; i++) {
+            await AppDataSource.manager
+              .find(HolidayHome, {
+                select: ["Name", "Address"],
+                where: {
+                  HolidayHomeId: reservations[i].HolidayHome,
+                },
+              })
+              .then((holidayHome) => {
+                const expireDate = new Date(reservations[i].updatedAt.getTime() + (3 * 24 * 60 * 60 * 1000));
+                ongoingReservations.push({
+                  reservation: reservations[i],
+                  holidayHome: holidayHome,
+                  expireDate: expireDate,
+                });
+              });
+          }
+          res.status(200).json(ongoingReservations);
         } else {
           res.status(200).json({ message: "no reservations" });
         }
@@ -820,27 +858,35 @@ const getUserPastReservation = async (req: Request, res: Response) => {
           ServiceNO: serviceNo,
           // get date before today + 1
           CheckoutDate: LessThan(new Date(Date.now() - 1 * 60000)),
+          IsPaid: true,
         },
         order: {
           CheckinDate: "DESC",
         },
       })
       .then(async (reservations) => {
-        // let pastReservations = [];
-        // for (let i = 0; i < reservations.length; i++) {
-        //   await AppDataSource.manager
-        //   .find(HolidayHome, {
-        //     select: ["Address"],
-        //     where: {
-        //       // HolidayHomeId: reservations[i].
-        //     }
-        //   })
-        // }
+        const pastReservations: any[] = [];
         if (reservations) {
-          res.status(200).json(reservations);
+          for (let i = 0; i < reservations.length; i++) {
+            await AppDataSource.manager
+              .find(HolidayHome, {
+                select: ["Name", "Address"],
+                where: {
+                  HolidayHomeId: reservations[i].HolidayHome,
+                },
+              })
+              .then((holidayHome) => {
+                pastReservations.push({
+                  reservation: reservations[i],
+                  holidayHome: holidayHome,
+                });
+              });
+          }
+          res.status(200).json(pastReservations);
         } else {
           res.status(200).json({ message: "no reservations" });
         }
+
       })
       .catch((err) => {
         res.status(500).json({ message: "Internal Server error" });
@@ -849,6 +895,55 @@ const getUserPastReservation = async (req: Request, res: Response) => {
     console.log(err);
   }
 };
+
+// get holidayhomes
+const getHolidayHomes = async (req: Request, res: Response) => {
+  const search = req.query.search;
+  console.log(search);
+  if(search && search !== "all"){
+    // serach by district or name
+    
+    await AppDataSource.manager.find(HolidayHome, {
+      select: ["HolidayHomeId", "Name", "Address","District", "TotalRental", "overall_rating"],
+      where: [
+        { Name: Like(`${search.toString()}%`),Approved: true, Status: "Active" },
+        { District: Like(`${search.toString()}%`),Approved: true, Status: "Active" },
+        // { Approved: true, Status: "Active" }
+      ],
+      order: {
+        updatedAt: "DESC",
+      }
+    }).then((holidayHomes) => {
+      if(holidayHomes){
+      res.status(200).json(holidayHomes);
+      }else{
+        res.status(200).json({ message: "No holiday homes found" });
+      }
+    
+    }).catch((err) => {
+      res.status(500).json({ message: "Internal Server error" });
+    });
+
+  }else{
+     await AppDataSource.manager.find(HolidayHome, {
+      select: ["HolidayHomeId", "Name", "Address","District", "TotalRental", "overall_rating"],
+      where: {
+        Approved: true,
+        Status: "Active",
+      },
+      order: {
+        updatedAt: "DESC",
+      }
+    }).then((holidayHomes) => {
+      res.status(200).json(holidayHomes);
+    
+    }).catch((err) => {
+      res.status(500).json({ message: "Internal Server error" });
+    });
+  }
+
+
+}
 
 export {
   allEmployees,
@@ -862,9 +957,11 @@ export {
   userById,
   updateUserDetails,
   updateUserPassword,
+  getTopRatedHolidayHomes,
   addUserIntersted,
   getUserIntersted,
   updateUserIntersted,
   getUserOngoingReservation,
   getUserPastReservation,
+  getHolidayHomes,
 };
