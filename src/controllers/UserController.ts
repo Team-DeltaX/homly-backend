@@ -32,7 +32,7 @@ import {
 import { Employee } from "../entities/Empolyee";
 
 import { HolidayHome } from "../entities/HolidayHome";
-
+import { Room } from "../entities/Room";
 import { Reservation } from "../entities/Reservation";
 
 // create token
@@ -653,6 +653,26 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+// calculate total rental for holiday home
+const calculateTotalRental = async (holidayHomeId: string) => {
+  const roomRental = await AppDataSource.manager.find(Room, {
+    select: ["roomRental"],
+    where: {
+      HolidayHomeId: holidayHomeId,
+    },
+  });
+
+  let totalRental = 0;
+  for (let i = 0; i < roomRental.length; i++) {
+    totalRental += roomRental[i].roomRental;
+  }
+
+  console.log("total rental",totalRental)
+
+  
+
+}
+
 // get top rated holiday homes
 const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
   const holidayHomes = await AppDataSource.manager
@@ -667,7 +687,14 @@ const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
     }
   });
 
+
+
   const topRatedHolidayHomes = holidayHomes.slice(0, 5);
+
+  let topRatedHolidayHomesWithPrice = [];
+  for(let i = 0; i < topRatedHolidayHomes.length; i++){
+    calculateTotalRental(topRatedHolidayHomes[i].HolidayHomeId)
+  }
   
   // console.log(topRatedHolidayHomes);
   res.status(200).json(topRatedHolidayHomes);
