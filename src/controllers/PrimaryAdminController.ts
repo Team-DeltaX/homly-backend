@@ -734,6 +734,7 @@ export const getallHH=async(req:Request,res:Response)=>{
     const  HH=await HolidayHome.find({
       select: {
           Name: true,
+          HolidayHomeId:true
       }
     })
    res.status(200).json({HH})
