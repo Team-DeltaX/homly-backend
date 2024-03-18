@@ -176,8 +176,8 @@ export class RoomRentalSettings extends BaseEntity {
   @Column()
   rental!: string;
 
-  // @Column()
-  // acNonAc!: string;
+  @Column()
+  acNonAc!: string;
 
 }
 
