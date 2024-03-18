@@ -68,7 +68,6 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
               inter2 as keyof HolidayHome,
               inter3 as keyof HolidayHome,
               "Name",
-              "TotalRental",
               "Address",
               "overall_rating"
             ],

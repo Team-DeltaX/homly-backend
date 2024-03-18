@@ -6,10 +6,8 @@ import { CareTaker } from '../entities/CareTaker';
 import { Unit } from '../entities/Unit';
 import { Room } from '../entities/Room';
 import { Hall } from '../entities/Hall';
-import { Image } from '../entities/Image';
 import { SelectedRooms } from '../entities/SelectedRooms';
 import { Rental } from '../entities/Rental';
-import { getManager } from 'typeorm';
 import { RoomTypeSettings } from '../entities/HolidayHome';
 import { RoomRentalSettings } from '../entities/HolidayHome';
 import { Reservation } from '../entities/Reservation';
@@ -152,27 +150,32 @@ const getReservationDetails = async (req: Request, res: Response) => {
 
 
 const createHolidayHome = async (req: Request, res: Response) => {
+
+
+
     try {
 
+        const hhId = await AppDataSource.query(
+            `SELECT MAX("HolidayHomeId") as maxval FROM "INOADMIN"."holiday_home"`
+        );
+        console.log("holidayhome id", hhId[0].MAXVAL);
+        let maxvalue = hhId[0].MAXVAL;
+
+        let holidayHomeId;
+        if (maxvalue) {
+            // incremenet string maxvalue by 1
+            let num = maxvalue.split("-");
+            console.log(num[1]);
+            holidayHomeId = "HH-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
+        } else {
+            holidayHomeId = "HH-000001";
+        }
+
         const allValues = req.body;
-        console.log(allValues);
-        console.log("roomtypearray", allValues.roomTypeArray);
-        // console.log(allValues.holidayHomeDetails);
-        // console.log(allValues.images);
-        // console.log(allValues.caretaker1);
-        // console.log(allValues.caretaker2);
-        // console.log("hello", allValues.homeBreakDown);
-        // console.log(allValues.roomArray);
-        // console.log(allValues.unitArray);
-        // console.log(allValues.hallArray);
-        // console.log(allValues);
-
-        const holidayHomeId = Date.now().toString();
-
 
         const holidayHome = HolidayHome.create({
             HolidayHomeId: holidayHomeId,
-            Name: allValues.holidayHomeDetails.name,
+            Name: allValues.holidayHomeDetails.name.toLowerCase(),
             Address: allValues.holidayHomeDetails.address,
             Description: allValues.holidayHomeDetails.description,
             Category: allValues.holidayHomeDetails.category,
@@ -189,16 +192,34 @@ const createHolidayHome = async (req: Request, res: Response) => {
             Pool: allValues.homeBreakDown.bdValue.pool,
             Bar: allValues.homeBreakDown.bdValue.bar,
             AdminNo: "1",
+            MainImage: "dsfdfs",
+            Image1: "sfdsfsd",
+            Image2: "sffdfdf",
+            Image3: "dfsdfds"
 
         })
 
         await holidayHome.save();
 
-        const careatakerId = "ct" + Date.now().toString();
+        const c1Id = await AppDataSource.query(
+            `SELECT MAX("CareTakerId") as maxval FROM "INOADMIN"."care_taker"`
+        );
+        console.log("holidayhome id", c1Id[0].MAXVAL);
+        let maxvaluecaretaker1 = c1Id[0].MAXVAL;
+
+        let caretakerId;
+        if (maxvaluecaretaker1) {
+            // incremenet string maxvalue by 1
+            let num = maxvaluecaretaker1.split("-");
+            console.log(num[1]);
+            caretakerId = "CT-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
+        } else {
+            caretakerId = "CT-000001";
+        }
 
 
         const careTaker1 = CareTaker.create({
-            CareTakerId: careatakerId,
+            CareTakerId: caretakerId,
             Name: allValues.caretaker1.caretakerName,
             ContactNo: allValues.caretaker1.caretakerContactNo,
             Status: allValues.caretaker1.caretakerStatus,
@@ -214,9 +235,26 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
 
         if (allValues.caretaker2.caretakerName !== "") {
-            const careatakerId2 = "ct2" + Date.now().toString();
+
+            const c2Id = await AppDataSource.query(
+                `SELECT MAX("CareTakerId") as maxval FROM "INOADMIN"."care_taker"`
+            );
+            console.log("caretaker2 id", c2Id[0].MAXVAL);
+            let maxvaluecaretaker2 = c2Id[0].MAXVAL;
+            console.log(maxvaluecaretaker2)
+
+            let caretakerId2;
+            if (maxvaluecaretaker2) {
+                // incremenet string maxvalue by 1
+                let num = maxvaluecaretaker2.split("-");
+                console.log(num[1]);
+                caretakerId2 = "CT-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
+            } else {
+                caretakerId2 = "CT-000001";
+            }
+
             const careTaker2 = CareTaker.create({
-                CareTakerId: careatakerId2,
+                CareTakerId: caretakerId2,
                 Name: allValues.caretaker2.caretakerName,
                 ContactNo: allValues.caretaker2.caretakerContactNo,
                 Status: allValues.caretaker2.caretakerStatus,
@@ -250,26 +288,34 @@ const createHolidayHome = async (req: Request, res: Response) => {
             await contactNo2.save();
         }
 
-        // // const imageId = "img" + Date.now().toString();
 
-        // // const image = Image.create({
 
-        // //     ImageId: imageId,
-        // //     MainImage: allValues.images.mainImage,
-        // //     Image1: allValues.images.image1,
-        // //     Image2: allValues.images.image2,
-        // //     Image3: allValues.images.image3,
-        // //     // HolidayHomeId: holidayHome.HolidayHomeId
-        // //     HolidayHomeId: holidayHomeId,
-        // // })
 
-        // // await image.save();
 
-        // settingRoomType
+        // // settingRoomType
 
         for (let i = 0; i < allValues.roomTypeArray.length; i++) {
 
-            const RTId = "RT" + Date.now().toString();
+
+            const roomTypeId = await AppDataSource.query(
+                `SELECT MAX("RTId") as maxval FROM "INOADMIN"."room_type_settings"`
+            );
+            console.log("roomtypesettings id", roomTypeId[0].MAXVAL);
+            let maxvalue = roomTypeId[0].MAXVAL;
+
+            let RTId;
+            if (maxvalue) {
+                // incremenet string maxvalue by 1
+                let num = maxvalue.split("-");
+                console.log(num[1]);
+                RTId = "RT-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
+            } else {
+                RTId = "RT-0000001";
+            }
+
+            const allValues = req.body;
+
+
             const roomType = RoomTypeSettings.create({
                 RTId: RTId,
                 roomType: allValues.roomTypeArray[i].type,
@@ -284,13 +330,32 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
         }
 
-        // settingRoomRental
+        // // settingRoomRental
 
         for (let i = 0; i < allValues.settingRoomRentalArray.length; i++) {
 
-            const RSId = "RS" + Date.now().toString();
+            const roomRentalId = await AppDataSource.query(
+                `SELECT MAX("RSId") as maxval FROM "INOADMIN"."room_rental_settings"`
+            );
+            console.log("roomrentalsettings id", roomRentalId[0].MAXVAL);
+            let maxvalue = roomRentalId[0].MAXVAL;
+
+            let RRId;
+            if (maxvalue) {
+                // incremenet string maxvalue by 1
+                let num = maxvalue.split("-");
+                console.log(num[1]);
+                RRId = "RR-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
+            } else {
+                RRId = "RR-000001";
+            }
+
+            const allValues = req.body;
+
+
+
             const roomRental = RoomRentalSettings.create({
-                RSId: RSId,
+                RSId: RRId,
                 roomType: allValues.settingRoomRentalArray[i].type,
                 acNonAc: allValues.settingRoomRentalArray[i].acNonAc,
                 rental: allValues.settingRoomRentalArray[i].rental,
@@ -473,9 +538,25 @@ const updateHolidayHome = async (req: Request, res: Response) => {
             );
         } else {
             if (updatedValues.caretaker2.caretakerName !== "") {
-                const careatakerId2 = "ct2" + Date.now().toString();
+                // const careatakerId2 = "ct2" + Date.now().toString();
+                const c2Id = await AppDataSource.query(
+                    `SELECT MAX("CareTakerId") as maxval FROM "INOADMIN"."care_taker"`
+                );
+                console.log("caretaker2 id", c2Id[0].MAXVAL);
+                let maxvaluecaretaker2 = c2Id[0].MAXVAL;
+                console.log(maxvaluecaretaker2)
+
+                let caretakerId2;
+                if (maxvaluecaretaker2) {
+                    // incremenet string maxvalue by 1
+                    let num = maxvaluecaretaker2.split("-");
+                    console.log(num[1]);
+                    caretakerId2 = "CT-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
+                } else {
+                    caretakerId2 = "CT-000001";
+                }
                 const careTaker2 = CareTaker.create({
-                    CareTakerId: careatakerId2,
+                    CareTakerId: caretakerId2,
                     Name: updatedValues.caretaker2.caretakerName,
                     ContactNo: updatedValues.caretaker2.caretakerContactNo,
                     Status: updatedValues.caretaker2.caretakerStatus,
