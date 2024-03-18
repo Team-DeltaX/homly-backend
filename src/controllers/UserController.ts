@@ -695,7 +695,7 @@ const calculateTotalRental = async (holidayHomeId: string) => {
           .find(Rental, {
             where: {
               HolidayHomeId: holidayHomeId,
-              HRUId: "r002",
+              HRUId: roomRental[i].roomCode,
               Month: String(currentMonth),
             },
           })
