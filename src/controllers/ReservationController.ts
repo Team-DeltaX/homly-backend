@@ -76,36 +76,42 @@ const AddResrvation = async (req: Request, res: Response) => {
 
     let reserveID;
     if (maxvalue) {
-      // incremenet string maxvalue by 1
-      let num = maxvalue.split("-");
-      console.log(num[1]);
-      reserveID = "RES-" + (parseInt(num[1]) + 1);
+        // Extract the numeric part and increment by 1
+        let num = parseInt(maxvalue.split("-")[1]);
+        num++; // Increment
+        reserveID = "RES-" + num.toString().padStart(5, '0'); // Format with leading zeros
     } else {
-      reserveID = "RES-1";
+        reserveID = "RES-00001"; // Initial reservation ID
     }
+
+    let checkinDate = new Date(CheckinDate);
+    checkinDate.setHours(0,0,0,0);
+    console.log("checkinDate", checkinDate);
+
+    let checkoutDate = new Date(CheckoutDate);
+    checkoutDate.setHours(23,59,0,0);
 
 
     await AppDataSource.createQueryBuilder()
       .insert()
       .into(Reservation)
       .values([
-        {
-          ReservationId: reserveID,
-          ServiceNO,
-          HolidayHome,
-          CheckinDate,
-          CheckoutDate,
-          NoOfAdults,
-          NoOfChildren,
-          NoOfRooms,
-          NoOfHalls,
-          RoomPrice,
-          HallPrice,
-          Price,
-          IsPaid,
-        },
+      {
+        ReservationId: reserveID,
+        ServiceNO,
+        HolidayHome,
+        CheckinDate:checkinDate, // Set time to 12:00 am
+        CheckoutDate:checkoutDate, // Set time to 11:59 pm
+        NoOfAdults,
+        NoOfChildren,
+        NoOfRooms,
+        NoOfHalls,
+        RoomPrice,
+        HallPrice,
+        Price,
+        IsPaid,
+      },
       ])
-
       .execute();
 
       // add room code array to reserved room table
@@ -368,20 +374,24 @@ const getAvailableRooms = async (req: Request, res: Response) => {
           },
         ],
       });
-      const onedayReservation = await AppDataSource.manager.find(Reservation, {
-        where: {
-          HolidayHome: holidayHomeId,
-          CheckinDate: LessThanOrEqual(new Date(checkinDate)),
-          CheckoutDate: MoreThanOrEqual(new Date(checkoutDate)),
-        },
-      });
+      console.log("reservation", reservation);
+      const onedayReservation = null
+      // const onedayReservation = await AppDataSource.manager.find(Reservation, {
+      //   where: {
+      //     HolidayHome: holidayHomeId,
+      //     CheckinDate: LessThanOrEqual(new Date(checkinDate)),
+      //     CheckoutDate: MoreThanOrEqual(new Date(checkoutDate)),
+      //   },
+      // });
+
+      // console.log("onedayReservation", onedayReservation);
 
       let availableRooms = await getReservedRooms(allRooms, reservation);
-      availableRooms = await getReservedRooms(
-        availableRooms,
-        onedayReservation
-      );
-
+      // availableRooms = await getReservedRooms(
+      //   availableRooms,
+      //   onedayReservation
+      // );
+      console.log({availableRooms});
       res.status(200).json({ availableRooms });
     }
   } catch (error) {
