@@ -657,7 +657,7 @@ const updateUserPassword = async (req: Request, res: Response) => {
 const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
   const holidayHomes = await AppDataSource.manager
   .find(HolidayHome, {
-    select: ["HolidayHomeId", "Name", "Address","TotalRental","overall_rating"],
+    select: ["HolidayHomeId", "Name", "Address","overall_rating"],
     order: {
       overall_rating: "DESC",
     },
@@ -904,7 +904,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
     // serach by district or name
     
     await AppDataSource.manager.find(HolidayHome, {
-      select: ["HolidayHomeId", "Name", "Address","District", "TotalRental", "overall_rating"],
+      select: ["HolidayHomeId", "Name", "Address","District", "overall_rating"],
       where: [
         { Name: Like(`${search.toString()}%`),Approved: true, Status: "Active" },
         { District: Like(`${search.toString()}%`),Approved: true, Status: "Active" },
@@ -926,7 +926,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
 
   }else{
      await AppDataSource.manager.find(HolidayHome, {
-      select: ["HolidayHomeId", "Name", "Address","District", "TotalRental", "overall_rating"],
+      select: ["HolidayHomeId", "Name", "Address","District",  "overall_rating"],
       where: {
         Approved: true,
         Status: "Active",
