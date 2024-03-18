@@ -16,13 +16,13 @@ export class Hall extends BaseEntity {
     hallAc!: string;
 
     @Column()
-    floorLevel!: Number;
+    floorLevel!: number;
 
     @Column()
-    hallNoOfAdults!: Number;
+    hallNoOfAdults!: number;
 
     @Column()
-    hallNoOfChildren!: Number;
+    hallNoOfChildren!: number;
 
     @Column()
     hallRemark!: string;
