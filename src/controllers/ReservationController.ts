@@ -154,19 +154,19 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
   try {
     // generate unique auto incrementing reservation id
     const reservationId = await AppDataSource.query(
-      `SELECT MAX("ReservationId") as maxval FROM "INOADMIN"."reservation"`
+      `SELECT MAX("ReservationId") as maxval FROM "INOADMIN"."reservation" ORDER BY "createdAt"`
     );
     console.log("reservation id", reservationId[0].MAXVAL);
     let maxvalue = reservationId[0].MAXVAL;
 
     let reserveID;
     if (maxvalue) {
-      // incremenet string maxvalue by 1
-      let num = maxvalue.split("-");
-      console.log(num[1]);
-      reserveID = "RES-" + (parseInt(num[1]) + 1);
+        // Extract the numeric part and increment by 1
+        let num = parseInt(maxvalue.split("-")[1]);
+        num++; // Increment
+        reserveID = "RES-" + num.toString().padStart(5, '0'); // Format with leading zeros
     } else {
-      reserveID = "RES-1";
+        reserveID = "RES-00001"; // Initial reservation ID
     }
 
 
@@ -215,7 +215,12 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
 
 const getHolidayHomeNames = async (req: Request, res: Response) => {
   try {
-    const holidayHomes = await AppDataSource.manager.find(HolidayHome);
+    const holidayHomes = await AppDataSource.manager.find(HolidayHome,{
+      where:{
+        Approved:true,
+        Status:"Active"
+      }
+    });
     const holidayHomeNames = holidayHomes.map((home) => ({
       id: home.HolidayHomeId,
       name: home.Name,
