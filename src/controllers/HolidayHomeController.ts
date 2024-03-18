@@ -12,6 +12,8 @@ import { Rental } from '../entities/Rental';
 import { getManager } from 'typeorm';
 import { RoomTypeSettings } from '../entities/HolidayHome';
 import { RoomRentalSettings } from '../entities/HolidayHome';
+import { Reservation } from '../entities/Reservation';
+import { ReservedRooms } from '../entities/ReservedRooms';
 
 const getHolidayHomes = async (req: Request, res: Response) => {
 
@@ -82,7 +84,7 @@ const getHolidayHomesDetails = async (req: Request, res: Response) => {
 
     const roomRentalSettings = await AppDataSource.manager.find(RoomRentalSettings, {
         where: { HolidayHomeId },
-        select: ["roomType", "rental"]
+        select: ["roomType", "rental", "acNonAc"]
     });
 
 
@@ -92,9 +94,12 @@ const getHolidayHomesDetails = async (req: Request, res: Response) => {
 
 const getHolidayHomeNames = async (req: Request, res: Response) => {
     const holidayHomeNames = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name"]
+        select: ["Name", "HolidayHomeId"]
     });
-    const names = holidayHomeNames.map((name) => name.Name);
+    const names = holidayHomeNames.map((holidayHome) => ({
+        name: holidayHome.Name,
+        id: holidayHome.HolidayHomeId
+    }));
     res.json({ names });
 }
 
@@ -125,6 +130,25 @@ const getRoomRental = async (req: Request, res: Response) => {
 
     res.json({ roomRental });
 }
+const getReservationDetails = async (req: Request, res: Response) => {
+    const { HolidayHomeId } = req.params;
+    const reservations: { reserved: any, reservation: any }[] = [];
+    const reservationDetails = await AppDataSource.manager.find(Reservation, {
+        where: { "HolidayHome": HolidayHomeId },
+        select: ["ReservationId", "CheckinDate", "CheckoutDate"]
+    });
+
+    for (const reservation of reservationDetails) {
+        const rooms = await AppDataSource.manager.find(ReservedRooms, {
+            where: { "ReservationId": reservation.ReservationId },
+            select: ["roomCode"]
+        });
+
+        reservations.push({ reserved: rooms, reservation });
+    }
+
+    res.json({ reservations: reservations });
+}
 
 
 const createHolidayHome = async (req: Request, res: Response) => {
@@ -153,7 +177,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
             Description: allValues.holidayHomeDetails.description,
             Category: allValues.holidayHomeDetails.category,
             Status: allValues.holidayHomeDetails.status,
-            // TotalRental: allValues.homeBreakDown.bdValue.totalRental,
+
             MaxNoOfAdults: allValues.homeBreakDown.adultsCount,
             MaxNoOfChildren: allValues.homeBreakDown.childCount,
             Approved: false,
@@ -269,6 +293,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
             const roomRental = RoomRentalSettings.create({
                 RSId: RSId,
                 roomType: allValues.settingRoomRentalArray[i].type,
+                acNonAc: allValues.settingRoomRentalArray[i].acNonAc,
                 rental: allValues.settingRoomRentalArray[i].rental,
                 HolidayHomeId: holidayHomeId,
                 // HolidayHomeId: holidayHome.HolidayHomeId
@@ -382,8 +407,6 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
             await hall.save();
         }
-        console.log("first")
-
 
 
 
@@ -400,9 +423,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
     try {
         console.log("first")
         const updatedValues = req.body;
-<<<<<<< Updated upstream
-        console.log(updatedValues.holidayHomeDetails);
-=======
+
         const HolidayHomeId = updatedValues.holidayHomeId;
         const CareTaker1Id = updatedValues.caretaker1Id;
         const CareTaker2Id = updatedValues.caretaker2Id;
@@ -593,19 +614,6 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         //     );
         // }
 
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> Stashed changes
-
         res.json({ message: "Holiday Home updated successfully" });
 
     }
@@ -617,4 +625,4 @@ const updateHolidayHome = async (req: Request, res: Response) => {
 };
 
 
-export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental, updateHolidayHome, getHolidayHomeNames }
+export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental, updateHolidayHome, getHolidayHomeNames, getReservationDetails }
