@@ -5,10 +5,9 @@ import { ReservedRooms } from "../entities/ReservedRooms";
 import { Complaints } from "../entities/Complaint";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
-import { getConnection } from "typeorm";
-import { getManager } from "typeorm";
 import { HolidayHome } from "../entities/HolidayHome";
 import { Room } from "../entities/Room";
+import { Hall } from "../entities/Hall";
 import { Between, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 
 const router = express.Router();
@@ -139,17 +138,14 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
     CheckoutDate,
     NoOfAdults,
     NoOfChildren,
-    NoOfRooms,
-    NoOfHalls,
     RoomPrice,
     HallPrice,
     Price,
     IsPaid,
-    RoomCodes,
   } = req.body;
 
   // const ServiceNO = req.cookies.serviceNo;
-  console.log("roomsss codesing ", RoomCodes);
+  //console.log("roomsss codesing ", RoomCodes);
   //   const locationadmin = LocationAdmin.create();
   console.log("arunaaa", ServiceNO);
 
@@ -186,8 +182,6 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
           CheckoutDate,
           NoOfAdults,
           NoOfChildren,
-          NoOfRooms,
-          NoOfHalls,
           RoomPrice,
           HallPrice,
           Price,
@@ -199,18 +193,18 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
       .execute();
 
       // add room code array to reserved room table
-      for (var i = 0; i < RoomCodes.length; i++) {
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(ReservedRooms)
-          .values([
-            {
-              ReservationId: reserveID,
-              roomCode: RoomCodes[i],
-            },
-          ])
-          .execute();
-      }
+      // for (var i = 0; i < RoomCodes.length; i++) {
+      //   await AppDataSource.createQueryBuilder()
+      //     .insert()
+      //     .into(ReservedRooms)
+      //     .values([
+      //       {
+      //         ReservationId: reserveID,
+      //         roomCode: RoomCodes[i],
+      //       },
+      //     ])
+      //     .execute();
+      // }
     res.status(200).json({ message: "Reservation added successfully" });
   } catch (error) {
     console.log(`error is ${error}`);
@@ -237,6 +231,42 @@ const getRooms = async (req: Request, res: Response) => {
   try {
     const rooms = await AppDataSource.manager.find(Room);
     res.status(200).json(rooms);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
+//get total room rental in paticular holidayhome
+const getTotalRoomRental = async (req: Request, res: Response) => {
+  const holidayHomeId = req.params.HolidayHomeId;
+  const rooms = await AppDataSource.manager.find(Room, {
+    where: {
+      HolidayHomeId: holidayHomeId,
+    },
+  });
+  const halls = await AppDataSource.manager.find(Hall, {
+    where: {
+      HolidayHomeId: holidayHomeId,
+    },
+  });
+  try {
+    let totalRoomRental = 0;
+    let maxAdults = 0;
+    let maxChildren = 0;
+    let totalHallRental = 0;
+    for (var i = 0; i < rooms.length; i++) {
+      totalRoomRental += rooms[i].roomRental;
+      maxAdults += rooms[i].NoOfAdults;
+      maxChildren += rooms[i].NoOfChildren;
+    }
+    for (var i = 0; i < halls.length; i++) {
+      totalHallRental += Number(halls[i].hallRental);
+      maxAdults += Number(halls[i].hallNoOfAdults);
+      maxChildren += Number(halls[i].hallNoOfChildren);
+    }
+    //console.log(totalRental);
+    res.status(200).json({totalRoomRental, totalHallRental , maxAdults, maxChildren});
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
@@ -357,8 +387,10 @@ const getAvailableRooms = async (req: Request, res: Response) => {
 export {
   getReservation,
   AddResrvation,
+  AddSpecialResrvation,
   getHolidayHomeNames,
   getRooms,
   AddComplaint,
   getAvailableRooms,
+  getTotalRoomRental,
 };
