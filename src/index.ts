@@ -11,7 +11,6 @@ import { CareTaker } from "./entities/CareTaker";
 import { HolidayHome } from "./entities/HolidayHome";
 import { RoomRentalSettings } from "./entities/HolidayHome";
 import { RoomTypeSettings } from "./entities/HolidayHome";
-import { Image } from "./entities/Image";
 import { Unit } from "./entities/Unit";
 import { Room } from "./entities/Room";
 import { ContactNo } from "./entities/ContactNo";
@@ -71,7 +70,7 @@ export const AppDataSource = new DataSource({
     Hall,
     CareTaker,
     HolidayHome,
-    Image,
+
     Unit,
     Room,
     Reservation,
