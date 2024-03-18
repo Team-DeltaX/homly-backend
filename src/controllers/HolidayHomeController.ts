@@ -177,7 +177,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
             Description: allValues.holidayHomeDetails.description,
             Category: allValues.holidayHomeDetails.category,
             Status: allValues.holidayHomeDetails.status,
-            TotalRental: allValues.homeBreakDown.bdValue.totalRental,
+
             MaxNoOfAdults: allValues.homeBreakDown.adultsCount,
             MaxNoOfChildren: allValues.homeBreakDown.childCount,
             Approved: false,
@@ -423,6 +423,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
     try {
         console.log("first")
         const updatedValues = req.body;
+
         const HolidayHomeId = updatedValues.holidayHomeId;
         const CareTaker1Id = updatedValues.caretaker1Id;
         const CareTaker2Id = updatedValues.caretaker2Id;
@@ -434,7 +435,6 @@ const updateHolidayHome = async (req: Request, res: Response) => {
                 Description: updatedValues.holidayHomeDetails.description,
                 Category: updatedValues.holidayHomeDetails.category,
                 Status: updatedValues.holidayHomeDetails.status,
-                TotalRental: updatedValues.homeBreakDown.bdValue.totalRental,
                 MaxNoOfAdults: updatedValues.homeBreakDown.adultsCount,
                 MaxNoOfChildren: updatedValues.homeBreakDown.childCount,
                 Gym: updatedValues.homeBreakDown.bdValue.gym,
@@ -613,18 +613,6 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         //         }
         //     );
         // }
-
-
-
-
-
-
-
-
-
-
-
-
 
         res.json({ message: "Holiday Home updated successfully" });
 
