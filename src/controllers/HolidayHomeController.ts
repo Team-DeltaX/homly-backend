@@ -177,7 +177,6 @@ const createHolidayHome = async (req: Request, res: Response) => {
             Description: allValues.holidayHomeDetails.description,
             Category: allValues.holidayHomeDetails.category,
             Status: allValues.holidayHomeDetails.status,
-
             MaxNoOfAdults: allValues.homeBreakDown.adultsCount,
             MaxNoOfChildren: allValues.homeBreakDown.childCount,
             Approved: false,
@@ -186,7 +185,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
             Park: allValues.homeBreakDown.bdValue.park,
             Wifi: allValues.homeBreakDown.bdValue.wifi,
             Facilities: allValues.homeBreakDown.bdValue.facilities,
-            District: allValues.holidayHomeDetails.district,
+            District: allValues.holidayHomeDetails.district.toLowerCase(),
             Pool: allValues.homeBreakDown.bdValue.pool,
             Bar: allValues.homeBreakDown.bdValue.bar,
             AdminNo: "1",
