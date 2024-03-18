@@ -30,7 +30,7 @@ export class Hall extends BaseEntity {
     @Column({
         type: "numeric"
     })
-    hallRental!: Number;
+    hallRental!: number;
 
 
 
