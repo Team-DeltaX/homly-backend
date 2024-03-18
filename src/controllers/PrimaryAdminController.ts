@@ -705,6 +705,7 @@ export const get_income_in_date = async (req: Request, res: Response) => {
 
   try {
     const reservations = await Reservation.find({
+      where: { IsPaid: true },
       select: ["Price", "createdAt"],
     });
     const modifiedReservations = reservations.map((reservation) => ({
