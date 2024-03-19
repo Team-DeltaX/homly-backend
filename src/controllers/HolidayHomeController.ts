@@ -130,24 +130,39 @@ const getRoomRental = async (req: Request, res: Response) => {
 }
 const getReservationDetails = async (req: Request, res: Response) => {
     const { HolidayHomeId } = req.params;
-    const reservations: { reserved: any, reservation: any }[] = [];
+    console.log(HolidayHomeId);
     const reservationDetails = await AppDataSource.manager.find(Reservation, {
         where: { "HolidayHome": HolidayHomeId },
-        select: ["ReservationId", "CheckinDate", "CheckoutDate"]
+        select: ["ReservationId", "CheckinDate", "CheckoutDate", "IsPaid"],
+        order: { CheckinDate: "ASC" }
     });
 
-    for (const reservation of reservationDetails) {
-        const rooms = await AppDataSource.manager.find(ReservedRooms, {
-            where: { "ReservationId": reservation.ReservationId },
+
+
+    res.json({ reservations: reservationDetails });
+}
+
+
+
+const getReservedRooms = async (req: Request, res: Response) => {
+    let roomCodes = []
+    const reservationIds = req.query;
+    console.log("idr", reservationIds);
+    for (let i in reservationIds) {
+        // console.log(reservationIds[i])
+        const reservedRooms = await AppDataSource.manager.find(ReservedRooms, {
+            where: { "ReservationId": reservationIds[i]?.toString() },
             select: ["roomCode"]
         });
 
-        reservations.push({ reserved: rooms, reservation });
+        for (let i = 0; reservedRooms.length > i; i++) {
+            roomCodes.push(reservedRooms[i].roomCode)
+        }
+
     }
 
-    res.json({ reservations: reservations });
+    res.json(roomCodes);
 }
-
 
 const createHolidayHome = async (req: Request, res: Response) => {
 
@@ -166,7 +181,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
             // incremenet string maxvalue by 1
             let num = maxvalue.split("-");
             console.log(num[1]);
-            holidayHomeId = "HH-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
+            holidayHomeId = "HH-" + (parseInt(num[1]) + 1).toString().padStart(6, "0");
         } else {
             holidayHomeId = "HH-000001";
         }
@@ -494,7 +509,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
 
         await HolidayHome.update({ HolidayHomeId: HolidayHomeId },
             {
-                Name: updatedValues.holidayHomeDetails.name,
+                Name: updatedValues.holidayHomeDetails.name.toLowerCase(),
                 Address: updatedValues.holidayHomeDetails.address,
                 Description: updatedValues.holidayHomeDetails.description,
                 Category: updatedValues.holidayHomeDetails.category,
@@ -506,7 +521,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
                 Park: updatedValues.homeBreakDown.bdValue.park,
                 Wifi: updatedValues.homeBreakDown.bdValue.wifi,
                 Facilities: updatedValues.homeBreakDown.bdValue.facilities,
-                District: updatedValues.holidayHomeDetails.district,
+                District: updatedValues.holidayHomeDetails.district.toLowerCase(),
                 Pool: updatedValues.homeBreakDown.bdValue.pool,
                 Bar: updatedValues.homeBreakDown.bdValue.bar,
             }
@@ -705,4 +720,4 @@ const updateHolidayHome = async (req: Request, res: Response) => {
 };
 
 
-export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental, updateHolidayHome, getHolidayHomeNames, getReservationDetails }
+export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental, updateHolidayHome, getHolidayHomeNames, getReservationDetails, getReservedRooms }
