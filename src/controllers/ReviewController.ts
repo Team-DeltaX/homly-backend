@@ -69,7 +69,8 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
               inter3 as keyof HolidayHome,
               "Name",
               "Address",
-              "overall_rating"
+              "overall_rating",
+              "MainImage"
             ],
             where:{
               Status: "Active",
