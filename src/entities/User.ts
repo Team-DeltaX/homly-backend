@@ -21,7 +21,6 @@ export class HomlyUser extends BaseEntity {
   contact_number!: string;
 
   @Column({
-    type: "clob",
     nullable: true,
   })
   image!: string;

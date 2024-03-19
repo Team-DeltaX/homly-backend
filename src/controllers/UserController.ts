@@ -534,6 +534,7 @@ const resetPassword = async (req: Request, res: Response) => {
 // get user by service number
 const userById = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
+  console.log(serviceNo);
   try {
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -1034,12 +1035,12 @@ const getHolidayHomes = async (req: Request, res: Response) => {
         ],
         where: [
           {
-            Name: Like(`${search.toString()}%`),
+            Name: Like(`${search.toString().toLowerCase()}%`),
             Approved: true,
             Status: "Active",
           },
           {
-            District: Like(`${search.toString()}%`),
+            District: Like(`${search.toString().toLowerCase()}%`),
             Approved: true,
             Status: "Active",
           },
