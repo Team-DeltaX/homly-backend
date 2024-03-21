@@ -1,7 +1,7 @@
 import { Entity, PrimaryColumn, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
 import { CareTaker } from "./CareTaker";
 import { Hall } from "./Hall";
-import { Image } from "./Image";
+
 import { ContactNo } from "./ContactNo";
 import { Unit } from "./Unit";
 import { Room } from "./Room";
@@ -34,28 +34,7 @@ export class HolidayHome extends BaseEntity {
   @Column()
   Status!: string;
 
-  @Column(
-    {
-      type: "numeric",
-    }
-  )
-  TotalRental!: number;
 
-  @Column(
-    {
-      type: "numeric",
-      default: 0
-    }
-  )
-  ServiceCharge!: number;
-
-  @Column(
-    {
-      type: "numeric",
-      default: 0
-    }
-  )
-  OtherCharge!: number;
 
   @Column(
     {
@@ -155,4 +134,68 @@ export class HolidayHome extends BaseEntity {
   })
   AdminNo!: string;
 
+  @Column({
+
+    default: null
+  })
+  MainImage!: string;
+
+  @Column({
+
+    default: null
+  })
+  Image1!: string;
+
+  @Column({
+
+    default: null
+  })
+  Image2!: string;
+
+  @Column({
+
+    default: null
+  })
+  Image3!: string;
+
+}
+
+
+@Entity()
+export class RoomRentalSettings extends BaseEntity {
+
+  @PrimaryColumn()
+  RSId!: string;
+
+  @Column()
+  HolidayHomeId!: string;
+
+  @Column()
+  roomType!: string;
+
+  @Column()
+  rental!: string;
+
+  @Column()
+  acNonAc!: string;
+
+}
+
+
+@Entity()
+export class RoomTypeSettings extends BaseEntity {
+  @PrimaryColumn()
+  RTId!: string;
+
+  @Column()
+  roomType!: string;
+
+  @Column()
+  HolidayHomeId!: string;
+
+  @Column()
+  adults!: string;
+
+  @Column()
+  children!: string;
 }
