@@ -743,3 +743,37 @@ export const getallHH=async(req:Request,res:Response)=>{
     res.status(500).json({ message: "Error in getting all HH names " });
   }
 }
+
+export const get_income_in_date_specificHH = async (req: Request, res: Response) => {
+  const date = req.params.date;
+  // console.log(date);
+  const hhid=req.params.hhid;
+
+
+  try {
+    const reservations = await Reservation.find({
+     
+      where: { IsPaid: true,HolidayHome:hhid },
+      select: ["Price", "createdAt"],
+    });
+    const modifiedReservations = reservations.map((reservation) => ({
+      Price: reservation.Price,
+      createdAt: reservation.createdAt.toISOString().split("T")[0],
+    }));
+
+    const targetDate = date;
+
+    const reservationsForDate = modifiedReservations.filter(
+      (reservation) => reservation.createdAt === targetDate
+    );
+
+    let sumForDate = 0;
+    reservationsForDate.forEach((reservation) => {
+      sumForDate += reservation.Price;
+    });
+
+    res.status(200).json({ sumForDate });
+  } catch (error) {
+    console.log(error);
+  }
+};
