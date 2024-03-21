@@ -32,7 +32,9 @@ import {
 import { Employee } from "../entities/Empolyee";
 
 import { HolidayHome } from "../entities/HolidayHome";
-
+import { Room } from "../entities/Room";
+import { Hall } from "../entities/Hall";
+import { Rental } from "../entities/Rental";
 import { Reservation } from "../entities/Reservation";
 
 // create token
@@ -532,6 +534,7 @@ const resetPassword = async (req: Request, res: Response) => {
 // get user by service number
 const userById = async (req: Request, res: Response) => {
   const serviceNo = req.cookies.serviceNo;
+  console.log(serviceNo);
   try {
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -653,25 +656,141 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+// calculate total rental for holiday home
+const calculateTotalRental = async (holidayHomeId: string) => {
+  let totalRental = 0;
+  try {
+    const roomRental = await AppDataSource.manager.find(Room, {
+      select: ["roomCode", "roomRental"],
+      where: {
+        HolidayHomeId: holidayHomeId,
+      },
+    });
+
+    for (let i = 0; i < roomRental.length; i++) {
+      totalRental += roomRental[i].roomRental;
+    }
+
+    const hallRental = await AppDataSource.manager.find(Hall, {
+      select: ["hallCode", "hallRental"],
+      where: {
+        HolidayHomeId: holidayHomeId,
+      },
+    });
+
+    for (let i = 0; i < hallRental.length; i++) {
+      totalRental += hallRental[i].hallRental;
+    }
+
+    const currentDate = new Date();
+    const currentMonth = currentDate.toLocaleString("default", {
+      month: "long",
+    });
+    // check weekend or weekday
+    const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+
+    if (isWeekend) {
+      for (let i = 0; i < roomRental.length; i++) {
+        await AppDataSource.manager
+          .find(Rental, {
+            where: {
+              HolidayHomeId: holidayHomeId,
+              HRUId: roomRental[i].roomCode,
+              Month: String(currentMonth),
+            },
+          })
+          .then((rental) => {
+            if (rental) {
+              totalRental -= rental[0].WeekEndRental;
+            }
+          });
+      }
+      for (let i = 0; i < hallRental.length; i++) {
+        await AppDataSource.manager
+          .find(Rental, {
+            where: {
+              HolidayHomeId: holidayHomeId,
+              HRUId: hallRental[i].hallCode,
+              Month: String(currentMonth),
+            },
+          })
+          .then((rental) => {
+            if (rental) {
+              totalRental -= rental[0].WeekEndRental;
+            }
+          });
+      }
+    } else {
+      for (let i = 0; i < roomRental.length; i++) {
+        await AppDataSource.manager
+          .find(Rental, {
+            where: {
+              HolidayHomeId: holidayHomeId,
+              HRUId: roomRental[i].roomCode,
+              Month: String(currentMonth),
+            },
+          })
+          .then((rental) => {
+            if (rental[0]) {
+              totalRental -= rental[0].WeekEndRental;
+            }
+          });
+      }
+      for (let i = 0; i < hallRental.length; i++) {
+        await AppDataSource.manager
+          .find(Rental, {
+            where: {
+              HolidayHomeId: holidayHomeId,
+              HRUId: hallRental[i].hallCode,
+              Month: String(currentMonth),
+            },
+          })
+          .then((rental) => {
+            if (rental[0]) {
+              totalRental -= rental[0].WeekEndRental;
+            }
+          });
+      }
+    }
+    return totalRental;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // get top rated holiday homes
 const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
-  const holidayHomes = await AppDataSource.manager
-  .find(HolidayHome, {
-    select: ["HolidayHomeId", "Name", "Address","overall_rating"],
+  const holidayHomes = await AppDataSource.manager.find(HolidayHome, {
+    select: ["HolidayHomeId", "Name", "Address", "overall_rating", "MainImage"],
     order: {
       overall_rating: "DESC",
     },
     where: {
       Approved: true,
       Status: "Active",
-    }
+    },
   });
 
   const topRatedHolidayHomes = holidayHomes.slice(0, 5);
-  
+
+  let topRatedHolidayHomesWithPrice = [];
+  for (let i = 0; i < topRatedHolidayHomes.length; i++) {
+    const totalRental = await calculateTotalRental(
+      topRatedHolidayHomes[i].HolidayHomeId
+    );
+    topRatedHolidayHomesWithPrice.push({
+      HolidayHomeId: topRatedHolidayHomes[i].HolidayHomeId,
+      Name: topRatedHolidayHomes[i].Name,
+      Address: topRatedHolidayHomes[i].Address,
+      overall_rating: topRatedHolidayHomes[i].overall_rating,
+      TotalRental: totalRental,
+      HHImage: topRatedHolidayHomes[i].MainImage,
+    });
+  }
+
   // console.log(topRatedHolidayHomes);
-  res.status(200).json(topRatedHolidayHomes);
-}
+  res.status(200).json(topRatedHolidayHomesWithPrice);
+};
 
 // change facility name
 const changeFacilityName = (facility: string) => {
@@ -821,13 +940,15 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
           for (let i = 0; i < reservations.length; i++) {
             await AppDataSource.manager
               .find(HolidayHome, {
-                select: ["Name", "Address"],
+                select: ["Name", "Address", "MainImage"],
                 where: {
                   HolidayHomeId: reservations[i].HolidayHome,
                 },
               })
               .then((holidayHome) => {
-                const expireDate = new Date(reservations[i].updatedAt.getTime() + (3 * 24 * 60 * 60 * 1000));
+                const expireDate = new Date(
+                  reservations[i].updatedAt.getTime() + 3 * 24 * 60 * 60 * 1000
+                );
                 ongoingReservations.push({
                   reservation: reservations[i],
                   holidayHome: holidayHome,
@@ -870,7 +991,7 @@ const getUserPastReservation = async (req: Request, res: Response) => {
           for (let i = 0; i < reservations.length; i++) {
             await AppDataSource.manager
               .find(HolidayHome, {
-                select: ["Name", "Address"],
+                select: ["Name", "Address", "MainImage"],
                 where: {
                   HolidayHomeId: reservations[i].HolidayHome,
                 },
@@ -886,7 +1007,6 @@ const getUserPastReservation = async (req: Request, res: Response) => {
         } else {
           res.status(200).json({ message: "no reservations" });
         }
-
       })
       .catch((err) => {
         res.status(500).json({ message: "Internal Server error" });
@@ -900,50 +1020,101 @@ const getUserPastReservation = async (req: Request, res: Response) => {
 const getHolidayHomes = async (req: Request, res: Response) => {
   const search = req.query.search;
   console.log(search);
-  if(search && search !== "all"){
+  if (search && search !== "all") {
     // serach by district or name
-    
-    await AppDataSource.manager.find(HolidayHome, {
-      select: ["HolidayHomeId", "Name", "Address","District", "overall_rating"],
-      where: [
-        { Name: Like(`${search.toString()}%`),Approved: true, Status: "Active" },
-        { District: Like(`${search.toString()}%`),Approved: true, Status: "Active" },
-        // { Approved: true, Status: "Active" }
-      ],
-      order: {
-        updatedAt: "DESC",
-      }
-    }).then((holidayHomes) => {
-      if(holidayHomes){
-      res.status(200).json(holidayHomes);
-      }else{
-        res.status(200).json({ message: "No holiday homes found" });
-      }
-    
-    }).catch((err) => {
-      res.status(500).json({ message: "Internal Server error" });
-    });
 
-  }else{
-     await AppDataSource.manager.find(HolidayHome, {
-      select: ["HolidayHomeId", "Name", "Address","District",  "overall_rating"],
-      where: {
-        Approved: true,
-        Status: "Active",
-      },
-      order: {
-        updatedAt: "DESC",
-      }
-    }).then((holidayHomes) => {
-      res.status(200).json(holidayHomes);
-    
-    }).catch((err) => {
-      res.status(500).json({ message: "Internal Server error" });
-    });
+    await AppDataSource.manager
+      .find(HolidayHome, {
+        select: [
+          "HolidayHomeId",
+          "Name",
+          "Address",
+          "District",
+          "overall_rating",
+          "MainImage",
+        ],
+        where: [
+          {
+            Name: Like(`${search.toString().toLowerCase()}%`),
+            Approved: true,
+            Status: "Active",
+          },
+          {
+            District: Like(`${search.toString().toLowerCase()}%`),
+            Approved: true,
+            Status: "Active",
+          },
+          // { Approved: true, Status: "Active" }
+        ],
+        order: {
+          updatedAt: "DESC",
+        },
+      })
+      .then(async (holidayHomes) => {
+        if (holidayHomes) {
+          let holidayHomesWithPrice = [];
+          for (let i = 0; i < holidayHomes.length; i++) {
+            const totalRental = await calculateTotalRental(
+              holidayHomes[i].HolidayHomeId
+            );
+            holidayHomesWithPrice.push({
+              HolidayHomeId: holidayHomes[i].HolidayHomeId,
+              Name: holidayHomes[i].Name,
+              Address: holidayHomes[i].Address,
+              overall_rating: holidayHomes[i].overall_rating,
+              TotalRental: totalRental,
+              HHImage: holidayHomes[i].MainImage,
+            });
+          }
+          res.status(200).json(holidayHomesWithPrice);
+        } else {
+          res.status(200).json({ message: "No holiday homes found" });
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ message: "Internal Server error" });
+      });
+  } else {
+    await AppDataSource.manager
+      .find(HolidayHome, {
+        select: [
+          "HolidayHomeId",
+          "Name",
+          "Address",
+          "District",
+          "overall_rating",
+          "MainImage",
+        ],
+        where: {
+          Approved: true,
+          Status: "Active",
+        },
+        order: {
+          updatedAt: "DESC",
+        },
+      })
+      .then(async (holidayHomes) => {
+        let holidayHomesWithPrice = [];
+        for (let i = 0; i < holidayHomes.length; i++) {
+          const totalRental = await calculateTotalRental(
+            holidayHomes[i].HolidayHomeId
+          );
+          holidayHomesWithPrice.push({
+            HolidayHomeId: holidayHomes[i].HolidayHomeId,
+            Name: holidayHomes[i].Name,
+            Address: holidayHomes[i].Address,
+            overall_rating: holidayHomes[i].overall_rating,
+            TotalRental: totalRental,
+            HHImage: holidayHomes[i].MainImage,
+          });
+        }
+        res.status(200).json(holidayHomesWithPrice);
+      })
+      .catch((err) => {
+        res.status(500).json({ message: "Internal Server error" });
+      });
   }
-
-
-}
+};
 
 export {
   allEmployees,
