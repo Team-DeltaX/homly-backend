@@ -40,6 +40,7 @@ import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
 import { requireAuth } from "./middleware/authMiddleware";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
+import { ReportsRouter } from "./routes/ReportRouters";
 
 import dotenv from "dotenv";
 import { ReservationRouter } from "./routes/ReservationRouter";
@@ -105,6 +106,7 @@ AppDataSource.initialize()
     app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
     app.use('/admin/auth/locationadmin/reservations', SpecialReservationRouter)
     app.use('/admin', LocationAdminRoute)
+    app.use('/admin', ReportsRouter)
     app.use('/admin', BlacklistRouter)
     app.use('/users', homly_user);
     app.use('/users', reg_users);
