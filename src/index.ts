@@ -28,6 +28,7 @@ import {
   UserOTPVerification,
   UserInteresed,
 } from "./entities/User";
+import { PaymentCard } from "./entities/PaymentCard";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { UserFeedback } from "./entities/Feedback";
@@ -83,6 +84,7 @@ export const AppDataSource = new DataSource({
     RoomRentalSettings,
     RoomTypeSettings,
     ReservedRooms,
+    PaymentCard,
   ],
 
   synchronize: true,
