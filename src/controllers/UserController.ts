@@ -1116,6 +1116,27 @@ const getHolidayHomes = async (req: Request, res: Response) => {
   }
 };
 
+// add payment card details
+const addPaymentCard = async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Payment card added", success: true });
+  
+};
+
+// get payment card details
+const getPaymentCard = async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Payment card details", success: true });
+};
+
+// update default payment card
+const updateDefaultPaymentCard = async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Default payment card updated", success: true });
+};
+
+// delete payment card
+const deletePaymentCard = async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Payment card deleted", success: true });
+};
+
 export {
   allEmployees,
   allUsers,
@@ -1135,4 +1156,8 @@ export {
   getUserOngoingReservation,
   getUserPastReservation,
   getHolidayHomes,
+  addPaymentCard,
+  getPaymentCard,
+  updateDefaultPaymentCard,
+  deletePaymentCard,                                
 };
