@@ -700,9 +700,7 @@ const calculateTotalRental = async (holidayHomeId: string) => {
             },
           })
           .then((rental) => {
-            if (rental) {
-              totalRental -= rental[0].WeekEndRental;
-            }
+            if (rental.length > 0) totalRental -= rental[0].WeekEndRental;
           });
       }
       for (let i = 0; i < hallRental.length; i++) {
@@ -715,9 +713,7 @@ const calculateTotalRental = async (holidayHomeId: string) => {
             },
           })
           .then((rental) => {
-            if (rental) {
-              totalRental -= rental[0].WeekEndRental;
-            }
+            if (rental.length > 0) totalRental -= rental[0].WeekEndRental;
           });
       }
     } else {
@@ -731,9 +727,7 @@ const calculateTotalRental = async (holidayHomeId: string) => {
             },
           })
           .then((rental) => {
-            if (rental[0]) {
-              totalRental -= rental[0].WeekEndRental;
-            }
+            if (rental.length > 0) totalRental -= rental[0].WeekEndRental;
           });
       }
       for (let i = 0; i < hallRental.length; i++) {
@@ -746,9 +740,7 @@ const calculateTotalRental = async (holidayHomeId: string) => {
             },
           })
           .then((rental) => {
-            if (rental[0]) {
-              totalRental -= rental[0].WeekEndRental;
-            }
+            if (rental.length > 0) totalRental -= rental[0].WeekEndRental;
           });
       }
     }
@@ -1119,7 +1111,6 @@ const getHolidayHomes = async (req: Request, res: Response) => {
 // add payment card details
 const addPaymentCard = async (req: Request, res: Response) => {
   res.status(200).json({ message: "Payment card added", success: true });
-  
 };
 
 // get payment card details
@@ -1129,7 +1120,9 @@ const getPaymentCard = async (req: Request, res: Response) => {
 
 // update default payment card
 const updateDefaultPaymentCard = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Default payment card updated", success: true });
+  res
+    .status(200)
+    .json({ message: "Default payment card updated", success: true });
 };
 
 // delete payment card
@@ -1159,5 +1152,5 @@ export {
   addPaymentCard,
   getPaymentCard,
   updateDefaultPaymentCard,
-  deletePaymentCard,                                
+  deletePaymentCard,
 };
