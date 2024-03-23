@@ -2,6 +2,7 @@ import express, { response } from "express";
 import { Reservation } from "../entities/Reservation";
 import { Employee } from "../entities/Empolyee";
 import { ReservedRooms } from "../entities/ReservedRooms";
+import { ReservedHalls } from "../entities/ReservedHalls";
 import { Complaints } from "../entities/Complaint";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
@@ -57,6 +58,7 @@ const AddResrvation = async (req: Request, res: Response) => {
     Price,
     IsPaid,
     RoomCodes,
+    HallCodes,
   } = req.body;
 
   const ServiceNO = req.cookies.serviceNo;
@@ -127,6 +129,19 @@ const AddResrvation = async (req: Request, res: Response) => {
           ])
           .execute();
       }
+      // add hall code array to reserved hall table
+      for (var i = 0; i < HallCodes.length; i++) {
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(ReservedHalls)
+          .values([
+            {
+              ReservationId: reserveID,
+              hallCode: HallCodes[i],
+            },
+          ])
+          .execute();
+      }
     res.status(200).json({ message: "Reservation added successfully" });
   } catch (error) {
     console.log(`error is ${error}`);
@@ -134,6 +149,9 @@ const AddResrvation = async (req: Request, res: Response) => {
   }
   console.log(ServiceNO, HolidayHome, CheckinDate, CheckoutDate);
 };
+
+//return all reservations in between given checkinDate and Checkout date
+
 
 const AddSpecialResrvation = async (req: Request, res: Response) => {
   console.log(req.body);
@@ -158,6 +176,22 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
   // add roomcodes array to database
 
   try {
+    const existingReservations = await AppDataSource.manager.find(Reservation, {
+      select: ["ReservationId"],
+      where: {
+        CheckinDate: LessThanOrEqual(new Date(CheckoutDate)),
+        CheckoutDate: MoreThanOrEqual(new Date(CheckinDate)),
+        HolidayHome: HolidayHome,
+      },
+    });
+    for (const reservation of existingReservations) {
+      await AppDataSource.manager.remove(Reservation, reservation);
+      // remove them also from reservedRoom and ReservedHalls table
+      // await AppDataSource.manager.remove(ReservedRooms, {
+      //   ReservationId: reservation.ReservationId,
+      // });
+    }
+    console.log("existing reservationsss",existingReservations);
     // generate unique auto incrementing reservation id
     const reservationId = await AppDataSource.query(
       `SELECT MAX("ReservationId") as maxval FROM "INOADMIN"."reservation" ORDER BY "createdAt"`
@@ -176,7 +210,7 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
     }
 
 
-    await AppDataSource.createQueryBuilder()
+    AppDataSource.createQueryBuilder()
       .insert()
       .into(Reservation)
       .values([
@@ -195,22 +229,54 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
           IsSpecial: true,
         },
       ])
-
+      // delete all reservations which are between these checkin date and checkout date
       .execute();
-
-      // add room code array to reserved room table
-      // for (var i = 0; i < RoomCodes.length; i++) {
+      // get all rooms codes in HolidayHome
+      // add all roomCodes in this holidayhome to the reservedRooms table in this reservation
+      // const rooms = await AppDataSource.manager.find(Room, {
+      //   where: {
+      //     HolidayHomeId: HolidayHome,
+      //   },
+      // });
+      // for (var i = 0; i < rooms.length; i++) {
       //   await AppDataSource.createQueryBuilder()
       //     .insert()
       //     .into(ReservedRooms)
       //     .values([
       //       {
       //         ReservationId: reserveID,
-      //         roomCode: RoomCodes[i],
+      //         roomCode: rooms[i].roomCode,
       //       },
       //     ])
       //     .execute();
       // }
+      // AppDataSource.createQueryBuilder()
+      // .delete()
+      // .from(Reservation)
+      // .where("CheckinDate BETWEEN :checkinDate AND :checkoutDate", {
+      //   HolidayHomeId: HolidayHome,
+      //   checkinDate: CheckinDate,
+      //   checkoutDate: CheckoutDate,
+      // })
+      // .execute();
+      // add all hallCodes in this holidayhome to the reservedHalls table in this reservation
+      const halls = await AppDataSource.manager.find(Hall, {
+        where: {
+          HolidayHomeId: HolidayHome,
+        },
+      });
+      for (var i = 0; i < halls.length; i++) {
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(ReservedHalls)
+          .values([
+            {
+              ReservationId: reserveID,
+              hallCode: halls[i].hallCode,
+            },
+          ])
+          .execute();
+      }
     res.status(200).json({ message: "Reservation added successfully" });
   } catch (error) {
     console.log(`error is ${error}`);
@@ -336,7 +402,48 @@ const getReservedRooms = async (
 
   return availableRooms;
 };
+// get halls
+const getReservedHalls = async (
+  allHalls: Hall[],
+  reservation: Reservation[]
+) => {
+  // get reserved rooms
+  let reservedHalls = [];
+  for (var i = 0; i < reservation.length; i++) {
+    const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
+      // select: ["roomCode"],
+      where: {
+        ReservationId: reservation[i].ReservationId,
+      },
+    });
 
+    for (var j = 0; j < reservedhalls.length; j++) {
+      reservedHalls.push(reservedhalls[j]);
+    }
+  }
+
+  // remove duplicated room code
+  reservedHalls = reservedHalls.filter(
+    (v, i, a) => a.findIndex((t) => t.hallCode === v.hallCode) === i
+  );
+
+  // remove room from all rooms
+  let availableHalls = [];
+  for (var i = 0; i < allHalls.length; i++) {
+    let flag = 0;
+    for (var j = 0; j < reservedHalls.length; j++) {
+      if (allHalls[i].hallCode === reservedHalls[j].hallCode) {
+        flag = 1;
+        break;
+      }
+    }
+    if (flag === 0) {
+      availableHalls.push(allHalls[i]);
+    }
+  }
+
+  return availableHalls;
+};
 {
   /* available rooms for paticular holidayHome for paticular checkin and checkout date */
 }
@@ -346,6 +453,8 @@ const getAvailableRooms = async (req: Request, res: Response) => {
     holidayHomeId = holidayHomeId?.toString();
     if (checkinDate) {
       checkinDate = new Date(checkinDate as string).toISOString();
+    // let checkinDate = new Date(CheckinDate);
+      //checkinDate.setHours(0,0,0,0);
     }
     if (checkoutDate) {
       checkoutDate = new Date(checkoutDate as string).toISOString();
@@ -399,6 +508,51 @@ const getAvailableRooms = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+
+/* available halls for paticular holidayHome for paticular checkin and checkout date */
+const getAvailableHalls = async (req: Request, res: Response) => {
+  try {
+    let { holidayHomeId, checkinDate, checkoutDate } = req.query;
+    holidayHomeId = holidayHomeId?.toString();
+    if (checkinDate) {
+      checkinDate = new Date(checkinDate as string).toISOString();
+    }
+    if (checkoutDate) {
+      checkoutDate = new Date(checkoutDate as string).toISOString();
+    }
+
+    if (checkinDate && checkoutDate) {
+      console.log("holidayHomeId", holidayHomeId, checkinDate, checkoutDate);
+      const allHalls = await AppDataSource.manager.find(Hall, {
+        where: {
+          HolidayHomeId: holidayHomeId,
+        },
+      });
+
+      const reservation = await AppDataSource.manager.find(Reservation, {
+        where: [
+          {
+            HolidayHome: holidayHomeId,
+            CheckinDate: Between(new Date(checkinDate), new Date(checkoutDate)),
+          },
+          {
+            HolidayHome: holidayHomeId,
+            CheckoutDate: Between(
+              new Date(checkinDate),
+              new Date(checkoutDate)
+            ),
+          },
+        ],
+      });
+
+      let availableHalls = await getReservedHalls(allHalls, reservation);
+      res.status(200).json({ availableHalls });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
 export {
   getReservation,
   AddResrvation,
@@ -407,5 +561,6 @@ export {
   getRooms,
   AddComplaint,
   getAvailableRooms,
+  getAvailableHalls,
   getTotalRoomRental,
 };
