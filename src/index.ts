@@ -5,6 +5,7 @@ import OracleDB from "oracledb";
 import { DataSource } from "typeorm";
 import { SpecailReservation } from "./entities/SpecialReservation";
 import { ReservedRooms } from "./entities/ReservedRooms";
+import { ReservedHalls } from "./entities/ReservedHalls";
 import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
@@ -83,6 +84,7 @@ export const AppDataSource = new DataSource({
     RoomRentalSettings,
     RoomTypeSettings,
     ReservedRooms,
+    ReservedHalls,
   ],
 
   synchronize: true,
