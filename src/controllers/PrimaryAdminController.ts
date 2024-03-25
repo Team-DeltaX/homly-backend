@@ -567,10 +567,10 @@ export const getblacklistedhistory = async (req: Request, res: Response) => {
 
 export const markedcomplaints = async (req: Request, res: Response) => {
   try {
-    const serviceno = req.body.ServiceNo;
+    const CompID = req.body.CompID;
     await AppDataSource.manager.update(
       Complaints,
-      { ServiceNo: serviceno },
+      { ComplaintID: CompID },
       { Marked: true }
     );
 
@@ -630,7 +630,6 @@ export const HHcount = async (req: Request, res: Response) => {
 export const Earning = async (req: Request, res: Response) => {
   try {
     const sum = await Reservation.sum("Price", { IsPaid: true });
-    // console.log(sum)
     res.status(200).json({ sum: sum });
   } catch (error) {
     console.log(error);
