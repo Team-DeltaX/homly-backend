@@ -319,7 +319,7 @@ const userLogin = async (req: Request, res: Response) => {
         if (result) {
           await AppDataSource.manager.update(
             HomlyUser,
-            { service_number: serviceNo,  role: "user" },
+            { service_number: serviceNo},
             {
               lastLogin: new Date(),
             }
@@ -999,7 +999,6 @@ const getUserPastReservation = async (req: Request, res: Response) => {
 // get holidayhomes
 const getHolidayHomes = async (req: Request, res: Response) => {
   const {district,search} = req.query;
-  console.log(district,search);
   if (district && district !== "all") {
     // serach by district or name
 
