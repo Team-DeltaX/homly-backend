@@ -46,7 +46,7 @@ const reviewSentiment = async (req: Request, res: Response) => {
 
 // get all holiday homes and save max rating holiday home
 const getHolidayHomesSorted = async (req: Request, res: Response) => {
-  const serviceNo = req.cookies.serviceNo;
+  const serviceNo = (req as any).serviceNo;
   try {
     // get interested
     await AppDataSource.manager
@@ -69,7 +69,8 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
               inter3 as keyof HolidayHome,
               "Name",
               "Address",
-              "overall_rating"
+              "overall_rating",
+              "MainImage"
             ],
             where:{
               Status: "Active",

@@ -29,6 +29,7 @@ import { HolidayHome } from "../entities/HolidayHome";
 import { Hall } from "../entities/Hall";
 import { Room } from "../entities/Room";
 import { ReservedRooms } from "../entities/ReservedRooms";
+import { ReservedHalls } from "../entities/ReservedHalls";
 // import { Reservation } from "../entities/Reservation";
 dotenv.config();
 
@@ -429,6 +430,18 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
       },
     });
 
+    // let reservationDetails = [];
+    // //get the reserved rooms
+    // for(var i = 0; i < reservation.length; i++){
+    //   const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
+    //     select: ["roomCode"],
+    //     where: {
+    //       ReservationId: reservation[i].ReservationId,
+    //     },
+    //   });
+    //   reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms});
+    // }
+
     let reservationDetails = [];
     //get the reserved rooms
     for(var i = 0; i < reservation.length; i++){
@@ -438,8 +451,24 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           ReservationId: reservation[i].ReservationId,
         },
       });
-      reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms});
+      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
+        select: ["hallCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+
+      //reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+            // if one of reservedrooms or reservedhalls is not found then set null for it.otherwise set like above code
+      if(reservedrooms.length === 0){
+        reservationDetails.push({reservation: reservation[i], reservedrooms: [], reservedhalls: reservedhalls});
+      }if(reservedhalls.length === 0){
+        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: []});
+      }else{
+        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+      }
     }
+    console.log(reservationDetails);
     res.status(200).json(reservationDetails);
   } catch (error) {
     console.log(error);
@@ -467,7 +496,34 @@ export const getPastReservation = async (req: Request, res: Response) => {
         CheckoutDate: LessThan(currentDate),
       },
     });
-    res.status(200).json(reservation);
+    let reservationDetails = [];
+    //get the reserved rooms
+    for(var i = 0; i < reservation.length; i++){
+      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
+        select: ["roomCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
+        select: ["hallCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+
+      //reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+            // if one of reservedrooms or reservedhalls is not found then set null for it.otherwise set like above code
+      if(reservedrooms.length === 0){
+        reservationDetails.push({reservation: reservation[i], reservedrooms: [], reservedhalls: reservedhalls});
+      }if(reservedhalls.length === 0){
+        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: []});
+      }else{
+        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+      }
+    }
+    console.log(reservationDetails);
+    res.status(200).json(reservationDetails);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });

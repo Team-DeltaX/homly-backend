@@ -1,5 +1,5 @@
 import express from "express";
-import {getReservation, AddResrvation, AddSpecialResrvation, getHolidayHomeNames, getRooms, AddComplaint,getAvailableRooms, getTotalRoomRental} from "../controllers/ReservationController"
+import {getReservation, AddResrvation, AddSpecialResrvation, getHolidayHomeNames, getRooms, AddComplaint,getAvailableRooms, getAvailableHalls, getTotalRoomRental} from "../controllers/ReservationController"
 import {getOngoingReservation, getPastReservation} from "../controllers/PrimaryAdminController";
 
 const ReservationRouter = express.Router ();
@@ -14,6 +14,7 @@ ReservationRouter.get("/reservation/ongoing",getOngoingReservation);
 ReservationRouter.get("/reservation/past",getPastReservation);
 // ReservationRouter.post("/reservation/storeReservedRooms",storeReservedRooms);
 ReservationRouter.get("/reservation/availableRooms",getAvailableRooms);
+ReservationRouter.get("/reservation/availableHalls",getAvailableHalls);
 ReservationRouter.get("/reservation/getTotalRoomRental/:HolidayHomeId",getTotalRoomRental);
 //getTotalRoomRental
 export {ReservationRouter}
