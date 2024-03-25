@@ -623,10 +623,10 @@ export const getblacklistedhistory = async (req: Request, res: Response) => {
 
 export const markedcomplaints = async (req: Request, res: Response) => {
   try {
-    const serviceno = req.body.ServiceNo;
+    const CompID = req.body.CompID;
     await AppDataSource.manager.update(
       Complaints,
-      { ServiceNo: serviceno },
+      { ComplaintID: CompID },
       { Marked: true }
     );
 
@@ -686,7 +686,6 @@ export const HHcount = async (req: Request, res: Response) => {
 export const Earning = async (req: Request, res: Response) => {
   try {
     const sum = await Reservation.sum("Price", { IsPaid: true });
-    // console.log(sum)
     res.status(200).json({ sum: sum });
   } catch (error) {
     console.log(error);
@@ -799,3 +798,37 @@ export const getallHH=async(req:Request,res:Response)=>{
     res.status(500).json({ message: "Error in getting all HH names " });
   }
 }
+
+export const get_income_in_date_specificHH = async (req: Request, res: Response) => {
+  const date = req.params.date;
+  // console.log(date);
+  const hhid=req.params.hhid;
+
+
+  try {
+    const reservations = await Reservation.find({
+     
+      where: { IsPaid: true,HolidayHome:hhid },
+      select: ["Price", "createdAt"],
+    });
+    const modifiedReservations = reservations.map((reservation) => ({
+      Price: reservation.Price,
+      createdAt: reservation.createdAt.toISOString().split("T")[0],
+    }));
+
+    const targetDate = date;
+
+    const reservationsForDate = modifiedReservations.filter(
+      (reservation) => reservation.createdAt === targetDate
+    );
+
+    let sumForDate = 0;
+    reservationsForDate.forEach((reservation) => {
+      sumForDate += reservation.Price;
+    });
+
+    res.status(200).json({ sumForDate });
+  } catch (error) {
+    console.log(error);
+  }
+};
