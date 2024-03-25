@@ -70,12 +70,12 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
               "Name",
               "Address",
               "overall_rating",
-              "MainImage"
+              "MainImage",
             ],
-            where:{
+            where: {
               Status: "Active",
-              Approved: true
-            }
+              Approved: true,
+            },
           });
 
           let rating = [];
@@ -107,7 +107,11 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
                 value: interested_value[i][inter3],
               },
             };
-            rating.push({ holiday_home: interested_value[i], rating: total, seperated:seperated });
+            rating.push({
+              holiday_home: interested_value[i],
+              rating: total,
+              seperated: seperated,
+            });
           }
 
           // select maxmimum 5 rated holiday homes
@@ -122,12 +126,20 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
       .catch((err) => {
         res.status(500).json({ message: "Internal Server error" });
       });
-
-  
   } catch (err: any) {
     console.log(err);
     res.status(500).json({ message: "Internal Server error" });
   }
 };
 
-export { reviewSentiment, getHolidayHomesSorted };
+// add user review and update overall rating
+const addUserReview = async (req: Request, res: Response) => {
+  res.status(200).json("add user details");
+};
+
+// get user review
+const getUserReview = async (req: Request, res: Response) => {
+  res.status(200).json("get user details");
+};
+
+export { reviewSentiment, getHolidayHomesSorted, addUserReview, getUserReview };

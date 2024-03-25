@@ -1,38 +1,46 @@
-import { Entity, PrimaryColumn, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
-import { Employee } from "./Empolyee"
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BaseEntity,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
+import { Employee } from "./Empolyee";
 
 @Entity()
 export class Reservation extends BaseEntity {
-    Save() {
+  Save() {
     throw new Error("Method not implemented.");
-    }
+  }
 
-    @PrimaryColumn()
-    ReservationId!: string;
+  @PrimaryColumn()
+  ReservationId!: string;
 
-    @Column()
-    ServiceNO!: string ;
+  @Column()
+  ServiceNO!: string;
 
-    @Column()
-    HolidayHome!: string ;
+  @Column()
+  HolidayHome!: string;
 
-    @Column()
-    CheckinDate!: Date ;
-  
-    @Column()
-    CheckoutDate!: Date ;
+  @Column()
+  CheckinDate!: Date;
 
-    @Column()
-    NoOfAdults!: number;
+  @Column()
+  CheckoutDate!: Date;
 
-    @Column()
-    NoOfChildren!: number;
+  @Column()
+  NoOfAdults!: number;
 
-    @Column({ nullable: true })
-    NoOfRooms!: number;
+  @Column()
+  NoOfChildren!: number;
 
-    @Column({ nullable: true })
-    NoOfHalls!: number;
+  @Column({ nullable: true })
+  NoOfRooms!: number;
 
     @Column({
         nullable: true
@@ -44,20 +52,27 @@ export class Reservation extends BaseEntity {
     })
     HallPrice!: number ;
 
-    @Column()
-    Price!: number ;
+  @Column({
+    nullable: true,
+  })
+  HallPrice!: number;
 
-    @Column()
-    IsPaid!: boolean;
+  @Column()
+  Price!: number;
 
-    @Column({
-        default: false
-    })
-    IsSpecial!: boolean;
+  @Column({
+    default: false,
+  })
+  IsPaid!: boolean;
 
-    @CreateDateColumn()
-    createdAt!: Date;
-  
-    @UpdateDateColumn()
-    updatedAt!: Date;
+  @Column({
+    default: false,
+  })
+  IsSpecial!: boolean;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
