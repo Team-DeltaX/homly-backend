@@ -42,13 +42,15 @@ export class Reservation extends BaseEntity {
   @Column({ nullable: true })
   NoOfRooms!: number;
 
-  @Column({ nullable: true })
-  NoOfHalls!: number;
+    @Column({
+        nullable: true
+    })
+    RoomPrice!: number ;
 
-  @Column({
-    nullable: true,
-  })
-  RoomPrice!: number;
+    @Column({
+        nullable: true
+    })
+    HallPrice!: number ;
 
   @Column({
     nullable: true,

@@ -5,6 +5,7 @@ import OracleDB from "oracledb";
 import { DataSource } from "typeorm";
 import { SpecailReservation } from "./entities/SpecialReservation";
 import { ReservedRooms } from "./entities/ReservedRooms";
+import { ReservedHalls } from "./entities/ReservedHalls";
 import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
@@ -28,6 +29,7 @@ import {
   UserOTPVerification,
   UserInteresed,
 } from "./entities/User";
+import { PaymentCard } from "./entities/PaymentCard";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { UserFeedback } from "./entities/Feedback";
@@ -84,6 +86,9 @@ export const AppDataSource = new DataSource({
     RoomTypeSettings,
     ReservedRooms,
     Review,
+    ReservedHalls,
+    PaymentCard,
+
   ],
 
   synchronize: true,
