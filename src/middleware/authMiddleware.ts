@@ -18,13 +18,16 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
           console.log(err.message);
           res.status(401).json({ message: "Unauthorized", autherized: false });
         } else {
-          console.log(decodedToken,serviceNo);
+          console.log(decodedToken, serviceNo);
           if (decodedToken.serviceNo !== serviceNo) {
             res
               .status(401)
               .json({ message: "Unauthorized", autherized: false });
           } else {
-            next();
+            if (decodedToken.role === "user") {
+              (req as any).serviceNo = decodedToken.serviceNo;
+              return next();
+            }
           }
         }
       }
