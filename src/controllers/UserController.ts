@@ -313,27 +313,18 @@ const userLogin = async (req: Request, res: Response) => {
     .where("user.service_number = :id", { id: serviceNo })
     .getOne();
 
-  // await AppDataSource.manager.findOneBy(HomlyUser, {
-  //   service_number: serviceNo,
-  // });
   if (user && user.verified) {
     if (!user.blacklisted) {
       bcrypt.compare(password, user.password).then(async (result) => {
         if (result) {
           await AppDataSource.manager.update(
             HomlyUser,
-            { service_number: serviceNo },
+            { service_number: serviceNo,  role: "user" },
             {
               lastLogin: new Date(),
             }
           );
           const token = createToken(serviceNo);
-          // set 2 cookies
-
-          res.cookie("serviceNo", serviceNo, {
-            httpOnly: true,
-            maxAge: maxAge * 1000,
-          });
           res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
 
           res.status(200).json({ message: "Login Successful", success: true });
@@ -533,7 +524,7 @@ const resetPassword = async (req: Request, res: Response) => {
 
 // get user by service number
 const userById = async (req: Request, res: Response) => {
-  const serviceNo = req.cookies.serviceNo;
+  const serviceNo = (req as any).serviceNo;
   console.log(serviceNo);
   try {
     const user = await AppDataSource.createQueryBuilder()
@@ -806,7 +797,7 @@ const changeFacilityName = (facility: string) => {
 
 // add user interested facilities
 const addUserIntersted = async (req: Request, res: Response) => {
-  const serviceNo = req.cookies.serviceNo;
+  const serviceNo = (req as any).serviceNo;
   let { fac1, fac2, fac3 } = req.body;
 
   fac1 = await changeFacilityName(fac1);
@@ -852,8 +843,7 @@ const changeFacilityNameReturn = (facility: string) => {
 };
 
 const getUserIntersted = async (req: Request, res: Response) => {
-  const serviceNo = req.cookies.serviceNo;
-  // res.status(200).json(serviceNo)
+  const serviceNo = (req as any).serviceNo;
   try {
     const interested = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -881,9 +871,8 @@ const getUserIntersted = async (req: Request, res: Response) => {
 };
 
 const updateUserIntersted = async (req: Request, res: Response) => {
-  const serviceNo = req.cookies.serviceNo;
+  const serviceNo = (req as any).serviceNo;
   let { fac1, fac2, fac3 } = req.body;
-
   console.log(fac1, fac2, fac3);
 
   try {
@@ -913,7 +902,7 @@ const updateUserIntersted = async (req: Request, res: Response) => {
 };
 
 const getUserOngoingReservation = async (req: Request, res: Response) => {
-  const serviceNo = req.cookies.serviceNo;
+  const serviceNo = (req as any).serviceNo;
 
   try {
     await AppDataSource.manager
@@ -962,8 +951,7 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
 };
 
 const getUserPastReservation = async (req: Request, res: Response) => {
-  const serviceNo = req.cookies.serviceNo;
-
+  const serviceNo = (req as any).serviceNo;
   try {
     await AppDataSource.manager
       .find(Reservation, {
@@ -1010,9 +998,9 @@ const getUserPastReservation = async (req: Request, res: Response) => {
 
 // get holidayhomes
 const getHolidayHomes = async (req: Request, res: Response) => {
-  const search = req.query.search;
-  console.log(search);
-  if (search && search !== "all") {
+  const {district,search} = req.query;
+  console.log(district,search);
+  if (district && district !== "all") {
     // serach by district or name
 
     await AppDataSource.manager
@@ -1025,19 +1013,14 @@ const getHolidayHomes = async (req: Request, res: Response) => {
           "overall_rating",
           "MainImage",
         ],
-        where: [
+        where: 
           {
-            Name: Like(`${search.toString().toLowerCase()}%`),
+            Name: Like(`%${search?.toString().toLowerCase()}%`),
+            District: district.toString().toLowerCase(),
             Approved: true,
             Status: "Active",
           },
-          {
-            District: Like(`${search.toString().toLowerCase()}%`),
-            Approved: true,
-            Status: "Active",
-          },
-          // { Approved: true, Status: "Active" }
-        ],
+        
         order: {
           updatedAt: "DESC",
         },
@@ -1078,6 +1061,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
           "MainImage",
         ],
         where: {
+          Name: Like(`%${search?.toString().toLowerCase()}%`),
           Approved: true,
           Status: "Active",
         },
@@ -1098,6 +1082,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
             overall_rating: holidayHomes[i].overall_rating,
             TotalRental: totalRental,
             HHImage: holidayHomes[i].MainImage,
+            District: holidayHomes[i].District,
           });
         }
         res.status(200).json(holidayHomesWithPrice);
