@@ -10,7 +10,6 @@ import { Console, error } from "console";
 import { v4 as uuid, v4 } from "uuid";
 import addadminemail from "../template/addadminemail";
 import sentEmail from "../services/sentEmal";
-// var nodemailer = require('nodemailer');
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import resetadmin from "../template/resetadmin";
@@ -30,7 +29,6 @@ import { Hall } from "../entities/Hall";
 import { Room } from "../entities/Room";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
-// import { Reservation } from "../entities/Reservation";
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -57,13 +55,11 @@ export const AddAdmin = async (req: Request, res: Response) => {
     ContactNo,
     Email,
     WorkLocation,
-    // Disabled,
     Sub,
   } = req.body;
 
   const Role = "LocationAdmin";
 
-  //   const locationadmin = LocationAdmin.create();
   const loginurl = "google.com";
   const str = uuid();
   const arrypw = str.split("-");
@@ -93,8 +89,6 @@ export const AddAdmin = async (req: Request, res: Response) => {
             addadminemail(UserName, Password, AdminNo, loginurl)
           );
           res.status(200).json({ message: "User added successfully" });
-
-          // send email
         })
         .catch((err) => {
           console.log(`error is ${error}`);
@@ -105,53 +99,6 @@ export const AddAdmin = async (req: Request, res: Response) => {
       console.log("error hashing verification code", err);
     });
 };
-
-// try {
-//   await AppDataSource.createQueryBuilder()
-//     .insert()
-//     .into(HomlyAdmin)
-//     .values([
-//       {
-//         AdminNo,
-//         UserName,
-//         Password,
-//         ContactNo,
-//         Email,
-//         WorkLocation,
-//         Role,
-//         // Disabled,
-//         Sub,
-
-//       },
-//     ])
-//     .execute();
-
-//     // var mailOptions = {
-//     //   from: process.env.AUTH_EMAIL,
-//     //   to: Email,
-//     //   subject: "You Are Added as Location Admin in Homly",
-//     //   html:
-//     // };
-
-//   // transporter.sendMail(mailOptions, function (error: any, info) {
-//   //   if (error) {
-//   //     console.log(error);
-//   //   } else {
-//   //     console.log("Email sent: " + info.response);
-//   //   }
-//   // });
-
-//   // console.log("sucess added");
-
-//   res.status(200).json({ message: "User added successfully" });
-
-// } catch (error) {
-
-//     console.log(`error is ${error}`);
-//     res.status(500).json({ message: "Internal Server Error!" });
-
-// }
-// }
 
 export const getall = async (req: Request, res: Response) => {
   const admins = await AppDataSource.manager.find(HomlyAdmin);
@@ -234,34 +181,7 @@ export const sendMail = (req: Request, res: Response) => {
     });
 };
 
-//   try {
-
-//     sentEmail(Email,"You're Admin Password resetted'",addadminemail(UserName,Password,AdminNo,loginurl))
-
-//     res.status(200).json({ message: "mail send sucessfull" });
-//     try {
-//       await AppDataSource.manager.update(
-//        HomlyAdmin,
-//         { AdminNo: AdminNo },
-//         { Verified: false,Password:Password }
-//       );
-
-//     } catch (error) {
-//       console.error(error);
-
-//     }
-
-//   } catch (error) {
-
-//       console.log(`error is ${error}`);
-//       res.status(500).json({ message: "mailsend error!" });
-
-//   }
-
-// }
-
 export const getcomplaints = async (req: Request, res: Response) => {
-  // const admins = await AppDataSource.manager.find(HomlyAdmin);
   try {
     const complaints = await AppDataSource.manager.find(Complaints);
     res.status(200).json(complaints);
@@ -299,26 +219,7 @@ export const get_user_from_employee = async (req: Request, res: Response) => {
   }
 };
 
-// export const get_user_from_complaints=async(req:Request,res:Response)=>{
-//   const serviceno=req.body.ServiceNo
-// try{
-//   const complaints = await Complaints.find({
-//     where: {
-//       ServiceNo: serviceno,
-//     }
-
-// })
-// res.send(complaints)
-
-// }
-// catch(error){
-//   console.log(error);
-//   res.status(500).json({ error: "Internal Server Error!!" });
-
-// }
-// }
 export const getprevcomplaints = async (req: Request, res: Response) => {
-  // const admins = await AppDataSource.manager.find(HomlyAdmin);
   const serviceno = req.params.serviceno;
   try {
     const complaints = await AppDataSource.manager.find(Complaints, {
@@ -346,14 +247,6 @@ export const addtoblacklist = async (req: Request, res: Response) => {
       { blacklisted: true }
     );
 
-    //  const UserDetails = await HomlyUser.findOne({
-    //     where: {
-    //       service_number: serviceno,
-    //     },
-    //   });
-    //   console.log(UserDetails)
-    //   const Email = String(UserDetails?.email);
-
     const UserDetails = await AppDataSource.getRepository(HomlyUser)
       .createQueryBuilder("user")
       .where({ service_number: serviceno })
@@ -374,8 +267,6 @@ export const addtoblacklist = async (req: Request, res: Response) => {
           BlacklistNotifyEmail()
         );
         res.status(200).json({ message: "User blacklisted successfully" });
-
-        // send email
       })
       .catch((error: Error) => {
         console.log(`error is ${error}`);
@@ -391,7 +282,6 @@ export const addtoblacklist = async (req: Request, res: Response) => {
 };
 
 export const getblacklistedusers = async (req: Request, res: Response) => {
-  // const admins = await AppDataSource.manager.find(HomlyAdmin);
   try {
     const BlackListedUsers = await AppDataSource.manager.find(BlackListedUser);
     res.status(200).json(BlackListedUsers);
@@ -410,7 +300,6 @@ export const checkuserexist = async (req: Request, res: Response) => {
         ServiceNo: serviceno,
       },
     });
-    // console.log(count)
     if (count > 0) {
       res.status(200).json({ exist: true });
     } else {
@@ -430,21 +319,8 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
       },
     });
 
-    // let reservationDetails = [];
-    // //get the reserved rooms
-    // for(var i = 0; i < reservation.length; i++){
-    //   const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
-    //     select: ["roomCode"],
-    //     where: {
-    //       ReservationId: reservation[i].ReservationId,
-    //     },
-    //   });
-    //   reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms});
-    // }
-
     let reservationDetails = [];
-    //get the reserved rooms
-    for(var i = 0; i < reservation.length; i++){
+    for (var i = 0; i < reservation.length; i++) {
       const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
         select: ["roomCode"],
         where: {
@@ -458,14 +334,25 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
         },
       });
 
-      //reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
-            // if one of reservedrooms or reservedhalls is not found then set null for it.otherwise set like above code
-      if(reservedrooms.length === 0){
-        reservationDetails.push({reservation: reservation[i], reservedrooms: [], reservedhalls: reservedhalls});
-      }if(reservedhalls.length === 0){
-        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: []});
-      }else{
-        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+      if (reservedrooms.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: [],
+          reservedhalls: reservedhalls,
+        });
+      }
+      if (reservedhalls.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: [],
+        });
+      } else {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: reservedhalls,
+        });
       }
     }
     console.log(reservationDetails);
@@ -477,18 +364,6 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
 };
 
 export const getPastReservation = async (req: Request, res: Response) => {
-  // try {
-  //   //const currentDate = new Date();
-  //   const reservations = await AppDataSource.manager.find(Reservation, {
-  //     // where: {
-  //     //   CheckoutDate: LessThan(currentDate),
-  //     // },
-  //   res.status(200).json(reservations);
-  //   });
-  // } catch (error) {
-  //   console.log(error);
-  //   res.status(500).json({ error: "Internal Server Error!!" });
-  // }
   try {
     const currentDate = new Date();
     const reservation = await AppDataSource.manager.find(Reservation, {
@@ -497,8 +372,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
       },
     });
     let reservationDetails = [];
-    //get the reserved rooms
-    for(var i = 0; i < reservation.length; i++){
+    for (var i = 0; i < reservation.length; i++) {
       const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
         select: ["roomCode"],
         where: {
@@ -512,14 +386,26 @@ export const getPastReservation = async (req: Request, res: Response) => {
         },
       });
 
-      //reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
-            // if one of reservedrooms or reservedhalls is not found then set null for it.otherwise set like above code
-      if(reservedrooms.length === 0){
-        reservationDetails.push({reservation: reservation[i], reservedrooms: [], reservedhalls: reservedhalls});
-      }if(reservedhalls.length === 0){
-        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: []});
-      }else{
-        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+      // if one of reservedrooms or reservedhalls is not found then set null for it.otherwise set like above code
+      if (reservedrooms.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: [],
+          reservedhalls: reservedhalls,
+        });
+      }
+      if (reservedhalls.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: [],
+        });
+      } else {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: reservedhalls,
+        });
       }
     }
     console.log(reservationDetails);
@@ -533,7 +419,6 @@ export const getPastReservation = async (req: Request, res: Response) => {
 export const removefromblacklist = async (req: Request, res: Response) => {
   const serviceno = req.body.ServiceNo;
   const Email = req.body.Email;
-  // const Name =req.body.UserName;
 
   try {
     await BlackListedUser.delete({ ServiceNo: serviceno });
@@ -560,7 +445,6 @@ export const deletefromblacklisttable = async (req: Request, res: Response) => {
       .status(200)
       .json({ message: "sucess fully removed from blacklist table" });
   } catch (error) {
-    // console.log(`error in removing from blacklist ${error}`)
     res.status(404).json({ message: "error in removing from blacklist table" });
   }
 };
@@ -590,7 +474,6 @@ export const addtoblacklisthistory = async (req: Request, res: Response) => {
 
   try {
     const addtoblacklisthistory = BlackListHistory.create({
-      // BlackListHistoryId: "12",
       Addreason: addreson,
       ServiceNo: serviceno,
       BlacklistedDate: blacklisteddate,
@@ -735,7 +618,6 @@ export const getroomcount = async (req: Request, res: Response) => {
 export const Hallincome = async (req: Request, res: Response) => {
   try {
     const sum = await Reservation.sum("HallPrice", { IsPaid: true });
-    // console.log(sum)
     res.status(200).json({ hallincome: sum });
   } catch (error) {
     console.log(error);
@@ -746,7 +628,6 @@ export const Hallincome = async (req: Request, res: Response) => {
 export const Roomincome = async (req: Request, res: Response) => {
   try {
     const sum = await Reservation.sum("RoomPrice", { IsPaid: true });
-    // console.log(sum)
     res.status(200).json({ roomincome: sum });
   } catch (error) {
     console.log(error);
@@ -756,7 +637,6 @@ export const Roomincome = async (req: Request, res: Response) => {
 
 export const get_income_in_date = async (req: Request, res: Response) => {
   const date = req.params.date;
-  // console.log(date);
 
   try {
     const reservations = await Reservation.find({
@@ -785,30 +665,30 @@ export const get_income_in_date = async (req: Request, res: Response) => {
   }
 };
 
-export const getallHH=async(req:Request,res:Response)=>{
-  try{
-    const  HH=await HolidayHome.find({
+export const getallHH = async (req: Request, res: Response) => {
+  try {
+    const HH = await HolidayHome.find({
       select: {
-          Name: true,
-          HolidayHomeId:true
-      }
-    })
-   res.status(200).json({HH})
-  }catch(error){
+        Name: true,
+        HolidayHomeId: true,
+      },
+    });
+    res.status(200).json({ HH });
+  } catch (error) {
     res.status(500).json({ message: "Error in getting all HH names " });
   }
-}
+};
 
-export const get_income_in_date_specificHH = async (req: Request, res: Response) => {
+export const get_income_in_date_specificHH = async (
+  req: Request,
+  res: Response
+) => {
   const date = req.params.date;
-  // console.log(date);
-  const hhid=req.params.hhid;
-
+  const hhid = req.params.hhid;
 
   try {
     const reservations = await Reservation.find({
-     
-      where: { IsPaid: true,HolidayHome:hhid },
+      where: { IsPaid: true, HolidayHome: hhid },
       select: ["Price", "createdAt"],
     });
     const modifiedReservations = reservations.map((reservation) => ({
