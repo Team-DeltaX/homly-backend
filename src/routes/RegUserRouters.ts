@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   allUsers,
   userById,
@@ -17,7 +16,6 @@ import {
   updateDefaultPaymentCard,
   deletePaymentCard, 
 } from "../controllers/UserController";
-
 import { getHolidayHomesSorted } from "../controllers/ReviewController";
 
 const reg_users = express.Router();
@@ -38,6 +36,5 @@ reg_users.get("/auth/paymentcard", addPaymentCard);
 reg_users.post("/auth/paymentcard", getPaymentCard);
 reg_users.put("/auth/paymentcard", updateDefaultPaymentCard);
 reg_users.delete("/auth/paymentcard", deletePaymentCard);
-
 
 export { reg_users };
