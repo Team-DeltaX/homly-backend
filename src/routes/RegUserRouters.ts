@@ -12,6 +12,10 @@ import {
   getUserOngoingReservation,
   getUserPastReservation,
   getHolidayHomes,
+  addPaymentCard,
+  getPaymentCard,
+  updateDefaultPaymentCard,
+  deletePaymentCard, 
 } from "../controllers/UserController";
 
 import { getHolidayHomesSorted } from "../controllers/ReviewController";
@@ -29,6 +33,11 @@ reg_users.get("/auth/holidayhomes/sort/topRated", getTopRatedHolidayHomes);
 reg_users.get("/auth/holidayhomes/sort", getHolidayHomesSorted);
 reg_users.get("/auth/userOngoingReservation", getUserOngoingReservation);
 reg_users.get("/auth/userPastReservation", getUserPastReservation);
-reg_users.get("/holidayhomes", getHolidayHomes);
+reg_users.get("/auth/holidayhomes", getHolidayHomes);
+reg_users.get("/auth/paymentcard", addPaymentCard);
+reg_users.post("/auth/paymentcard", getPaymentCard);
+reg_users.put("/auth/paymentcard", updateDefaultPaymentCard);
+reg_users.delete("/auth/paymentcard", deletePaymentCard);
+
 
 export { reg_users };

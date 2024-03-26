@@ -5,6 +5,7 @@ import OracleDB from "oracledb";
 import { DataSource } from "typeorm";
 import { SpecailReservation } from "./entities/SpecialReservation";
 import { ReservedRooms } from "./entities/ReservedRooms";
+import { ReservedHalls } from "./entities/ReservedHalls";
 import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
@@ -28,10 +29,12 @@ import {
   UserOTPVerification,
   UserInteresed,
 } from "./entities/User";
+import { PaymentCard } from "./entities/PaymentCard";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { UserFeedback } from "./entities/Feedback";
 import { SelectedRooms } from "./entities/SelectedRooms";
+import { Review } from "./entities/Review";
 
 // routes
 import { homly_user } from "./routes/UserRouters";
@@ -40,7 +43,7 @@ import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
 import { requireAuth } from "./middleware/authMiddleware";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
-
+import { ReportsRouter } from "./routes/ReportRouters";
 
 import dotenv from "dotenv";
 import { ReservationRouter } from "./routes/ReservationRouter";
@@ -70,7 +73,6 @@ export const AppDataSource = new DataSource({
     Hall,
     CareTaker,
     HolidayHome,
-
     Unit,
     Room,
     Reservation,
@@ -83,6 +85,10 @@ export const AppDataSource = new DataSource({
     RoomRentalSettings,
     RoomTypeSettings,
     ReservedRooms,
+    Review,
+    ReservedHalls,
+    PaymentCard,
+
   ],
 
   synchronize: true,
@@ -93,30 +99,29 @@ export const AppDataSource = new DataSource({
 app.use(express.json());
 app.use(cookieParser());
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: "http://localhost:3000",
   credentials: true,
-  optionSuccessStatus: 200
-}
+  optionSuccessStatus: 200,
+};
 app.use(cors(corsOptions));
 
 AppDataSource.initialize()
   .then(() => {
-
     // use requireAuth middleware to users/auth all paths
-    app.use('/users/auth/*', requireAuth);
-    app.use('/admin/auth/locationadmin/holidayhome', HolidayHomeRouter);
-    app.use('/admin/auth/locationadmin/reservations', SpecialReservationRouter)
-    app.use('/admin', LocationAdminRoute)
-    app.use('/admin', BlacklistRouter)
-    app.use('/users', homly_user);
-    app.use('/users', reg_users);
-    app.use('/users', homly_review);
-    app.use('/admin', admin_router);
-    app.use('/users', ReservationRouter);
-    app.use('/admin', PrimaryAdminDashboardRouter)
+    app.use("/users/auth/*", requireAuth);
+    app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
+    app.use("/admin/auth/locationadmin/reservations", SpecialReservationRouter);
+    app.use("/admin", LocationAdminRoute);
+    app.use("/admin", ReportsRouter);
+    app.use("/admin", BlacklistRouter);
+    app.use("/users", homly_user);
+    app.use("/users", reg_users);
+    app.use("/users", homly_review);
+    app.use("/admin", admin_router);
+    app.use("/users", ReservationRouter);
+    app.use("/admin", PrimaryAdminDashboardRouter);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
-
     });
   })
   .catch((error) => console.log(error));

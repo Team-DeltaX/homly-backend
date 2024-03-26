@@ -29,6 +29,7 @@ import { HolidayHome } from "../entities/HolidayHome";
 import { Hall } from "../entities/Hall";
 import { Room } from "../entities/Room";
 import { ReservedRooms } from "../entities/ReservedRooms";
+import { ReservedHalls } from "../entities/ReservedHalls";
 // import { Reservation } from "../entities/Reservation";
 dotenv.config();
 
@@ -429,6 +430,18 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
       },
     });
 
+    // let reservationDetails = [];
+    // //get the reserved rooms
+    // for(var i = 0; i < reservation.length; i++){
+    //   const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
+    //     select: ["roomCode"],
+    //     where: {
+    //       ReservationId: reservation[i].ReservationId,
+    //     },
+    //   });
+    //   reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms});
+    // }
+
     let reservationDetails = [];
     //get the reserved rooms
     for(var i = 0; i < reservation.length; i++){
@@ -438,8 +451,24 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           ReservationId: reservation[i].ReservationId,
         },
       });
-      reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms});
+      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
+        select: ["hallCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+
+      //reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+            // if one of reservedrooms or reservedhalls is not found then set null for it.otherwise set like above code
+      if(reservedrooms.length === 0){
+        reservationDetails.push({reservation: reservation[i], reservedrooms: [], reservedhalls: reservedhalls});
+      }if(reservedhalls.length === 0){
+        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: []});
+      }else{
+        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+      }
     }
+    console.log(reservationDetails);
     res.status(200).json(reservationDetails);
   } catch (error) {
     console.log(error);
@@ -467,7 +496,34 @@ export const getPastReservation = async (req: Request, res: Response) => {
         CheckoutDate: LessThan(currentDate),
       },
     });
-    res.status(200).json(reservation);
+    let reservationDetails = [];
+    //get the reserved rooms
+    for(var i = 0; i < reservation.length; i++){
+      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
+        select: ["roomCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
+        select: ["hallCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+
+      //reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+            // if one of reservedrooms or reservedhalls is not found then set null for it.otherwise set like above code
+      if(reservedrooms.length === 0){
+        reservationDetails.push({reservation: reservation[i], reservedrooms: [], reservedhalls: reservedhalls});
+      }if(reservedhalls.length === 0){
+        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: []});
+      }else{
+        reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
+      }
+    }
+    console.log(reservationDetails);
+    res.status(200).json(reservationDetails);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
@@ -567,10 +623,10 @@ export const getblacklistedhistory = async (req: Request, res: Response) => {
 
 export const markedcomplaints = async (req: Request, res: Response) => {
   try {
-    const serviceno = req.body.ServiceNo;
+    const CompID = req.body.CompID;
     await AppDataSource.manager.update(
       Complaints,
-      { ServiceNo: serviceno },
+      { ComplaintID: CompID },
       { Marked: true }
     );
 
@@ -630,7 +686,6 @@ export const HHcount = async (req: Request, res: Response) => {
 export const Earning = async (req: Request, res: Response) => {
   try {
     const sum = await Reservation.sum("Price", { IsPaid: true });
-    // console.log(sum)
     res.status(200).json({ sum: sum });
   } catch (error) {
     console.log(error);
@@ -705,6 +760,7 @@ export const get_income_in_date = async (req: Request, res: Response) => {
 
   try {
     const reservations = await Reservation.find({
+      where: { IsPaid: true },
       select: ["Price", "createdAt"],
     });
     const modifiedReservations = reservations.map((reservation) => ({
@@ -734,6 +790,7 @@ export const getallHH=async(req:Request,res:Response)=>{
     const  HH=await HolidayHome.find({
       select: {
           Name: true,
+          HolidayHomeId:true
       }
     })
    res.status(200).json({HH})
@@ -741,3 +798,37 @@ export const getallHH=async(req:Request,res:Response)=>{
     res.status(500).json({ message: "Error in getting all HH names " });
   }
 }
+
+export const get_income_in_date_specificHH = async (req: Request, res: Response) => {
+  const date = req.params.date;
+  // console.log(date);
+  const hhid=req.params.hhid;
+
+
+  try {
+    const reservations = await Reservation.find({
+     
+      where: { IsPaid: true,HolidayHome:hhid },
+      select: ["Price", "createdAt"],
+    });
+    const modifiedReservations = reservations.map((reservation) => ({
+      Price: reservation.Price,
+      createdAt: reservation.createdAt.toISOString().split("T")[0],
+    }));
+
+    const targetDate = date;
+
+    const reservationsForDate = modifiedReservations.filter(
+      (reservation) => reservation.createdAt === targetDate
+    );
+
+    let sumForDate = 0;
+    reservationsForDate.forEach((reservation) => {
+      sumForDate += reservation.Price;
+    });
+
+    res.status(200).json({ sumForDate });
+  } catch (error) {
+    console.log(error);
+  }
+};
