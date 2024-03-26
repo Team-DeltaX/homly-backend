@@ -45,8 +45,6 @@ export class HomlyUser extends BaseEntity {
   })
   created_at!: Date;
 }
-
-
 @Entity()
 export class UserEmailVerification extends BaseEntity {
   @PrimaryColumn()
@@ -87,10 +85,7 @@ export class UserOTPVerification extends BaseEntity {
     nullable: false,
   })
   expires_at!: Date;
-
-
 }
-
 @Entity()
 export class UserInteresed extends BaseEntity {
   @PrimaryColumn()
@@ -110,5 +105,4 @@ export class UserInteresed extends BaseEntity {
     nullable: true,
   })
   interested_3!: string;
-
 }
