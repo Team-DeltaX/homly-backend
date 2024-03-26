@@ -38,7 +38,9 @@ export class LocationAdmin {
     })
     Sub!: string;
 
-    @OneToMany(() => HolidayHome, (holidayhome) => holidayhome.locationadmin)
-    holidayhome!: HolidayHome[];
+    @Column()
+    HolidayHomeId!: string;
+
+
 
 }

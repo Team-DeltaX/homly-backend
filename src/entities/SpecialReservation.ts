@@ -5,8 +5,8 @@ export class SpecailReservation {
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryGeneratedColumn()
-  SpecailReservationID!: String ;
+  @PrimaryColumn()
+  SpecailReservationID!: string ;
 
   @Column()
   ServiceNo!: string;

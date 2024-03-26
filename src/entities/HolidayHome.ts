@@ -1,7 +1,7 @@
-import { Entity, PrimaryColumn, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryColumn, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
 import { CareTaker } from "./CareTaker";
 import { Hall } from "./Hall";
-import { Image } from "./Image";
+
 import { ContactNo } from "./ContactNo";
 import { Unit } from "./Unit";
 import { Room } from "./Room";
@@ -9,7 +9,7 @@ import { LocationAdmin } from "./LocationAdmin";
 import { Rental } from "./Rental";
 @Entity()
 export class HolidayHome extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   HolidayHomeId!: string;
 
   @Column({
@@ -23,7 +23,9 @@ export class HolidayHome extends BaseEntity {
   @Column()
   District!: string;
 
-  @Column()
+  @Column({
+    length: 1000
+  })
   Description!: string;
 
   @Column()
@@ -32,26 +34,7 @@ export class HolidayHome extends BaseEntity {
   @Column()
   Status!: string;
 
-  @Column(
-    {
-      type: "numeric"
-    }
-  )
-  TotalRental!: number;
 
-  @Column(
-    {
-      type: "numeric"
-    }
-  )
-  ServiceCharge!: number;
-
-  @Column(
-    {
-      type: "numeric"
-    }
-  )
-  OtherCharge!: number;
 
   @Column(
     {
@@ -93,7 +76,52 @@ export class HolidayHome extends BaseEntity {
   @Column({
     default: null
   })
+  Pool!: String;
+
+  @Column({
+    default: null
+  })
+  Bar!: String;
+
+  @Column({
+    default: null
+  })
   Facilities!: string;
+
+  @Column({
+    default: 0
+  })
+  food_rating!: number;
+
+  @Column({
+    default: 0
+  })
+  value_for_money_rating!: number;
+
+  @Column({
+    default: 0
+  })
+  staff_rating!: number;
+
+  @Column({
+    default: 0
+  })
+  location_rating!: number;
+
+  @Column({
+    default: 0
+  })
+  furniture_rating!: number;
+
+  @Column({
+    default: 0
+  })
+  wifi_rating!: number;
+
+  @Column({
+    default: 0
+  })
+  overall_rating!: number;
 
   @CreateDateColumn()
   createdAt!: Date;
@@ -101,28 +129,73 @@ export class HolidayHome extends BaseEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @OneToMany(() => CareTaker, (careTaker) => careTaker.holidayhome)
-  careTaker!: CareTaker[]
+  @Column({
+    default: null
+  })
+  AdminNo!: string;
 
-  @OneToMany(() => Hall, (hall) => hall.holidayhome)
-  hall!: Hall[]
+  @Column({
 
-  @OneToMany(() => Image, (image) => image.holidayhome)
-  image!: Image[]
+    default: null
+  })
+  MainImage!: string;
 
-  @OneToMany(() => ContactNo, (contactNo) => contactNo.holidayhome)
-  contactNo!: ContactNo[]
+  @Column({
 
-  @OneToMany(() => Unit, (unit) => unit.holidayhome)
-  unit!: Unit[]
+    default: null
+  })
+  Image1!: string;
 
-  @OneToMany(() => Room, (room) => room.holidayhome)
-  room!: Room[]
+  @Column({
 
-  @OneToMany(() => Rental, (room) => room.holidayhome)
-  rental!: Rental[]
+    default: null
+  })
+  Image2!: string;
 
-  @ManyToOne(() => LocationAdmin, (locationadmin) => locationadmin.holidayhome)
-  @JoinColumn({ name: "AdminNo" })
-  locationadmin!: LocationAdmin
+  @Column({
+
+    default: null
+  })
+  Image3!: string;
+
+}
+
+
+@Entity()
+export class RoomRentalSettings extends BaseEntity {
+
+  @PrimaryColumn()
+  RSId!: string;
+
+  @Column()
+  HolidayHomeId!: string;
+
+  @Column()
+  roomType!: string;
+
+  @Column()
+  rental!: string;
+
+  @Column()
+  acNonAc!: string;
+
+}
+
+
+@Entity()
+export class RoomTypeSettings extends BaseEntity {
+  @PrimaryColumn()
+  RTId!: string;
+
+  @Column()
+  roomType!: string;
+
+  @Column()
+  HolidayHomeId!: string;
+
+  @Column()
+  adults!: string;
+
+  @Column()
+  children!: string;
 }

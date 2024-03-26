@@ -1,14 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn,CreateDateColumn} from 'typeorm';
-// import {LocationAdmin} from './Admin';
-import { Userdel } from './Userdel';
-
 
 @Entity()
 export class Complaints{
     Save() {
         throw new Error("Method not implemented.");
     }
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   ComplaintID!: String ;
 
   @Column()
@@ -18,9 +15,6 @@ export class Complaints{
   // @ManyToOne(() => Userdel, (userdel) =>userdel.ServiceNo)
   // @JoinColumn({ name: 'ServiceNo' })
   //   ServiceNoEmp!: Userdel
-
-
-
 
   // @ManyToOne(() => LocationAdmin, (locationadmin) => locationadmin.Complaint)
   // @JoinColumn({ name: 'AdminNo' })
@@ -37,17 +31,11 @@ export class Complaints{
   created_at!: Date;
 
   @Column()
-  Reson!:String;
+  Reason!:String;
 
   @Column({
     default:false
   })
   Marked!:Boolean
-
-
-
-
-
-
 
 }

@@ -1,35 +1,76 @@
-import { Entity, PrimaryColumn, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm";
-import { Employee } from "./Empolyee"
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BaseEntity,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
+import { Employee } from "./Empolyee";
 
 @Entity()
 export class Reservation extends BaseEntity {
-    @PrimaryGeneratedColumn()
-    ReservationId!: string;
+  Save() {
+    throw new Error("Method not implemented.");
+  }
 
-    @Column()
-    ServiceNO!: String ;
+  @PrimaryColumn()
+  ReservationId!: string;
 
-    @Column()
-    CheckinDate!: Date ;
-  
-    @Column()
-    CheckoutDate!: Date ;
+  @Column()
+  ServiceNO!: string;
 
-    @Column()
-    NoOfAdults!: number;
+  @Column()
+  HolidayHome!: string;
 
-    @Column()
-    NoOfChildren!: number;
+  @Column()
+  CheckinDate!: Date;
 
-    @Column()
-    NoOfSingleRooms!: number;
+  @Column()
+  CheckoutDate!: Date;
 
-    @Column()
-    NoOfDoubleRooms!: number;
+  @Column()
+  NoOfAdults!: number;
 
-    @Column()
-    NoOfTripleRooms!: number;
+  @Column()
+  NoOfChildren!: number;
 
-    @Column()
-    Price!: number ;
+  @Column({ nullable: true })
+  NoOfRooms!: number;
+
+  @Column({ nullable: true })
+  NoOfHalls!: number;
+
+  @Column({
+    nullable: true,
+  })
+  RoomPrice!: number;
+
+  @Column({
+    nullable: true,
+  })
+  HallPrice!: number;
+
+  @Column()
+  Price!: number;
+
+  @Column({
+    default: false,
+  })
+  IsPaid!: boolean;
+
+  @Column({
+    default: false,
+  })
+  IsSpecial!: boolean;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
