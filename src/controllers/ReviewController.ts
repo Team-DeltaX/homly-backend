@@ -150,6 +150,13 @@ const addUserReview = async (req: Request, res: Response) => {
 
   //get data from db
   let reviewCount = 0;
+  let oldfr = 0;
+  let oldvfmr = 0;
+  let oldsr = 0;
+  let oldlr = 0;
+  let oldftr = 0;
+  let oldwr = 0;
+
   await AppDataSource.manager
     .find(Reservation, {
       where: {
@@ -168,11 +175,31 @@ const addUserReview = async (req: Request, res: Response) => {
             reviewCount = rev.length;
           });
 
-        await AppDataSource.manager.find(HolidayHome, {
+        await AppDataSource.manager
+        .find(HolidayHome, {
           where: {
             HolidayHomeId: res[0].HolidayHome,
           },
+        })
+        .then((rev) => {
+          oldfr = rev[0].food_rating;
+          oldvfmr = rev[0].value_for_money_rating;
+          oldsr = rev[0].staff_rating;
+          oldlr = rev[0].location_rating;
+          oldftr = rev[0].furniture_rating;
+          oldwr = rev[0].wifi_rating;
+
         });
+        await AppDataSource.manager.update(HolidayHome,
+            {HolidayHomeId: HolidayHome},
+            {food_rating: calculateRating(reviewCount,oldfr,values.food_rating),
+              value_for_money_rating: calculateRating(reviewCount,oldvfmr,values.value_for_money_rating),
+              staff_rating:calculateRating(reviewCount,oldsr,values.staff_rating),
+              location_rating:calculateRating(reviewCount,oldlr,values.location_rating),
+              furniture_rating:calculateRating(reviewCount,oldfr,values.furniture_rating),
+              wifi_rating:calculateRating(reviewCount,oldwr,values.wifi_rating),
+            }
+        );
       }
     });
 
