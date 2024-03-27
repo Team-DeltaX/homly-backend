@@ -59,17 +59,12 @@ const sendVerificationEmail = (
       userVerification
         .save()
         .then(() => {
-          console.log("verification code saved");
           // send email
           sentEmail(email, "Homly User Verification", emailVerify(link, name));
         })
-        .catch((err) => {
-          console.log("error saving verification code", err);
-        });
+        .catch((err) => {});
     })
-    .catch((err) => {
-      console.log("error hashing verification code", err);
-    });
+    .catch((err) => {});
 };
 
 const userExist = async (ServiceNo: string) => {
@@ -108,7 +103,6 @@ const userRegistration = async (req: Request, res: Response) => {
     .getOne()
     .then(async (employee) => {
       if (employee) {
-        console.log(employee);
         if (await userExist(ServiceNo)) {
           sendVerificationEmail(Email, ServiceNo, employee.name);
           // bcrypt password
@@ -154,7 +148,7 @@ const userRegistration = async (req: Request, res: Response) => {
 // verify email
 // url with verification code and service number
 const emailVerification = async (req: Request, res: Response) => {
-  let message, verified; // send details to frontend
+  let message, verified;
   const { serviceNo, verificationCode } = req.params;
   const userVerification = await AppDataSource.createQueryBuilder()
     .select("user")
@@ -166,9 +160,6 @@ const emailVerification = async (req: Request, res: Response) => {
     const expiresAt = userVerification?.expires_at;
 
     if (expiresAt && expiresAt < new Date()) {
-      // record has expired, then delete data
-      // delete user record from userverification table
-      console.log("verified email expired");
       await AppDataSource.manager
         .delete(UserEmailVerification, {
           service_number: serviceNo,
@@ -188,8 +179,6 @@ const emailVerification = async (req: Request, res: Response) => {
         .compare(verificationCode, userVerification.verification_code)
         .then((result) => {
           if (result) {
-            // update user
-            console.log("email verified");
             AppDataSource.manager
               .update(
                 HomlyUser,
@@ -197,9 +186,6 @@ const emailVerification = async (req: Request, res: Response) => {
                 { verified: true }
               )
               .then(() => {
-                console.log(
-                  "user verified and deleted from userverification table"
-                );
                 AppDataSource.manager.delete(UserEmailVerification, {
                   service_number: serviceNo,
                 });
@@ -297,23 +283,17 @@ const sendOTP = (email: string, serviceNo: string, name: string) => {
       userOTPVerification
         .save()
         .then(() => {
-          console.log("OTP saved");
           // send email
           sentEmail(email, "Homly User OTP", sentOTPEmail(otp, name));
         })
-        .catch((err) => {
-          console.log("error saving otp", err);
-        });
+        .catch((err) => {});
     })
-    .catch((err) => {
-      console.log("error hashing otp", err);
-    });
+    .catch((err) => {});
 };
 
 // get user by email,serviceno
 const forgetPasswordDetails = async (req: Request, res: Response) => {
   const { serviceNo, email } = req.body;
-  console.log(serviceNo, email);
   const user = await AppDataSource.createQueryBuilder()
     .select("user")
     .from(HomlyUser, "user")
@@ -364,8 +344,6 @@ const otpVerification = async (req: Request, res: Response) => {
     const expiresAt = userOTP.expires_at;
 
     if (expiresAt && expiresAt < new Date()) {
-      // record has expired, then delete data
-      // delete user record from userotpverification table
       await AppDataSource.manager.delete(UserOTPVerification, {
         service_number: serviceNo,
       });
@@ -373,7 +351,6 @@ const otpVerification = async (req: Request, res: Response) => {
     } else {
       bcrypt.compare(otp, userOTP.otp).then(async (result) => {
         if (result) {
-          console.log("OTP Verified");
           await AppDataSource.manager.update(
             UserOTPVerification,
             { service_number: serviceNo },
@@ -393,7 +370,6 @@ const otpVerification = async (req: Request, res: Response) => {
 // reset password
 const resetPassword = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
-  console.log("reset password", serviceNo, password);
 
   const user = await AppDataSource.createQueryBuilder()
     .select("user")
@@ -437,7 +413,6 @@ const resetPassword = async (req: Request, res: Response) => {
 // get user by service number
 const userById = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
-  console.log(serviceNo);
   try {
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -467,7 +442,6 @@ const userById = async (req: Request, res: Response) => {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (err: any) {
-    console.log("get user by service number", err);
     res.status(501).json({ message: "Server Error", success: false });
   }
 };
@@ -497,7 +471,6 @@ const updateUserDetails = async (req: Request, res: Response) => {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (error: any) {
-    console.log(error);
     res
       .status(200)
       .json({ message: "Error updating user details", success: false });
@@ -552,7 +525,6 @@ const updateUserPassword = async (req: Request, res: Response) => {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (error: any) {
-    console.log(error);
     res
       .status(200)
       .json({ message: "Error updating user password", success: false });
@@ -648,7 +620,7 @@ const calculateTotalRental = async (holidayHomeId: string) => {
     }
     return totalRental;
   } catch (err) {
-    console.log(err);
+    return totalRental;
   }
 };
 
@@ -767,7 +739,6 @@ const getUserIntersted = async (req: Request, res: Response) => {
       };
       res.status(200).json({ updated: true, userInterested: userInterested });
     } else {
-      console.log("not found");
       res.status(200).json({ updated: false });
     }
   } catch (err: any) {
@@ -778,7 +749,6 @@ const getUserIntersted = async (req: Request, res: Response) => {
 const updateUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
   let { fac1, fac2, fac3 } = req.body;
-  console.log(fac1, fac2, fac3);
 
   try {
     fac1 = changeFacilityName(fac1);
@@ -851,7 +821,7 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal Server error" });
       });
   } catch (err: any) {
-    console.log(err);
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
@@ -896,7 +866,7 @@ const getUserPastReservation = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal Server error" });
       });
   } catch (err: any) {
-    console.log(err);
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
