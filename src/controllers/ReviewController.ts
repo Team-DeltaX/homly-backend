@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 
 import { HolidayHome } from "../entities/HolidayHome";
 import { UserInteresed } from "../entities/User";
+import { Reservation } from "../entities/Reservation";
+import { Review } from "../entities/Review";
 
 // import natural
 import natural from "natural";
@@ -132,14 +134,58 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
   }
 };
 
-// add user review and update overall rating
-const addUserReview = async (req: Request, res: Response) => {
-  res.status(200).json("add user details");
+//calculate new rating
+const calculateRating = (reviewCount: number, oldrating : number, newrating: number) => {
+  let newRating = 0;
+  
+  newRating = (oldrating * reviewCount + newrating) / (reviewCount + 1);
+
+  return newRating;
 };
 
-// get user review
-const getUserReview = async (req: Request, res: Response) => {
-  res.status(200).json("get user details");
+// add user review and update overall rating
+const addUserReview = async (req: Request, res: Response) => {
+  const values = req.body;
+  const serviceNo = (req as any).serviceNo;
+
+  //get data from db
+  let reviewCount = 0;
+  await AppDataSource.manager
+    .find(Reservation, {
+      where: {
+        ReservationId: values.reservationID,
+      },
+    })
+    .then(async (res) => {
+      if (res) {
+        await AppDataSource.manager
+          .find(Review, {
+            where: {
+              HolidayHomeId: res[0].HolidayHome,
+            },
+          })
+          .then((rev) => {
+            reviewCount = rev.length;
+          });
+
+        await AppDataSource.manager.find(HolidayHome, {
+          where: {
+            HolidayHomeId: res[0].HolidayHome,
+          },
+        });
+      }
+    });
+
+  console.log(values);
+  res.status(200).json({ message: "add user details", success: true });
 };
+
+  // get user review
+  const getUserReview = async (req: Request, res: Response) => {
+    res.status(200).json("get user details");
+  };
+
+   
+
 
 export { reviewSentiment, getHolidayHomesSorted, addUserReview, getUserReview };
