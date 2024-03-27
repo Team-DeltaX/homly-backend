@@ -13,8 +13,6 @@ import sentEmail from "../services/sentEmal";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import resetadmin from "../template/resetadmin";
-
-// import dotenv
 import dotenv from "dotenv";
 import { Employee } from "../entities/Empolyee";
 import { BlackListedUser } from "../entities/BlackListedUser";
@@ -49,23 +47,13 @@ transporter.verify(function (error, success) {
 export const AddAdmin = async (req: Request, res: Response) => {
   const count = await AppDataSource.manager.count(HomlyAdmin);
   const AdminNo = `HomlyLocAdmin${count + 1}`;
-  const {
-    UserName,
-
-    ContactNo,
-    Email,
-    WorkLocation,
-    Sub,
-  } = req.body;
+  const { UserName, ContactNo, Email, WorkLocation, Sub } = req.body;
 
   const Role = "LocationAdmin";
-
   const loginurl = "google.com";
   const str = uuid();
   const arrypw = str.split("-");
-
   const Password = arrypw[arrypw.length - 1];
-
   const saltRound = 10;
   bcrypt
     .hash(Password, saltRound)
@@ -96,7 +84,7 @@ export const AddAdmin = async (req: Request, res: Response) => {
         });
     })
     .catch((err) => {
-      console.log("error hashing verification code", err);
+      res.status(500).json({ message: "Error occured!" });
     });
 };
 
@@ -107,14 +95,12 @@ export const getall = async (req: Request, res: Response) => {
 
     res.status(200).json(admins);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
 
 export const disableadmin = async (req: Request, res: Response) => {
   const id = req.params.id;
-
   try {
     await AppDataSource.manager.update(
       HomlyAdmin,
@@ -133,8 +119,6 @@ export const editadmindeatails = async (req: Request, res: Response) => {
   const AdminNo = req.body.AdminNo;
   const Email = req.body.Email;
   const ContactNo = req.body.ContactNo;
-  console.log(AdminNo, ContactNo, Email);
-
   try {
     await AppDataSource.manager.update(
       HomlyAdmin,
@@ -144,7 +128,6 @@ export const editadmindeatails = async (req: Request, res: Response) => {
 
     res.status(200).json({ message: "update sucessful!" });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ mes: "Internal Server Error" });
   }
 };
@@ -155,10 +138,8 @@ export const sendMail = (req: Request, res: Response) => {
 
   const str = uuid();
   const arrypw = str.split("-");
-
   const Password = arrypw[arrypw.length - 1];
   const loginurl = "google.com";
-
   const saltRound = 10;
   bcrypt
     .hash(Password, saltRound)
@@ -177,7 +158,7 @@ export const sendMail = (req: Request, res: Response) => {
       res.status(200).json({ message: "mail send sucessfull" });
     })
     .catch((err) => {
-      console.log("error hashing verification code", err);
+      res.status(500).json({ message: "Error occured in send mail!" });
     });
 };
 
@@ -190,6 +171,7 @@ export const getcomplaints = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+
 export const get_user_from_user = async (req: Request, res: Response) => {
   const serviceno = req.params.serviceno;
   try {
@@ -200,10 +182,10 @@ export const get_user_from_user = async (req: Request, res: Response) => {
     });
     res.send(user);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+
 export const get_user_from_employee = async (req: Request, res: Response) => {
   const serviceno = req.params.serviceno;
   try {
@@ -230,7 +212,6 @@ export const getprevcomplaints = async (req: Request, res: Response) => {
     });
     res.status(200).json(complaints);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
@@ -275,9 +256,9 @@ export const addtoblacklist = async (req: Request, res: Response) => {
           .json({ message: "Internal Server Error in Blacklist !(adding)" });
       });
   } catch (error) {
-    console.log(
-      `error in  blacklisting (get details or update homly user table  ) ${error}`
-    );
+    res.status(500).json({
+      message: `error in  blacklisting (get details or update homly user table  ) ${error}`,
+    });
   }
 };
 
@@ -306,7 +287,7 @@ export const checkuserexist = async (req: Request, res: Response) => {
       res.status(200).json({ exist: false });
     }
   } catch (error) {
-    console.log("error in getting exist");
+    res.status(500).json({ message: "Error in check user exist!" });
   }
 };
 
@@ -462,8 +443,7 @@ export const updatehomlyuser = async (req: Request, res: Response) => {
     sentEmail(Email, "Your Are Removed From BlackList", BlacklistRemoveEmail());
     res.status(200).json({ message: "sucessfully updated as unblacklisted" });
   } catch (error) {
-    console.log(`error in updating user unblacklist false ${error}`);
-    res.status(404).json({ message: "error in updaing unblacklisted" });
+    res.status(500).json({ message: "error in updaing unblacklisted" });
   }
 };
 export const addtoblacklisthistory = async (req: Request, res: Response) => {
@@ -486,7 +466,7 @@ export const addtoblacklisthistory = async (req: Request, res: Response) => {
       .json({ message: "sucessfully added to blacklis history table" });
   } catch (error) {
     res
-      .status(404)
+      .status(500)
       .json({ message: "error in adding to blacklis history table" });
   }
 };
@@ -499,7 +479,7 @@ export const getblacklistedhistory = async (req: Request, res: Response) => {
     res.status(200).json(BlackListedHistory);
   } catch (error) {
     res
-      .status(404)
+      .status(500)
       .json({ message: "error in getting blacklis history table" });
   }
 };
@@ -516,7 +496,7 @@ export const markedcomplaints = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Successfully marked the complaint" });
   } catch (error) {
     res
-      .status(404)
+      .status(500)
       .json({ message: "Error in marking the complaint as viewed!" });
   }
 };
@@ -531,7 +511,7 @@ export const getNotApprovedHomes = async (req: Request, res: Response) => {
 
     res.status(200).json(homes);
   } catch (error) {
-    res.status(404).json({ message: "Error in getting not approved homes!" });
+    res.status(500).json({ message: "Error in getting not approved homes!" });
   }
 };
 
@@ -541,7 +521,7 @@ export const approveHH = async (req: Request, res: Response) => {
     await HolidayHome.update(id, { Approved: true });
     res.status(200).json({ message: "Successfully approved the home" });
   } catch (error) {
-    res.status(404).json({ message: "Error in approving the home!" });
+    res.status(500).json({ message: "Error in approving the home!" });
   }
 };
 
@@ -553,7 +533,7 @@ export const rejectHH = async (req: Request, res: Response) => {
       message: "Successfully rejected the home(deleted from HH table)",
     });
   } catch (error) {
-    res.status(404).json({ message: "Error in rejecting the home!" });
+    res.status(500).json({ message: "Error in rejecting the home!" });
   }
 };
 
@@ -562,7 +542,7 @@ export const HHcount = async (req: Request, res: Response) => {
     const count = await HolidayHome.count();
     res.status(200).json({ count: count });
   } catch (error) {
-    res.status(404).json({ message: "Error in getting home count!" });
+    res.status(500).json({ message: "Error in getting home count!" });
   }
 };
 
@@ -661,7 +641,7 @@ export const get_income_in_date = async (req: Request, res: Response) => {
 
     res.status(200).json({ sumForDate });
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ message: "error occured in get income in date" });
   }
 };
 
