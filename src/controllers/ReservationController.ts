@@ -61,7 +61,7 @@ const AddResrvation = async (req: Request, res: Response) => {
     HallCodes,
   } = req.body;
 
-  const ServiceNO = req.cookies.serviceNo;
+  const ServiceNO = (req as any).serviceNo;
   console.log("roomsss codesing ", RoomCodes);
   //   const locationadmin = LocationAdmin.create();
   console.log("arunaaa", ServiceNO);
