@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 const router = express.Router();
 import { HomlyAdmin } from "../entities/HomlyAdmin";
 import { Reservation } from "../entities/Reservation";
@@ -91,12 +91,11 @@ export const AddAdmin = async (req: Request, res: Response) => {
 export const getall = async (req: Request, res: Response) => {
   const admins = await AppDataSource.manager.find(HomlyAdmin);
   try {
-    const admins = await AppDataSource.manager.find(HomlyAdmin,{
+    const admins = await AppDataSource.manager.find(HomlyAdmin, {
       order: {
-        createddate: 'ASC' 
-      }
+        createddate: "ASC",
+      },
     });
-   
 
     res.status(200).json(admins);
   } catch (error) {
@@ -622,19 +621,20 @@ export const Roomincome = async (req: Request, res: Response) => {
 
 export const get_income_in_date = async (req: Request, res: Response) => {
   const date = req.params.date;
-
+  //get all paid ones
   try {
     const reservations = await Reservation.find({
       where: { IsPaid: true },
       select: ["Price", "createdAt"],
     });
+    //chnage the format of the time(to easy comparing)
     const modifiedReservations = reservations.map((reservation) => ({
       Price: reservation.Price,
       createdAt: reservation.createdAt.toISOString().split("T")[0],
     }));
 
     const targetDate = date;
-
+    //get reservations in given date
     const reservationsForDate = modifiedReservations.filter(
       (reservation) => reservation.createdAt === targetDate
     );
@@ -695,5 +695,18 @@ export const get_income_in_date_specificHH = async (
     res.status(200).json({ sumForDate });
   } catch (error) {
     res.status(500).json({ message: "Error " });
+  }
+};
+
+export const get_not_approved_count = async (req: Request, res: Response) => {
+  try {
+    const count = await HolidayHome.count({
+      where: {
+        Approved: false,
+      },
+    });
+    res.status(200).json({ notapprovedcount: count });
+  } catch {
+    res.status(500).json({ message: "Error in getting not approved count" });
   }
 };
