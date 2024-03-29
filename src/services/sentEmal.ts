@@ -27,13 +27,7 @@ const sentEmail = (email: string, subject: string, html: string) => {
         subject: subject,
         html: html,
         };
-    transporter.sendMail(mailOptions, function (err, info) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(info);
-        }
-    });
+    transporter.sendMail(mailOptions);
 
 }
 

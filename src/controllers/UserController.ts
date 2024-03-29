@@ -21,6 +21,7 @@ import { Rental } from "../entities/Rental";
 import { Reservation } from "../entities/Reservation";
 
 import dotenv from "dotenv";
+import { Review } from "../entities/Review";
 dotenv.config();
 
 // create token
@@ -850,10 +851,17 @@ const getUserPastReservation = async (req: Request, res: Response) => {
                   HolidayHomeId: reservations[i].HolidayHome,
                 },
               })
-              .then((holidayHome) => {
+              .then(async (holidayHome) => {
+
+                const review = await AppDataSource.manager.find(Review, {
+                  where: {
+                    ReservationId: reservations[i].ReservationId,
+                  }
+                })
                 pastReservations.push({
                   reservation: reservations[i],
                   holidayHome: holidayHome,
+                  IsReviewed: review.length > 0 ? true: false
                 });
               });
           }
