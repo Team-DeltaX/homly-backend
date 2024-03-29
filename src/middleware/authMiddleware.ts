@@ -12,17 +12,14 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
       secretCode!,
       (err: jwt.VerifyErrors | null, decodedToken: any) => {
         if (err) {
-          console.log('no token');
           res.status(401).json({ message: "Unauthorized", autherized: false });
         } else {
-          console.log('token',decodedToken);
           (req as any).serviceNo = decodedToken.serviceNo;
           return next();
         }
       }
     );
   } else {
-    console.log('no token');
     res.status(401).json({ message: "Unauthorized", autherized: false });
   }
 };
