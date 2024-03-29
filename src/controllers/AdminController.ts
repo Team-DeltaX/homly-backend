@@ -1,14 +1,10 @@
 import { AppDataSource } from "../index";
 import { Request, Response } from "express";
-
 import { HomlyAdmin } from "../entities/HomlyAdmin";
-
-// bycrypt
 import bcrypt from "bcrypt";
 
 const adminLogin = async (req: Request, res: Response) => {
   const { adminId, password } = req.body;
-  console.log(adminId, password);
   await AppDataSource.manager
     .find(HomlyAdmin, {
       where: { AdminNo: adminId },
