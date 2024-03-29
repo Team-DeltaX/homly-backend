@@ -105,17 +105,17 @@ app.use(cors(corsOptions));
 AppDataSource.initialize()
   .then(() => {
     // use requireAuth middleware to users/auth all paths
-    app.use("/users/auth/*", requireAuth);
+    app.use("/user/auth/*", requireAuth);
     app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
     app.use("/admin/auth/locationadmin/reservations", SpecialReservationRouter);
     app.use("/admin", LocationAdminRoute);
     app.use("/admin", ReportsRouter);
     app.use("/admin", BlacklistRouter);
-    app.use("/users", homly_user);
-    app.use("/users", reg_users);
-    app.use("/users", homly_review);
+    app.use("/user", homly_user);
+    app.use("/user", reg_users);
+    app.use("/user", homly_review);
     app.use("/admin", admin_router);
-    app.use("/users", ReservationRouter);
+    app.use("/user", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
