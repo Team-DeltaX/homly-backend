@@ -710,3 +710,20 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error in getting not approved count" });
   }
 };
+
+export const get_holiday_home_rating = async (req: Request, res: Response) => {
+  const holidayhomeid = req.params.homeid;
+  try {
+    const rating = await AppDataSource.manager.find(HolidayHome, {
+      select: {
+        overall_rating: true,
+      },
+      where: {
+        HolidayHomeId: holidayhomeid,
+      },
+    });
+    res.status(200).json({ rating });
+  } catch {
+    res.status(500).json({ message: "error in getting holiday home rating" });
+  }
+};
