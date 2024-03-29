@@ -91,7 +91,12 @@ export const AddAdmin = async (req: Request, res: Response) => {
 export const getall = async (req: Request, res: Response) => {
   const admins = await AppDataSource.manager.find(HomlyAdmin);
   try {
-    const admins = await AppDataSource.manager.find(HomlyAdmin);
+    const admins = await AppDataSource.manager.find(HomlyAdmin,{
+      order: {
+        createddate: 'ASC' 
+      }
+    });
+   
 
     res.status(200).json(admins);
   } catch (error) {
@@ -689,6 +694,6 @@ export const get_income_in_date_specificHH = async (
 
     res.status(200).json({ sumForDate });
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ message: "Error " });
   }
 };
