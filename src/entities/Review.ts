@@ -9,6 +9,9 @@ export class Review extends BaseEntity {
   HolidayHomeId!: string;
 
   @Column()
+  ServiceNo!: string;
+
+  @Column()
   UserReview!: string;
 
   @Column()

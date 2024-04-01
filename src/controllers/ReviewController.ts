@@ -3,46 +3,8 @@ import { Request, Response } from "express";
 
 import { HolidayHome } from "../entities/HolidayHome";
 import { UserInteresed } from "../entities/User";
-
-// import natural
-import natural from "natural";
-
-// initialize natural
-const Analyzer = natural.SentimentAnalyzer;
-const stemmer = natural.PorterStemmer;
-const analyzer = new Analyzer("English", stemmer, "afinn");
-
-function interpretSentiment(score: number) {
-  if (score > 0.5) return "Strongly Positive";
-  if (score > 0) return "Positive";
-  if (score === 0) return "Neutral";
-  if (score > -0.5) return "Negative";
-  return "Strongly Negative";
-}
-
-// test natural
-const tests = [
-  { input: "I love this tutorial" },
-  { input: "I hate this tutorial" },
-  { input: "This is an average tutorial" },
-  { input: "This is the best tutorial ever" },
-  { input: "This is the worst tutorial ever" },
-];
-
-// tests.forEach((test, index) => {
-//   const result = analyzer.getSentiment(test.input.split(" "));
-//   const humanReadable = interpretSentiment(result);
-
-//   console.log(`Test ${index + 1}: Score is ${result} - ${humanReadable}`);
-// });
-
-// review sentiment
-const reviewSentiment = async (req: Request, res: Response) => {
-  const { review } = req.body;
-  const result = analyzer.getSentiment(review.split(" "));
-  const humanReadable = interpretSentiment(result);
-  res.status(200).json({ score: result, sentiment: humanReadable });
-};
+import { Reservation } from "../entities/Reservation";
+import { Review } from "../entities/Review";
 
 // get all holiday homes and save max rating holiday home
 const getHolidayHomesSorted = async (req: Request, res: Response) => {
@@ -132,9 +94,134 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
   }
 };
 
+//calculate new rating
+const calculateRating = (
+  reviewCount: number,
+  oldrating: number,
+  newrating: number
+) => {
+  let newRating = 0;
+
+  newRating = (oldrating * reviewCount + newrating) / (reviewCount + 1);
+
+  return newRating;
+};
+
 // add user review and update overall rating
 const addUserReview = async (req: Request, res: Response) => {
-  res.status(200).json("add user details");
+  const values = req.body;
+  const serviceNo = (req as any).serviceNo;
+
+  try {
+    //get data from database
+    let reviewCount = 0;
+    let newfr = 0;
+    let newvfmr = 0;
+    let newsr = 0;
+    let newlr = 0;
+    let newftr = 0;
+    let newwr = 0;
+    let overallRating =
+      (values.food_rating +
+        values.value_for_money_rating +
+        values.staff_rating +
+        values.location_rating +
+        values.furniture_rating +
+        values.wifi_rating) /
+      6;
+    let newOveralRating = 0;
+
+    await AppDataSource.manager
+      .find(Reservation, {
+        where: {
+          ReservationId: values.reservationID,
+        },
+      })
+      .then(async (res) => {
+        if (res) {
+          await AppDataSource.manager
+            .find(Review, {
+              where: {
+                HolidayHomeId: res[0].HolidayHome,
+              },
+            })
+            .then((rev) => {
+              reviewCount = rev.length;
+            });
+
+          await AppDataSource.manager
+            .find(HolidayHome, {
+              where: {
+                HolidayHomeId: res[0].HolidayHome,
+              },
+            })
+            .then(async (rev) => {
+              newfr = calculateRating(
+                reviewCount,
+                rev[0].food_rating,
+                values.food_rating
+              );
+              newvfmr = calculateRating(
+                reviewCount,
+                rev[0].value_for_money_rating,
+                values.value_for_money_rating
+              );
+              newsr = calculateRating(
+                reviewCount,
+                rev[0].staff_rating,
+                values.staff_rating
+              );
+              newlr = calculateRating(
+                reviewCount,
+                rev[0].location_rating,
+                values.location_rating
+              );
+              newftr = calculateRating(
+                reviewCount,
+                rev[0].furniture_rating,
+                values.furniture_rating
+              );
+              newwr = calculateRating(
+                reviewCount,
+                rev[0].wifi_rating,
+                values.wifi_rating
+              );
+              newOveralRating = calculateRating(
+                reviewCount,
+                rev[0].overall_rating,
+                overallRating
+              );
+
+              await AppDataSource.manager.update(
+                HolidayHome,
+                { HolidayHomeId: res[0].HolidayHome },
+                {
+                  food_rating: newfr,
+                  value_for_money_rating: newvfmr,
+                  staff_rating: newsr,
+                  location_rating: newlr,
+                  furniture_rating: newftr,
+                  wifi_rating: newwr,
+                  overall_rating: newOveralRating,
+                }
+              );
+
+              const addReview = Review.create({
+                ReservationId: values.reservationID,
+                HolidayHomeId: res[0].HolidayHome,
+                ServiceNo: serviceNo,
+                UserReview: values.review,
+              });
+
+              addReview.save();
+            });
+        }
+      });
+
+    res.status(200).json({ message: "Successfully added", success: true });
+  } catch (err) {
+    res.status(400).json({ message: "Internal Server Error" });
+  }
 };
 
 // get user review
@@ -142,4 +229,4 @@ const getUserReview = async (req: Request, res: Response) => {
   res.status(200).json("get user details");
 };
 
-export { reviewSentiment, getHolidayHomesSorted, addUserReview, getUserReview };
+export { getHolidayHomesSorted, addUserReview, getUserReview };
