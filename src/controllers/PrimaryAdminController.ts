@@ -462,13 +462,13 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
             // if one of reservedrooms or reservedhalls is not found then set null for it.otherwise set like above code
       if(reservedrooms.length === 0){
         reservationDetails.push({reservation: reservation[i], reservedrooms: [], reservedhalls: reservedhalls});
-      }if(reservedhalls.length === 0){
+      }else if(reservedhalls.length === 0){
         reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: []});
       }else{
         reservationDetails.push({reservation: reservation[i], reservedrooms: reservedrooms, reservedhalls: reservedhalls});
       }
     }
-    console.log(reservationDetails);
+    console.log(reservationDetails,reservationDetails.length);
     res.status(200).json(reservationDetails);
   } catch (error) {
     console.log(error);

@@ -153,8 +153,6 @@ const AddResrvation = async (req: Request, res: Response) => {
   console.log(ServiceNO, HolidayHome, CheckinDate, CheckoutDate);
 };
 
-//return all reservations in between given checkinDate and Checkout date
-
 const AddSpecialResrvation = async (req: Request, res: Response) => {
   console.log(req.body);
   const {
@@ -285,6 +283,8 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
   }
   console.log(ServiceNO, HolidayHome, CheckinDate, CheckoutDate);
 };
+
+//return all reservations in between given checkinDate and Checkout date
 
 const getHolidayHomeNames = async (req: Request, res: Response) => {
   try {
