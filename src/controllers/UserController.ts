@@ -21,6 +21,7 @@ import { Rental } from "../entities/Rental";
 import { Reservation } from "../entities/Reservation";
 
 import dotenv from "dotenv";
+import { Review } from "../entities/Review";
 dotenv.config();
 
 // create token
@@ -59,17 +60,12 @@ const sendVerificationEmail = (
       userVerification
         .save()
         .then(() => {
-          console.log("verification code saved");
           // send email
           sentEmail(email, "Homly User Verification", emailVerify(link, name));
         })
-        .catch((err) => {
-          console.log("error saving verification code", err);
-        });
+        .catch((err) => {});
     })
-    .catch((err) => {
-      console.log("error hashing verification code", err);
-    });
+    .catch((err) => {});
 };
 
 const userExist = async (ServiceNo: string) => {
@@ -108,7 +104,6 @@ const userRegistration = async (req: Request, res: Response) => {
     .getOne()
     .then(async (employee) => {
       if (employee) {
-        console.log(employee);
         if (await userExist(ServiceNo)) {
           sendVerificationEmail(Email, ServiceNo, employee.name);
           // bcrypt password
@@ -154,7 +149,7 @@ const userRegistration = async (req: Request, res: Response) => {
 // verify email
 // url with verification code and service number
 const emailVerification = async (req: Request, res: Response) => {
-  let message, verified; // send details to frontend
+  let message, verified;
   const { serviceNo, verificationCode } = req.params;
   const userVerification = await AppDataSource.createQueryBuilder()
     .select("user")
@@ -166,9 +161,6 @@ const emailVerification = async (req: Request, res: Response) => {
     const expiresAt = userVerification?.expires_at;
 
     if (expiresAt && expiresAt < new Date()) {
-      // record has expired, then delete data
-      // delete user record from userverification table
-      console.log("verified email expired");
       await AppDataSource.manager
         .delete(UserEmailVerification, {
           service_number: serviceNo,
@@ -188,8 +180,6 @@ const emailVerification = async (req: Request, res: Response) => {
         .compare(verificationCode, userVerification.verification_code)
         .then((result) => {
           if (result) {
-            // update user
-            console.log("email verified");
             AppDataSource.manager
               .update(
                 HomlyUser,
@@ -197,9 +187,6 @@ const emailVerification = async (req: Request, res: Response) => {
                 { verified: true }
               )
               .then(() => {
-                console.log(
-                  "user verified and deleted from userverification table"
-                );
                 AppDataSource.manager.delete(UserEmailVerification, {
                   service_number: serviceNo,
                 });
@@ -297,23 +284,17 @@ const sendOTP = (email: string, serviceNo: string, name: string) => {
       userOTPVerification
         .save()
         .then(() => {
-          console.log("OTP saved");
           // send email
           sentEmail(email, "Homly User OTP", sentOTPEmail(otp, name));
         })
-        .catch((err) => {
-          console.log("error saving otp", err);
-        });
+        .catch((err) => {});
     })
-    .catch((err) => {
-      console.log("error hashing otp", err);
-    });
+    .catch((err) => {});
 };
 
 // get user by email,serviceno
 const forgetPasswordDetails = async (req: Request, res: Response) => {
   const { serviceNo, email } = req.body;
-  console.log(serviceNo, email);
   const user = await AppDataSource.createQueryBuilder()
     .select("user")
     .from(HomlyUser, "user")
@@ -364,8 +345,6 @@ const otpVerification = async (req: Request, res: Response) => {
     const expiresAt = userOTP.expires_at;
 
     if (expiresAt && expiresAt < new Date()) {
-      // record has expired, then delete data
-      // delete user record from userotpverification table
       await AppDataSource.manager.delete(UserOTPVerification, {
         service_number: serviceNo,
       });
@@ -373,7 +352,6 @@ const otpVerification = async (req: Request, res: Response) => {
     } else {
       bcrypt.compare(otp, userOTP.otp).then(async (result) => {
         if (result) {
-          console.log("OTP Verified");
           await AppDataSource.manager.update(
             UserOTPVerification,
             { service_number: serviceNo },
@@ -393,7 +371,6 @@ const otpVerification = async (req: Request, res: Response) => {
 // reset password
 const resetPassword = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
-  console.log("reset password", serviceNo, password);
 
   const user = await AppDataSource.createQueryBuilder()
     .select("user")
@@ -437,7 +414,6 @@ const resetPassword = async (req: Request, res: Response) => {
 // get user by service number
 const userById = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
-  console.log(serviceNo);
   try {
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -467,7 +443,6 @@ const userById = async (req: Request, res: Response) => {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (err: any) {
-    console.log("get user by service number", err);
     res.status(501).json({ message: "Server Error", success: false });
   }
 };
@@ -497,7 +472,6 @@ const updateUserDetails = async (req: Request, res: Response) => {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (error: any) {
-    console.log(error);
     res
       .status(200)
       .json({ message: "Error updating user details", success: false });
@@ -552,7 +526,6 @@ const updateUserPassword = async (req: Request, res: Response) => {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (error: any) {
-    console.log(error);
     res
       .status(200)
       .json({ message: "Error updating user password", success: false });
@@ -648,7 +621,7 @@ const calculateTotalRental = async (holidayHomeId: string) => {
     }
     return totalRental;
   } catch (err) {
-    console.log(err);
+    return totalRental;
   }
 };
 
@@ -767,7 +740,6 @@ const getUserIntersted = async (req: Request, res: Response) => {
       };
       res.status(200).json({ updated: true, userInterested: userInterested });
     } else {
-      console.log("not found");
       res.status(200).json({ updated: false });
     }
   } catch (err: any) {
@@ -778,7 +750,6 @@ const getUserIntersted = async (req: Request, res: Response) => {
 const updateUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
   let { fac1, fac2, fac3 } = req.body;
-  console.log(fac1, fac2, fac3);
 
   try {
     fac1 = changeFacilityName(fac1);
@@ -851,7 +822,7 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal Server error" });
       });
   } catch (err: any) {
-    console.log(err);
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
@@ -880,10 +851,16 @@ const getUserPastReservation = async (req: Request, res: Response) => {
                   HolidayHomeId: reservations[i].HolidayHome,
                 },
               })
-              .then((holidayHome) => {
+              .then(async (holidayHome) => {
+                const review = await AppDataSource.manager.find(Review, {
+                  where: {
+                    ReservationId: reservations[i].ReservationId,
+                  },
+                });
                 pastReservations.push({
                   reservation: reservations[i],
                   holidayHome: holidayHome,
+                  IsReviewed: review.length > 0 ? true : false,
                 });
               });
           }
@@ -896,100 +873,66 @@ const getUserPastReservation = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal Server error" });
       });
   } catch (err: any) {
-    console.log(err);
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
 // get holidayhomes
 const getHolidayHomes = async (req: Request, res: Response) => {
-  const { district, search } = req.query;
-  if (district && district !== "all") {
-    await AppDataSource.manager
-      .find(HolidayHome, {
-        select: [
-          "HolidayHomeId",
-          "Name",
-          "Address",
-          "District",
-          "overall_rating",
-          "MainImage",
-        ],
-        where: {
-          Name: Like(`%${search?.toString().toLowerCase()}%`),
-          District: district.toString().toLowerCase(),
-          Approved: true,
-          Status: "Active",
-        },
+  const { district, search, page } = req.query;
 
-        order: {
-          updatedAt: "DESC",
-        },
-      })
-      .then(async (holidayHomes) => {
-        if (holidayHomes) {
-          let holidayHomesWithPrice = [];
-          for (let i = 0; i < holidayHomes.length; i++) {
-            const totalRental = await calculateTotalRental(
-              holidayHomes[i].HolidayHomeId
-            );
-            holidayHomesWithPrice.push({
-              HolidayHomeId: holidayHomes[i].HolidayHomeId,
-              Name: holidayHomes[i].Name,
-              Address: holidayHomes[i].Address,
-              overall_rating: holidayHomes[i].overall_rating,
-              TotalRental: totalRental,
-              HHImage: holidayHomes[i].MainImage,
-            });
-          }
-          res.status(200).json(holidayHomesWithPrice);
-        } else {
-          res.status(200).json({ message: "No holiday homes found" });
-        }
-      })
-      .catch((err) => {
-        res.status(500).json({ message: "Internal Server error" });
+  let queryOptions: any = {
+    select: [
+      "HolidayHomeId",
+      "Name",
+      "Address",
+      "District",
+      "overall_rating",
+      "MainImage",
+    ],
+    where: {
+      Approved: true,
+      Status: "Active",
+      Name: Like(`%${search?.toString().toLowerCase()}%`),
+    },
+    order: {
+      updatedAt: "DESC",
+    },
+  };
+
+  if (district && district !== "all") {
+    queryOptions.where.District = district.toString().toLowerCase();
+  }
+
+  try {
+    let holidayHomes = await AppDataSource.manager.find(
+      HolidayHome,
+      queryOptions
+    );
+    let holidayHomesWithPrice = [];
+
+    for (let i = 0; i < holidayHomes.length; i++) {
+      const totalRental = await calculateTotalRental(
+        holidayHomes[i].HolidayHomeId
+      );
+      holidayHomesWithPrice.push({
+        HolidayHomeId: holidayHomes[i].HolidayHomeId,
+        Name: holidayHomes[i].Name,
+        Address: holidayHomes[i].Address,
+        overall_rating: holidayHomes[i].overall_rating,
+        TotalRental: totalRental,
+        HHImage: holidayHomes[i].MainImage,
+        District: holidayHomes[i].District,
       });
-  } else {
-    await AppDataSource.manager
-      .find(HolidayHome, {
-        select: [
-          "HolidayHomeId",
-          "Name",
-          "Address",
-          "District",
-          "overall_rating",
-          "MainImage",
-        ],
-        where: {
-          Name: Like(`%${search?.toString().toLowerCase()}%`),
-          Approved: true,
-          Status: "Active",
-        },
-        order: {
-          updatedAt: "DESC",
-        },
-      })
-      .then(async (holidayHomes) => {
-        let holidayHomesWithPrice = [];
-        for (let i = 0; i < holidayHomes.length; i++) {
-          const totalRental = await calculateTotalRental(
-            holidayHomes[i].HolidayHomeId
-          );
-          holidayHomesWithPrice.push({
-            HolidayHomeId: holidayHomes[i].HolidayHomeId,
-            Name: holidayHomes[i].Name,
-            Address: holidayHomes[i].Address,
-            overall_rating: holidayHomes[i].overall_rating,
-            TotalRental: totalRental,
-            HHImage: holidayHomes[i].MainImage,
-            District: holidayHomes[i].District,
-          });
-        }
-        res.status(200).json(holidayHomesWithPrice);
-      })
-      .catch((err) => {
-        res.status(500).json({ message: "Internal Server error" });
-      });
+    }
+    const HHcount = holidayHomesWithPrice.length;
+    const slicedHH = holidayHomesWithPrice.slice(
+      (parseInt(page?.toString() || "1") - 1) * 9,
+      parseInt(page?.toString() || "1") * 9
+    );
+    res.status(200).json({ holidayHomes: slicedHH, HHcount: HHcount });
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
