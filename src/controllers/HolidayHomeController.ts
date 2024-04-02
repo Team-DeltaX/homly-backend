@@ -207,10 +207,10 @@ const createHolidayHome = async (req: Request, res: Response) => {
             Pool: allValues.homeBreakDown.bdValue.pool,
             Bar: allValues.homeBreakDown.bdValue.bar,
             AdminNo: "1",
-            MainImage: "dsfdfs",
-            Image1: "sfdsfsd",
-            Image2: "sffdfdf",
-            Image3: "dfsdfds"
+            MainImage: allValues.mainImage,
+            Image1: allValues.iamge1,
+            Image2:allValues.image2, 
+            Image3: allValues.image3,
 
         })
 
@@ -589,27 +589,27 @@ const updateHolidayHome = async (req: Request, res: Response) => {
 
 
 
-        await ContactNo.update({ HolidayHomeId: HolidayHomeId },
-            {
-                ContactNo: updatedValues.holidayHomeDetails.contactNo1,
-            }
-        );
+        // await ContactNo.update({ HolidayHomeId: HolidayHomeId },
+        //     {
+        //         ContactNo: updatedValues.holidayHomeDetails.contactNo1,
+        //     }
+        // );
 
-        if (updatedValues.holidayHomeDetails.contactNo2) {
-            await ContactNo.update({ HolidayHomeId: HolidayHomeId },
-                {
-                    ContactNo: updatedValues.holidayHomeDetails.contactNo2,
-                }
-            );
-        } else {
-            if (updatedValues.holidayHomeDetails.contactNo2 !== "") {
-                const contactNo2 = ContactNo.create({
-                    ContactNo: updatedValues.holidayHomeDetails.contactNo2,
-                    HolidayHomeId: HolidayHomeId,
-                })
-                await contactNo2.save();
-            }
-        }
+        // if (updatedValues.holidayHomeDetails.contactNo2) {
+        //     await ContactNo.update({ HolidayHomeId: HolidayHomeId },
+        //         {
+        //             ContactNo: updatedValues.holidayHomeDetails.contactNo2,
+        //         }
+        //     );
+        // } else {
+        //     if (updatedValues.holidayHomeDetails.contactNo2 !== "") {
+        //         const contactNo2 = ContactNo.create({
+        //             ContactNo: updatedValues.holidayHomeDetails.contactNo2,
+        //             HolidayHomeId: HolidayHomeId,
+        //         })
+        //         await contactNo2.save();
+        //     }
+        // }
 
 
         // for (let i = 0; i < updatedValues.roomTypeArray.length; i++) {

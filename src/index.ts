@@ -50,7 +50,7 @@ import { ReservationRouter } from "./routes/ReservationRouter";
 import { PrimaryAdminDashboardRouter } from "./routes/ParimayAdminDashboardRouters";
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 8080;
 
 OracleDB.initOracleClient();
 
