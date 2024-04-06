@@ -89,37 +89,44 @@ export class HolidayHome extends BaseEntity {
   Facilities!: string;
 
   @Column({
-    default: 0
+    default: 0,
+    type: "float"
   })
   food_rating!: number;
 
   @Column({
-    default: 0
+    default: 0,
+    type: "float"
   })
   value_for_money_rating!: number;
 
   @Column({
-    default: 0
+    default: 0,
+    type: "float"
   })
   staff_rating!: number;
 
   @Column({
-    default: 0
+    default: 0,
+    type: "float"
   })
   location_rating!: number;
 
   @Column({
-    default: 0
+    default: 0,
+    type: "float"
   })
   furniture_rating!: number;
 
   @Column({
-    default: 0
+    default: 0,
+    type: "float"
   })
   wifi_rating!: number;
 
   @Column({
-    default: 0
+    default: 0,
+    type: "float"
   })
   overall_rating!: number;
 

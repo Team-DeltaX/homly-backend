@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { LessThan, MoreThanOrEqual, Like } from "typeorm";
+import { LessThan, MoreThanOrEqual, Like, Between, Not, In } from "typeorm";
 import { Request, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -19,9 +19,10 @@ import { Room } from "../entities/Room";
 import { Hall } from "../entities/Hall";
 import { Rental } from "../entities/Rental";
 import { Reservation } from "../entities/Reservation";
-
-import dotenv from "dotenv";
 import { Review } from "../entities/Review";
+import { ReservedRooms } from "../entities/ReservedRooms";
+import { ReservedHalls } from "../entities/ReservedHalls";
+import dotenv from "dotenv";
 dotenv.config();
 
 // create token
@@ -936,6 +937,188 @@ const getHolidayHomes = async (req: Request, res: Response) => {
   }
 };
 
+// search holidayhomes
+const searchHolidayHomes = async (req: Request, res: Response) => {
+  const { district, startDate, endDate } = req.query;
+
+  let queryOptions: any = {
+    select: [
+      "HolidayHomeId",
+      "Name",
+      "Address",
+      "District",
+      "overall_rating",
+      "MainImage",
+    ],
+    where: {
+      Approved: true,
+      Status: "Active",
+    },
+    order: {
+      updatedAt: "DESC",
+    },
+  };
+
+  if (district && district !== "all") {
+    queryOptions.where.District = district.toString().toLowerCase();
+  }
+
+  const sDate = new Date(startDate as string);
+  const eDate = new Date(endDate as string);
+
+  try {
+    const reservations = await AppDataSource.manager.find(Reservation, {
+      where: [
+        {
+          CheckinDate: Between(sDate, eDate),
+        },
+        {
+          CheckoutDate: Between(sDate, eDate),
+        },
+        {
+          CheckinDate: LessThan(sDate),
+          CheckoutDate: MoreThanOrEqual(eDate),
+        },
+      ],
+    });
+
+    let holidayHomesIds: string[] = [];
+    for (let i = 0; i < reservations.length; i++) {
+      if (!holidayHomesIds.includes(reservations[i].HolidayHome)) {
+        holidayHomesIds.push(reservations[i].HolidayHome);
+      }
+    }
+    let availableRooms: any = [];
+    let availableHalls: any = [];
+    for (let i = 0; i < holidayHomesIds.length; i++) {
+      let room: string[] = [];
+      let hall: string[] = [];
+      await AppDataSource.manager
+        .find(Room, {
+          select: ["roomCode"],
+          where: {
+            HolidayHomeId: holidayHomesIds[i],
+          },
+        })
+        .then((rooms) => {
+          rooms.forEach((r) => {
+            room.push(r.roomCode);
+          });
+          availableRooms.push({
+            HolidayHomeId: holidayHomesIds[i],
+            Rooms: room,
+          });
+        });
+
+      await AppDataSource.manager
+        .find(Hall, {
+          select: ["hallCode"],
+          where: {
+            HolidayHomeId: holidayHomesIds[i],
+          },
+        })
+        .then((halls) => {
+          halls.forEach((h) => {
+            hall.push(h.hallCode);
+          });
+          availableHalls.push({
+            HolidayHomeId: holidayHomesIds[i],
+            Halls: hall,
+          });
+        });
+    }
+
+    for (let i = 0; i < reservations.length; i++) {
+      let room: string[] = [];
+      let hall: string[] = [];
+      await AppDataSource.manager
+        .find(ReservedRooms, {
+          select: ["roomCode"],
+          where: {
+            ReservationId: reservations[i].ReservationId,
+          },
+        })
+        .then((rooms) => {
+          rooms.forEach((r) => {
+            room.push(r.roomCode);
+          });
+
+          const index = availableRooms.findIndex(
+            (r: { HolidayHomeId: string }) =>
+              r.HolidayHomeId === reservations[i].HolidayHome
+          );
+
+          if (index != -1) {
+            availableRooms[index].Rooms = availableRooms[index].Rooms.filter(
+              (r: string) => !room.includes(r)
+            );
+          }
+        });
+
+      await AppDataSource.manager
+        .find(ReservedHalls, {
+          select: ["hallCode"],
+          where: {
+            ReservationId: reservations[i].ReservationId,
+          },
+        })
+        .then((halls) => {
+          halls.forEach((h) => {
+            hall.push(h.hallCode);
+          });
+          const index = availableHalls.findIndex(
+            (h: { HolidayHomeId: string }) =>
+              h.HolidayHomeId === reservations[i].HolidayHome
+          );
+
+          if (index != -1) {
+            availableHalls[index].Halls = availableHalls[index].Halls.filter(
+              (h: string) => !hall.includes(h)
+            );
+          }
+        });
+    }
+
+    for (let i = 0; i < holidayHomesIds.length; i++) {
+      if (
+        availableRooms[i].Rooms.length > 0 ||
+        availableHalls[i].Halls.length > 0
+      ) {
+        holidayHomesIds = holidayHomesIds.filter(
+          (id) => id !== availableRooms[i].HolidayHomeId
+        );
+      }
+    }
+
+    queryOptions.where.HolidayHomeId = Not(In(holidayHomesIds));
+    const holidayHomes = await AppDataSource.manager.find(
+      HolidayHome,
+      queryOptions
+    );
+    let holidayHomesWithPrice = [];
+
+    for (let i = 0; i < holidayHomes.length; i++) {
+      const totalRental = await calculateTotalRental(
+        holidayHomes[i].HolidayHomeId
+      );
+      holidayHomesWithPrice.push({
+        HolidayHomeId: holidayHomes[i].HolidayHomeId,
+        Name: holidayHomes[i].Name,
+        Address: holidayHomes[i].Address,
+        overall_rating: holidayHomes[i].overall_rating,
+        TotalRental: totalRental,
+        HHImage: holidayHomes[i].MainImage,
+        District: holidayHomes[i].District,
+      });
+    }
+
+    res.status(200).json(holidayHomesWithPrice);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal Server error", err: err });
+  }
+};
+
 // add payment card details
 const addPaymentCard = async (req: Request, res: Response) => {
   res.status(200).json({ message: "Payment card added", success: true });
@@ -977,6 +1160,7 @@ export {
   getUserOngoingReservation,
   getUserPastReservation,
   getHolidayHomes,
+  searchHolidayHomes,
   addPaymentCard,
   getPaymentCard,
   updateDefaultPaymentCard,
