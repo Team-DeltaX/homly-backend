@@ -27,10 +27,14 @@ export class Reservation extends BaseEntity {
   @Column()
   HolidayHome!: string;
 
-  @Column()
+  @Column({
+    type: "date",
+  })
   CheckinDate!: Date;
 
-  @Column()
+  @Column({
+    type: "date",
+  })
   CheckoutDate!: Date;
 
   @Column()

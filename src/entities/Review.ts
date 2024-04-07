@@ -12,5 +12,8 @@ export class Review extends BaseEntity {
  ServiceNo!:string;
  
   @Column()
+  ServiceNo!: string;
+
+  @Column()
   UserReview!: string;
 }
