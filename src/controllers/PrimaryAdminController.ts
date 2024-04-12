@@ -644,6 +644,7 @@ export const get_income_in_date = async (req: Request, res: Response) => {
       sumForDate += reservation.Price;
     });
 
+   
     res.status(200).json({ sumForDate });
   } catch (error) {
     res.status(500).json({ message: "error occured in get income in date" });
@@ -712,6 +713,7 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
 };
 
 export const get_holiday_home_rating = async (req: Request, res: Response) => {
+  
   const holidayhomeid = req.params.homeid;
   try {
     const rating = await AppDataSource.manager.find(HolidayHome, {
@@ -722,6 +724,7 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
         HolidayHomeId: holidayhomeid,
       },
     });
+    
     res.status(200).json({ rating });
   } catch {
     res.status(500).json({ message: "error in getting holiday home rating" });

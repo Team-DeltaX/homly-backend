@@ -11,8 +11,7 @@ export class Review extends BaseEntity {
  @Column()
  ServiceNo!:string;
  
-  @Column()
-  ServiceNo!: string;
+ 
 
   @Column()
   UserReview!: string;
