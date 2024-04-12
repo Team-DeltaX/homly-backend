@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import OracleDB from "oracledb";
+import io from "./services/socketio";
 import { DataSource } from "typeorm";
 import { SpecailReservation } from "./entities/SpecialReservation";
 import { ReservedRooms } from "./entities/ReservedRooms";
@@ -101,6 +102,8 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
+io.listen(8081);
 
 AppDataSource.initialize()
   .then(() => {
