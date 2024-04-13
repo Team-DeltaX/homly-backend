@@ -40,7 +40,7 @@ const sendVerificationEmail = (
   serviceNo: string,
   name: string
 ) => {
-  const url = `http://localhost:3002/users/verify`;
+  const url = `http://localhost:8080/users/verify`;
   const verificationCode = uuidv4() + serviceNo;
   const link = `${url}/${serviceNo}/${verificationCode}`;
 

@@ -7,35 +7,54 @@ const io = new Server({
   },
 });
 
-
 let onlineUsers: any = [];
 
 const addUser = (userId: string, socketId: string) => {
-    !onlineUsers.some((user: any) => user.userId === userId) &&
-        onlineUsers.push({ userId, socketId });
+  const user = onlineUsers.find((user: any) => user.userId === userId);
+  if (user) {
+    user.socketId = socketId;
+  } else {
+    onlineUsers.push({ userId, socketId });
+  }
+
+  console.log(onlineUsers);
 };
 
 const removeUser = (socketId: string) => {
-    onlineUsers = onlineUsers.filter((user: any) => user.socketId !== socketId);
+  onlineUsers = onlineUsers.filter((user: any) => user.socketId !== socketId);
 };
 
 const getUser = (userId: string) => {
-    return onlineUsers.find((user: any) => user.userId === userId);
+  return onlineUsers.find((user: any) => user.userId === userId);
 };
 
 io.on("connection", (socket) => {
-    io.emit("connection", "a user connected2");
+  io.emit("connection", "a user connected2");
 
-    // when connect
-    socket.on("addUser", (userId: string) => {
-        addUser(userId, socket.id);
-    });
+  // when connect
+  socket.on("addUser", (userId: string) => {
+    console.log(userId + " id", socket.id + " socket id");
+    addUser(userId, socket.id);
+  });
 
-    console.log("a user connected");
-    socket.on("disconnect", () => {
-        console.log("user disconnected");
-        removeUser(socket.id);
+  socket.on("newNotification", ({ senderId, receiverId, data }) => {
+    console.log("newNotification", senderId, receiverId, data);
+    const user = getUser(receiverId);
+    console.log(user, "user");
+    io.to(user.socketId).emit("notification", {
+      id: senderId,
+      type: "Authorization Denied",
+      image: "",
+      data: data,
     });
+  });
+
+  console.log("a user connected");
+  socket.on("disconnect", () => {
+    console.log("user disconnected", socket.id);
+    removeUser(socket.id);
+    console.log(onlineUsers);
+  });
 });
 
 export default io;
