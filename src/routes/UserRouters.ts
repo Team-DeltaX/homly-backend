@@ -13,7 +13,7 @@ const homly_user = express.Router();
 
 homly_user.get("/employee", allEmployees);
 homly_user.post("/", userRegistration);
-homly_user.get("/verify/:serviceNo/:verificationCode", emailVerification);
+homly_user.get("/verify/:serviceNo/:verificationCode/:isUpdate/:email", emailVerification);
 homly_user.post("/login", userLogin);
 homly_user.post("/forgetPassword", forgetPasswordDetails);
 homly_user.post("/forgetPassword/otp", otpVerification);

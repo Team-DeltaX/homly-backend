@@ -30,7 +30,7 @@ import {
   UserOTPVerification,
   UserInteresed,
 } from "./entities/User";
-import { PaymentCard } from "./entities/PaymentCard";
+import { WishList } from "./entities/WishList";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { UserFeedback } from "./entities/Feedback";
@@ -88,7 +88,7 @@ export const AppDataSource = new DataSource({
     ReservedRooms,
     Review,
     ReservedHalls,
-    PaymentCard,
+    WishList,
   ],
   synchronize: true,
   logging: false,

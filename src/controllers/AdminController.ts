@@ -2,6 +2,16 @@ import { AppDataSource } from "../index";
 import { Request, Response } from "express";
 import { HomlyAdmin } from "../entities/HomlyAdmin";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+// create token
+const maxAge = 5 * 60 * 60;
+const createToken = (serviceNo: String, role: String) => {
+  const secretCode = process.env.JWT_SECRET;
+  return jwt.sign({ serviceNo, role }, secretCode!, {
+    expiresIn: maxAge,
+  });
+};
 
 const adminLogin = async (req: Request, res: Response) => {
   const { adminId, password } = req.body;
@@ -15,11 +25,16 @@ const adminLogin = async (req: Request, res: Response) => {
           .compare(password, admin[0].Password)
           .then((result) => {
             if (result) {
+              const token = createToken(admin[0].AdminNo, admin[0].Role);
               if (admin[0].Role === "PrimaryAdmin") {
                 res.status(200).json({
                   message: "Login Success",
                   success: true,
                   role: "PrimaryAdmin",
+                });
+                res.cookie("jwt", token, {
+                  httpOnly: true,
+                  maxAge: maxAge * 1000,
                 });
               } else {
                 if (admin[0].Verified) {
@@ -28,6 +43,10 @@ const adminLogin = async (req: Request, res: Response) => {
                     success: true,
                     verified: true,
                     role: "LocationAdmin",
+                  });
+                  res.cookie("jwt", token, {
+                    httpOnly: true,
+                    maxAge: maxAge * 1000,
                   });
                 } else {
                   res.status(200).json({
