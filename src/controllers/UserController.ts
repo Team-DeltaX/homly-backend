@@ -47,11 +47,12 @@ const createToken = (serviceNo: String) => {
 const sendVerificationEmail = (
   email: string,
   serviceNo: string,
-  name: string
+  name: string,
+  isUpdate: boolean
 ) => {
-  const url = `http://localhost:8080/users/verify`;
+  const url = `http://localhost:8080/user/verify`;
   const verificationCode = uuidv4() + serviceNo;
-  const link = `${url}/${serviceNo}/${verificationCode}`;
+  const link = `${url}/${serviceNo}/${verificationCode}/${isUpdate}/${email}`;
 
   // hash the verification code
   const saltRound = 10;
@@ -115,7 +116,7 @@ const userRegistration = async (req: Request, res: Response) => {
     .then(async (employee) => {
       if (employee) {
         if (await userExist(ServiceNo)) {
-          sendVerificationEmail(Email, ServiceNo, employee.name);
+          sendVerificationEmail(Email, ServiceNo, employee.name, false);
           // bcrypt password
           const saltRounds = 10;
           bcrypt
@@ -160,7 +161,7 @@ const userRegistration = async (req: Request, res: Response) => {
 // url with verification code and service number
 const emailVerification = async (req: Request, res: Response) => {
   let message, verified;
-  const { serviceNo, verificationCode } = req.params;
+  const { serviceNo, verificationCode, isUpdate, email } = req.params;
   const userVerification = await AppDataSource.createQueryBuilder()
     .select("user")
     .from(UserEmailVerification, "user")
@@ -170,7 +171,7 @@ const emailVerification = async (req: Request, res: Response) => {
   if (userVerification) {
     const expiresAt = userVerification?.expires_at;
 
-    if (expiresAt && expiresAt < new Date()) {
+    if (expiresAt && expiresAt < new Date() && !isUpdate) {
       await AppDataSource.manager
         .delete(UserEmailVerification, {
           service_number: serviceNo,
@@ -194,7 +195,7 @@ const emailVerification = async (req: Request, res: Response) => {
               .update(
                 HomlyUser,
                 { service_number: serviceNo },
-                { verified: true }
+                { verified: true, email: email }
               )
               .then(() => {
                 AppDataSource.manager.delete(UserEmailVerification, {
@@ -202,10 +203,17 @@ const emailVerification = async (req: Request, res: Response) => {
                 });
               });
             verified = true;
-            message = "User is Verified";
-            res.redirect(
-              `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
-            );
+            if (!isUpdate) {
+              message = "User is Verified";
+              res.redirect(
+                `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
+              );
+            } else {
+              message = "Email updated";
+              res.redirect(
+                `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
+              );
+            }
           }
         });
     }
@@ -424,6 +432,7 @@ const resetPassword = async (req: Request, res: Response) => {
 // get user by service number
 const userById = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
+  console.log(serviceNo, "serviceNo get");
   try {
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -459,7 +468,9 @@ const userById = async (req: Request, res: Response) => {
 
 // update user details
 const updateUserDetails = async (req: Request, res: Response) => {
-  const { serviceNo, email, contactNo, image } = req.body;
+  const { email, contactNo, image } = req.body;
+  const serviceNo = (req as any).serviceNo;
+
   try {
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -467,17 +478,38 @@ const updateUserDetails = async (req: Request, res: Response) => {
       .where("user.service_number = :id", { id: serviceNo })
       .getOne();
 
+    const employee = await AppDataSource.manager.find(Employee, {
+      where: {
+        service_number: serviceNo,
+      },
+    });
+    console.log(
+      (req as any).serviceNo,
+      contactNo,
+      image,
+      email,
+      user?.email,
+      email === user?.email,
+      "update"
+    );
     if (user && user.verified) {
       await AppDataSource.manager.update(
         HomlyUser,
         { service_number: serviceNo },
         {
-          email,
           contact_number: contactNo,
           image,
         }
       );
-      res.status(200).json({ message: "User details updated", success: true });
+      if (user.email !== email) {
+        sendVerificationEmail(email, serviceNo, employee[0].name, true);
+        res.status(200).json({
+          success: true,
+          emailUpdated: true,
+        });
+      } else {
+        res.status(200).json({ success: true, emailUpdated: false });
+      }
     } else {
       res.status(200).json({ message: "User not found", success: false });
     }
