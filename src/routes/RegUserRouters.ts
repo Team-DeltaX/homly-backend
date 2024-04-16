@@ -12,10 +12,9 @@ import {
   getUserPastReservation,
   getHolidayHomes,
   searchHolidayHomes,
-  addPaymentCard,
-  getPaymentCard,
-  updateDefaultPaymentCard,
-  deletePaymentCard, 
+  addtoWhishList,
+  getWishList,
+  deleteFromWishList,
 } from "../controllers/UserController";
 import { getHolidayHomesSorted } from "../controllers/ReviewController";
 
@@ -34,9 +33,8 @@ reg_users.get("/auth/userOngoingReservation", getUserOngoingReservation);
 reg_users.get("/auth/userPastReservation", getUserPastReservation);
 reg_users.get("/auth/holidayhomes", getHolidayHomes);
 reg_users.get("/auth/holidayhomes/search", searchHolidayHomes);
-reg_users.get("/auth/paymentcard", addPaymentCard);
-reg_users.post("/auth/paymentcard", getPaymentCard);
-reg_users.put("/auth/paymentcard", updateDefaultPaymentCard);
-reg_users.delete("/auth/paymentcard", deletePaymentCard);
+reg_users.post("/auth/wishlist", addtoWhishList);
+reg_users.get("/auth/wishlist", getWishList);
+reg_users.delete("/auth/wishlist", deleteFromWishList);
 
 export { reg_users };

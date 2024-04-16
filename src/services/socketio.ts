@@ -38,15 +38,15 @@ io.on("connection", (socket) => {
   });
 
   socket.on("newNotification", ({ senderId, receiverId, data }) => {
-    console.log("newNotification", senderId, receiverId, data);
     const user = getUser(receiverId);
-    console.log(user, "user");
+    if(user) {
     io.to(user.socketId).emit("notification", {
       id: senderId,
       type: "Authorization Denied",
       image: "",
       data: data,
     });
+    }
   });
 
   console.log("a user connected");

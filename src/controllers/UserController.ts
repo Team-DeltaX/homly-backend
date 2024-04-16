@@ -1,7 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { LessThan, MoreThanOrEqual, Like, Between, Not, In } from "typeorm";
+import {
+  LessThan,
+  MoreThanOrEqual,
+  Like,
+  Between,
+  Not,
+  In,
+  Admin,
+} from "typeorm";
 import { Request, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -22,6 +30,7 @@ import { Reservation } from "../entities/Reservation";
 import { Review } from "../entities/Review";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
+import { WishList } from "../entities/WishList";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -646,6 +655,12 @@ const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
     const totalRental = await calculateTotalRental(
       topRatedHolidayHomes[i].HolidayHomeId
     );
+    const isFavourite = await AppDataSource.manager.find(WishList, {
+      where: {
+        service_number: (req as any).serviceNo,
+        holidayHomeId: topRatedHolidayHomes[i].HolidayHomeId,
+      },
+    });
     topRatedHolidayHomesWithPrice.push({
       HolidayHomeId: topRatedHolidayHomes[i].HolidayHomeId,
       Name: topRatedHolidayHomes[i].Name,
@@ -653,6 +668,7 @@ const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
       overall_rating: topRatedHolidayHomes[i].overall_rating,
       TotalRental: totalRental,
       HHImage: topRatedHolidayHomes[i].MainImage,
+      isWishListed: isFavourite.length > 0 ? true : false,
     });
   }
   res.status(200).json(topRatedHolidayHomesWithPrice);
@@ -798,7 +814,7 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
           for (let i = 0; i < reservations.length; i++) {
             await AppDataSource.manager
               .find(HolidayHome, {
-                select: ["Name", "Address", "MainImage"],
+                select: ["Name", "Address", "MainImage", "AdminNo"],
                 where: {
                   HolidayHomeId: reservations[i].HolidayHome,
                 },
@@ -847,7 +863,7 @@ const getUserPastReservation = async (req: Request, res: Response) => {
           for (let i = 0; i < reservations.length; i++) {
             await AppDataSource.manager
               .find(HolidayHome, {
-                select: ["Name", "Address", "MainImage"],
+                select: ["Name", "Address", "MainImage", "AdminNo"],
                 where: {
                   HolidayHomeId: reservations[i].HolidayHome,
                 },
@@ -881,6 +897,7 @@ const getUserPastReservation = async (req: Request, res: Response) => {
 // get holidayhomes
 const getHolidayHomes = async (req: Request, res: Response) => {
   const { district, search, page } = req.query;
+  const serviceNo = (req as any).serviceNo;
 
   let queryOptions: any = {
     select: [
@@ -916,6 +933,12 @@ const getHolidayHomes = async (req: Request, res: Response) => {
       const totalRental = await calculateTotalRental(
         holidayHomes[i].HolidayHomeId
       );
+      const isFavourite = AppDataSource.manager.find(WishList, {
+        where: {
+          service_number: serviceNo,
+          holidayHomeId: holidayHomes[i].HolidayHomeId,
+        },
+      });
       holidayHomesWithPrice.push({
         HolidayHomeId: holidayHomes[i].HolidayHomeId,
         Name: holidayHomes[i].Name,
@@ -924,6 +947,9 @@ const getHolidayHomes = async (req: Request, res: Response) => {
         TotalRental: totalRental,
         HHImage: holidayHomes[i].MainImage,
         District: holidayHomes[i].District,
+        AdminId: holidayHomes[i].AdminNo,
+        isWishListed:
+          isFavourite && (await isFavourite).length > 0 ? true : false,
       });
     }
     const HHcount = holidayHomesWithPrice.length;
@@ -1114,31 +1140,85 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
 
     res.status(200).json(holidayHomesWithPrice);
   } catch (err) {
-    console.log(err);
     res.status(500).json({ message: "Internal Server error", err: err });
   }
 };
 
-// add payment card details
-const addPaymentCard = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Payment card added", success: true });
+// add wish list details
+const addtoWhishList = async (req: Request, res: Response) => {
+  const serviceNo = (req as any).serviceNo;
+  const { holidayHomeId } = req.body;
+  console.log(serviceNo, holidayHomeId);
+  const wishList = WishList.create({
+    service_number: serviceNo,
+    holidayHomeId: holidayHomeId,
+  });
+  await wishList
+    .save()
+    .then(() => {
+      res.status(200).json({ success: true });
+    })
+    .catch(() => {
+      res.status(500).json({ success: false });
+    });
 };
 
-// get payment card details
-const getPaymentCard = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Payment card details", success: true });
+// get wish list details
+const getWishList = async (req: Request, res: Response) => {
+  const serviceNo = (req as any).serviceNo;
+
+  try {
+    const wishList = await AppDataSource.manager.find(WishList, {
+      where: {
+        service_number: serviceNo,
+      },
+      order: {
+        created_at: "DESC",
+      },
+    });
+
+    let wishListDetails = [];
+    for (let i = 0; i < wishList.length; i++) {
+      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+        select: ["Name", "Address", "MainImage", "overall_rating"],
+        where: {
+          HolidayHomeId: wishList[i].holidayHomeId,
+        },
+      });
+
+      const totalRental = await calculateTotalRental(wishList[i].holidayHomeId);
+      wishListDetails.push({
+        HolidayHomeId: wishList[i].holidayHomeId,
+        Name: holidayHome[0].Name,
+        Address: holidayHome[0].Address,
+        HHImage: holidayHome[0].MainImage,
+        TotalRental: totalRental,
+        overall_rating: holidayHome[0].overall_rating,
+        isWishListed: true,
+      });
+    }
+    res.status(200).json(wishListDetails);
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server error" });
+  }
 };
 
-// update default payment card
-const updateDefaultPaymentCard = async (req: Request, res: Response) => {
-  res
-    .status(200)
-    .json({ message: "Default payment card updated", success: true });
-};
+// delete wish list
+const deleteFromWishList = async (req: Request, res: Response) => {
+  const serviceNo = (req as any).serviceNo;
+  const { holidayHomeId } = req.body;
 
-// delete payment card
-const deletePaymentCard = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Payment card deleted", success: true });
+  await AppDataSource.manager
+    .delete(WishList, {
+      service_number: serviceNo,
+      holidayHomeId: holidayHomeId,
+    })
+    .then(() => {
+      res.status(200).json({ message: "wish list deleted", success: true });
+    })
+    .catch(() => {
+      res.status(500).json({ message: "error", success: false });
+    });
 };
 
 export {
@@ -1161,8 +1241,7 @@ export {
   getUserPastReservation,
   getHolidayHomes,
   searchHolidayHomes,
-  addPaymentCard,
-  getPaymentCard,
-  updateDefaultPaymentCard,
-  deletePaymentCard,
+  addtoWhishList,
+  getWishList,
+  deleteFromWishList,
 };
