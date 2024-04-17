@@ -25,16 +25,13 @@ const adminLogin = async (req: Request, res: Response) => {
           .compare(password, admin[0].Password)
           .then((result) => {
             if (result) {
-              const token = createToken(admin[0].AdminNo, admin[0].Role);
+              const token = createToken(admin[0].AdminNo, "Admin");
               if (admin[0].Role === "PrimaryAdmin") {
                 res.status(200).json({
                   message: "Login Success",
                   success: true,
-                  role: "PrimaryAdmin",
-                });
-                res.cookie("jwt", token, {
-                  httpOnly: true,
-                  maxAge: maxAge * 1000,
+                  role: "Admin",
+                  token: token,
                 });
               } else {
                 if (admin[0].Verified) {
@@ -42,11 +39,8 @@ const adminLogin = async (req: Request, res: Response) => {
                     message: "Login Success",
                     success: true,
                     verified: true,
-                    role: "LocationAdmin",
-                  });
-                  res.cookie("jwt", token, {
-                    httpOnly: true,
-                    maxAge: maxAge * 1000,
+                    role: "Admin",
+                    token: token,
                   });
                 } else {
                   res.status(200).json({
