@@ -35,7 +35,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // create token
-const maxAge = 60 * 60;
+const maxAge = 10 * 60;
 const createToken = (serviceNo: String) => {
   const secretCode = process.env.JWT_SECRET;
   return jwt.sign({ serviceNo }, secretCode!, {
@@ -261,9 +261,9 @@ const userLogin = async (req: Request, res: Response) => {
             }
           );
           const token = createToken(serviceNo);
-          res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-
-          res.status(200).json({ message: "Login Successful", success: true });
+          res
+            .status(200)
+            .json({ token: token, message: "Login Successful", success: true });
         } else {
           res.status(200).json({
             message: "Incorrect password or Username",

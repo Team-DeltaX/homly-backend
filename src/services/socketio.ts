@@ -16,8 +16,7 @@ const addUser = (userId: string, socketId: string) => {
   } else {
     onlineUsers.push({ userId, socketId });
   }
-
-  console.log(onlineUsers);
+  console.log(onlineUsers)
 };
 
 const removeUser = (socketId: string) => {
@@ -34,18 +33,20 @@ io.on("connection", (socket) => {
   // when connect
   socket.on("addUser", (userId: string) => {
     console.log(userId + " id", socket.id + " socket id");
-    addUser(userId, socket.id);
+    if (userId) {
+      addUser(userId, socket.id);
+    }
   });
 
   socket.on("newNotification", ({ senderId, receiverId, data }) => {
     const user = getUser(receiverId);
-    if(user) {
-    io.to(user.socketId).emit("notification", {
-      id: senderId,
-      type: "Authorization Denied",
-      image: "",
-      data: data,
-    });
+    if (user) {
+      io.to(user.socketId).emit("notification", {
+        id: senderId,
+        type: "Authorization Denied",
+        image: "",
+        data: data,
+      });
     }
   });
 
