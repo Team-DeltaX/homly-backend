@@ -88,14 +88,11 @@ export const AppDataSource = new DataSource({
     Review,
     ReservedHalls,
     PaymentCard,
-
   ],
-
   synchronize: true,
   logging: false,
 });
 
-// app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
 const corsOptions = {
