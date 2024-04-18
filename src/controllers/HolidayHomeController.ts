@@ -587,128 +587,117 @@ const updateHolidayHome = async (req: Request, res: Response) => {
 
         }
 
+        // roomTypeSettings deelete where holidayhomeid = holidayhomeid
+        await RoomTypeSettings.delete({ HolidayHomeId: HolidayHomeId });
+
+        // create with new incoming data
+
+        for (let i = 0; i < updatedValues.roomTypeArray.length; i++) {
+            const roomTypeId = await AppDataSource.query(
+                `SELECT MAX("RTId") as maxval FROM "INOADMIN"."room_type_settings"`
+            );
+            console.log("roomtypesettings id", roomTypeId[0].MAXVAL);
+            let maxvalue = roomTypeId[0].MAXVAL;
+
+            let RTId;
+            if (maxvalue) {
+                // incremenet string maxvalue by 1
+                let num = maxvalue.split("-");
+                console.log(num[1]);
+                RTId = "RT-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
+            } else {
+                RTId = "RT-0000001";
+            }
+
+            const updatedValues = req.body;
+
+            const roomType = RoomTypeSettings.create({
+                RTId: RTId,
+                roomType: updatedValues.roomTypeArray[i].roomType,
+                adults: updatedValues.roomTypeArray[i].adults,
+                children: updatedValues.roomTypeArray[i].children,
+                HolidayHomeId: HolidayHomeId,
+                // HolidayHomeId: holidayHome.HolidayHomeId
+            })
+            await roomType.save();
+        }
 
 
-        // await ContactNo.update({ HolidayHomeId: HolidayHomeId },
-        //     {
-        //         ContactNo: updatedValues.holidayHomeDetails.contactNo1,
-        //     }
-        // );
+        await RoomRentalSettings.delete({ HolidayHomeId: HolidayHomeId });
 
-        // if (updatedValues.holidayHomeDetails.contactNo2) {
-        //     await ContactNo.update({ HolidayHomeId: HolidayHomeId },
-        //         {
-        //             ContactNo: updatedValues.holidayHomeDetails.contactNo2,
-        //         }
-        //     );
-        // } else {
-        //     if (updatedValues.holidayHomeDetails.contactNo2 !== "") {
-        //         const contactNo2 = ContactNo.create({
-        //             ContactNo: updatedValues.holidayHomeDetails.contactNo2,
-        //             HolidayHomeId: HolidayHomeId,
-        //         })
-        //         await contactNo2.save();
-        //     }
-        // }
+        for (let i = 0; i < updatedValues.settingRoomRentalArray.length; i++) {
 
+            const roomRentalId = await AppDataSource.query(
+                `SELECT MAX("RSId") as maxval FROM "INOADMIN"."room_rental_settings"`
+            );
+            console.log("roomrentalsettings id", roomRentalId[0].MAXVAL);
+            let maxvalue = roomRentalId[0].MAXVAL;
 
-        // for (let i = 0; i < updatedValues.roomTypeArray.length; i++) {
-        //     await RoomTypeSettings.update({ HolidayHomeId: HolidayHomeId },
-        //         {
-        //             roomType: updatedValues.roomTypeArray[i].roomType,
-        //             adults: updatedValues.roomTypeArray[i].adults,
-        //             children: updatedValues.roomTypeArray[i].children,
-        //         }
-        //     );
-        // }
+            let RRId;
+            if (maxvalue) {
+                // incremenet string maxvalue by 1
+                let num = maxvalue.split("-");
+                console.log(num[1]);
+                RRId = "RR-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
+            } else {
+                RRId = "RR-000001";
+            }
 
-        // for (let i = 0; i < updatedValues.settingRoomRentalArray.length; i++) {
-        //     await RoomRentalSettings.update({ HolidayHomeId: HolidayHomeId },
-        //         {
-        //             roomType: updatedValues.settingRoomRentalArray[i].type,
-        //             acNonAc: updatedValues.settingRoomRentalArray[i].acNonAc,
-        //             rental: updatedValues.settingRoomRentalArray[i].rental,
-        //         }
-        //     );
-        // }
+            const updatedValues = req.body;
 
+            const roomRental = RoomRentalSettings.create({
+                RSId: RRId,
+                roomType: updatedValues.settingRoomRentalArray[i].roomType,
+                acNonAc: updatedValues.settingRoomRentalArray[i].acNonAc,
+                rental: updatedValues.settingRoomRentalArray[i].rental,
+                HolidayHomeId: HolidayHomeId,
+            })
 
-        // for (let i = 0; i < updatedValues.roomArray.length; i++) {
+            await roomRental.save();
 
-        //     if (updatedValues.roomArray[i].rentalArray) {
-        //         for (let j = 0; j < updatedValues.roomArray[i].rentalArray.length; j++) {
-        //             await Rental.update({ HolidayHomeId: HolidayHomeId },
-        //                 {
-        //                     Month: updatedValues.roomArray[i].rentalArray[j].district,
-        //                     WeekRental: updatedValues.roomArray[i].rentalArray[j].weekDays,
-        //                     WeekEndRental: updatedValues.roomArray[i].rentalArray[j].weekEnds,
-        //                 }
-        //             );
-        //         }
-        //     }
+        }
 
-        //     await Room.update({ HolidayHomeId: HolidayHomeId },
-        //         {
-        //             roomCode: updatedValues.roomArray[i].roomCode,
-        //             roomAc: updatedValues.roomArray[i].roomAc,
-        //             RoomType: updatedValues.roomArray[i].RoomType,
-        //             FloorLevel: updatedValues.roomArray[i].floorLevel,
-        //             NoOfAdults: updatedValues.roomArray[i].NoOfAdults,
-        //             NoOfChildren: updatedValues.roomArray[i].NoOfChildren,
-        //             groupByUnit: updatedValues.roomArray[i].groupByUnit,
-        //             roomRemarks: updatedValues.roomArray[i].roomRemarks,
-        //             roomRental: updatedValues.roomArray[i].roomRental,
-        //         }
-        //     );
-        // }
+        // hall delete where holidayhomeid = holidayhomeid
+        await Hall.delete({ HolidayHomeId: HolidayHomeId });
 
-        // for (let i = 0; i < updatedValues.unitArray.length; i++) {
-        //     for (let j = 0; j < updatedValues.unitArray[i].selectedRooms.length; j++) {
-        //         await SelectedRooms.update({ HolidayHomeId: HolidayHomeId },
-        //             {
-        //                 roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
-        //                 unitCode: updatedValues.unitArray[i].unitCode,
-        //             }
-        //         );
-        //     }
+        console.log("hall array", updatedValues.hallArray)
 
-        //     await Unit.update({ HolidayHomeId: HolidayHomeId },
-        //         {
-        //             unitCode: updatedValues.unitArray[i].unitCode,
-        //             unitAc: updatedValues.unitArray[i].unitAc,
-        //             floorLevel: updatedValues.unitArray[i].floorLevel,
-        //             unitRemark: updatedValues.unitArray[i].unitRemark,
-        //             roomAttached: updatedValues.unitArray[i].roomAttached,
-        //         }
-        //     );
-        // }
+        for (let i = 0; i < updatedValues.hallArray.length; i++) {
+            for (let j = 0; j < updatedValues.hallArray[i].hallRentalArray.length; j++) {
+                const rental = Rental.create({
+                    Month: updatedValues.hallArray[i].hallRentalArray[j].district,
+                    WeekRental: updatedValues.hallArray[i].hallRentalArray[j].weekDays,
+                    WeekEndRental: updatedValues.hallArray[i].hallRentalArray[j].weekEnds,
+                    HolidayHomeId: HolidayHomeId,
+                    HRUId: updatedValues.hallArray[i].hallCode
+                })
+
+                await rental.save();
+
+            }
+            const hall = Hall.create({
+                hallCode: updatedValues.hallArray[i].hallCode,
+                hallAc: updatedValues.hallArray[i].hallAc,
+                floorLevel: updatedValues.hallArray[i].floorLevel,
+                hallNoOfAdults: updatedValues.hallArray[i].hallNoOfAdults,
+                hallNoOfChildren: updatedValues.hallArray[i].hallNoOfChildren,
+                hallRemark: updatedValues.hallArray[i].hallRemark,
+                hallRental: updatedValues.hallArray[i].hallRental,
+                HolidayHomeId: HolidayHomeId,
+            })
+
+            await hall.save();
+        }
+
+       
 
 
 
-        // for (let i = 0; i < updatedValues.hallArray.length; i++) {
-        //     for (let j = 0; j < updatedValues.hallArray[i].hallRentalArray.length; j++) {
-        //         await Rental.update({ HolidayHomeId: HolidayHomeId },
-        //             {
-        //                 Month: updatedValues.hallArray[i].hallRentalArray[j].district,
-        //                 WeekRental: updatedValues.hallArray[i].hallRentalArray[j].weekDays,
-        //                 WeekEndRental: updatedValues.hallArray[i].hallRentalArray[j].weekEnds,
-        //             }
-        //         );
-        //     }
+   
 
-        //     await Hall.update({ HolidayHomeId: HolidayHomeId },
-        //         {
-        //             hallCode: updatedValues.hallArray[i].hallCode,
-        //             hallAc: updatedValues.hallArray[i].hallAc,
-        //             floorLevel: updatedValues.hallArray[i].floorLevel,
-        //             hallNoOfAdults: updatedValues.hallArray[i].hallNoOfAdults,
-        //             hallNoOfChildren: updatedValues.hallArray[i].hallNoOfChildren,
-        //             hallRemark: updatedValues.hallArray[i].hallRemark,
-        //             hallRental: updatedValues.hallArray[i].hallRental,
-        //         }
-        //     );
-        // }
-
+       
+    
+        
         res.json({ message: "Holiday Home updated successfully" });
 
     }
