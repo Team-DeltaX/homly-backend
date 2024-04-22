@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import { v4 as uuidv4 } from "uuid";
 
 const io = new Server({
   cors: {
@@ -16,7 +17,7 @@ const addUser = (userId: string, socketId: string) => {
   } else {
     onlineUsers.push({ userId, socketId });
   }
-  console.log(onlineUsers)
+  console.log(onlineUsers);
 };
 
 const removeUser = (socketId: string) => {
@@ -42,7 +43,7 @@ io.on("connection", (socket) => {
     const user = getUser(receiverId);
     if (user) {
       io.to(user.socketId).emit("notification", {
-        id: senderId,
+        id: uuidv4(),
         type: type,
         data: data,
         senderId: senderId,

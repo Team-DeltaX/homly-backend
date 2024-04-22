@@ -8,8 +8,8 @@ import {
 
 @Entity()
 export class Notification extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
   @Column()
   receiverId!: string;
