@@ -38,14 +38,15 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("newNotification", ({ senderId, receiverId, data }) => {
+  socket.on("newNotification", ({ senderId, receiverId, data, type, time }) => {
     const user = getUser(receiverId);
     if (user) {
       io.to(user.socketId).emit("notification", {
         id: senderId,
-        type: "Authorization Denied",
-        image: "",
+        type: type,
         data: data,
+        senderId: senderId,
+        time: time,
       });
     }
   });
