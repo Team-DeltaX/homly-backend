@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import OracleDB from "oracledb";
+import io from "./services/socketio";
 import { DataSource } from "typeorm";
 import { SpecailReservation } from "./entities/SpecialReservation";
 import { ReservedRooms } from "./entities/ReservedRooms";
@@ -29,7 +30,7 @@ import {
   UserOTPVerification,
   UserInteresed,
 } from "./entities/User";
-import { PaymentCard } from "./entities/PaymentCard";
+import { WishList } from "./entities/WishList";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { UserFeedback } from "./entities/Feedback";
@@ -87,7 +88,7 @@ export const AppDataSource = new DataSource({
     ReservedRooms,
     Review,
     ReservedHalls,
-    PaymentCard,
+    WishList,
   ],
   synchronize: true,
   logging: false,
@@ -101,6 +102,8 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
+io.listen(8081);
 
 AppDataSource.initialize()
   .then(() => {

@@ -74,6 +74,11 @@ export class Reservation extends BaseEntity {
   })
   IsSpecial!: boolean;
 
+  @Column({
+    default: false,
+  })
+  IsCancelled!: boolean;
+
   @CreateDateColumn()
   createdAt!: Date;
 
