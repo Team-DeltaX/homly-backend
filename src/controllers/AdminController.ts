@@ -15,6 +15,7 @@ const createToken = (serviceNo: String, role: String) => {
 
 const adminLogin = async (req: Request, res: Response) => {
   const { adminId, password } = req.body;
+  console.log(adminId, password, "adminId, password")
   await AppDataSource.manager
     .find(HomlyAdmin, {
       where: { AdminNo: adminId },
@@ -30,7 +31,7 @@ const adminLogin = async (req: Request, res: Response) => {
                 res.status(200).json({
                   message: "Login Success",
                   success: true,
-                  role: "Admin",
+                  role: "PrimaryAdmin",
                   token: token,
                 });
               } else {
@@ -39,7 +40,7 @@ const adminLogin = async (req: Request, res: Response) => {
                     message: "Login Success",
                     success: true,
                     verified: true,
-                    role: "Admin",
+                    role: "LocationAdmin",
                     token: token,
                   });
                 } else {
