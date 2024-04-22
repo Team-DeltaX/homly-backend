@@ -15,6 +15,12 @@ export class Notification extends BaseEntity {
   receiverId!: string;
 
   @Column()
+  senderId!: string;
+
+  @Column()
+  notificationType!: string;
+
+  @Column()
   data!: string;
 
   @CreateDateColumn()
