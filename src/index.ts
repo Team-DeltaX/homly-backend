@@ -109,6 +109,7 @@ AppDataSource.initialize()
   .then(() => {
     // use requireAuth middleware to users/auth all paths
     app.use("/user/auth/*", requireAuth);
+    app.use("/admin/auth/*", requireAuth);
     app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
     app.use("/admin/auth/locationadmin/reservations", SpecialReservationRouter);
     app.use("/admin", LocationAdminRoute);
