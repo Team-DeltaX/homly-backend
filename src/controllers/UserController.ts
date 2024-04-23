@@ -1100,7 +1100,7 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
         .find(ReservedHalls, {
           select: ["hallCode"],
           where: {
-            ReservationId: reservations[i].ReservationId,
+            ReservationId: reservations[i].ReservationId ?? undefined,
           },
         })
         .then((halls) => {
@@ -1252,6 +1252,25 @@ const getNotifications = async (req: Request, res: Response) => {
     });
 };
 
+// add notification
+const addNotification = async (req: Request, res: Response) => {
+  const { receiverId, senderId, data, type } = req.body;
+
+  const notifiactions = Notification.create({
+    receiverId,
+    senderId,
+    type,
+    data,
+    time: new Date(),
+  });
+
+  notifiactions.save().then(() => {
+    res.status(200)
+  }).catch(() => {
+    res.status(500).json({ message: "Internal Server error" });
+  });
+};
+
 // delete notification
 const deleteNotification = async (req: Request, res: Response) => {
   const { notificationIds } = req.body;
@@ -1290,5 +1309,6 @@ export {
   getWishList,
   deleteFromWishList,
   getNotifications,
+  addNotification,
   deleteNotification,
 };
