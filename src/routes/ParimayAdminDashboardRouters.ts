@@ -7,7 +7,7 @@ const PrimaryAdminDashboardRouter = express.Router();
 
 PrimaryAdminDashboardRouter.get('/auth/holidayhomecount',HHcount)
 PrimaryAdminDashboardRouter.get('/auth/earning',Earning)
-PrimaryAdminDashboardRouter.get('/auth/holidayhomehstatus',Active_InActive_HHcount )
+PrimaryAdminDashboardRouter.get('/auth/holidayhomestatus',Active_InActive_HHcount )
 PrimaryAdminDashboardRouter.get('/auth/bookingcount',getBookingscounts )
 PrimaryAdminDashboardRouter.get('/auth/hall',gethallcount)
 PrimaryAdminDashboardRouter.get('/auth/room',getroomcount)
