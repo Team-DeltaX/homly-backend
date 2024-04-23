@@ -1261,7 +1261,7 @@ const addNotification = async (req: Request, res: Response) => {
     senderId,
     data,
     type,
-    created_at: new Date(),
+    time: new Date(),
   });
 
   notifiactions
