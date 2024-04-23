@@ -29,11 +29,13 @@ export class Reservation extends BaseEntity {
 
   @Column({
     type: "date",
+    nullable: true
   })
   CheckinDate!: Date;
 
   @Column({
     type: "date",
+    nullable: true
   })
   CheckoutDate!: Date;
 

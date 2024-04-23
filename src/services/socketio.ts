@@ -1,5 +1,4 @@
 import { Server } from "socket.io";
-import { v4 as uuidv4 } from "uuid";
 
 const io = new Server({
   cors: {
@@ -17,6 +16,7 @@ const addUser = (userId: string, socketId: string) => {
   } else {
     onlineUsers.push({ userId, socketId });
   }
+  console.log(onlineUsers)
 };
 
 const removeUser = (socketId: string) => {
@@ -28,7 +28,11 @@ const getUser = (userId: string) => {
 };
 
 io.on("connection", (socket) => {
+  io.emit("connection", "a user connected2");
+
+  // when connect
   socket.on("addUser", (userId: string) => {
+    console.log(userId + " id", socket.id + " socket id");
     if (userId) {
       addUser(userId, socket.id);
     }
@@ -38,7 +42,7 @@ io.on("connection", (socket) => {
     const user = getUser(receiverId);
     if (user) {
       io.to(user.socketId).emit("notification", {
-        id: uuidv4(),
+        id: senderId,
         type: type,
         data: data,
         senderId: senderId,
@@ -46,8 +50,12 @@ io.on("connection", (socket) => {
       });
     }
   });
+
+  console.log("a user connected");
   socket.on("disconnect", () => {
+    console.log("user disconnected", socket.id);
     removeUser(socket.id);
+    console.log(onlineUsers);
   });
 });
 
