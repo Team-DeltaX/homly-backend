@@ -18,7 +18,7 @@ export class Notification extends BaseEntity {
   senderId!: string;
 
   @Column()
-  notificationType!: string;
+  type!: string;
 
   @Column()
   data!: string;
