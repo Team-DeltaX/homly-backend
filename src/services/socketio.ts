@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { v4 as uuidv4 } from "uuid";
+import { Notification } from "../entities/Notification";
 
 const io = new Server({
   cors: {
@@ -34,18 +34,33 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("newNotification", ({ senderId, receiverId, data, type, time }) => {
-    const user = getUser(receiverId);
-    if (user) {
-      io.to(user.socketId).emit("notification", {
-        id: uuidv4(),
-        type: type,
-        data: data,
-        senderId: senderId,
-        time: time,
+  socket.on(
+    "newNotification",
+    async ({ senderId, receiverId, data, type, time }) => {
+      
+      const notifiactions = Notification.create({
+        receiverId,
+        senderId,
+        type,
+        data,
+        time: new Date(),
       });
+
+      await notifiactions.save().then((res) => {
+        const user = getUser(receiverId);
+        if (user) {
+          io.to(user.socketId).emit("notification", {
+            id: res.id,
+            type: type,
+            data: data,
+            senderId: senderId,
+            time: time,
+          });
+        }
+      });
+      
     }
-  });
+  );
   socket.on("disconnect", () => {
     removeUser(socket.id);
   });

@@ -1237,11 +1237,11 @@ const deleteFromWishList = async (req: Request, res: Response) => {
 
 // get notifications
 const getNotifications = async (req: Request, res: Response) => {
-  const serviceNo = (req as any).serviceNo;
+  const userId = (req as any).serviceNo || (req as any).adminNo;
   await AppDataSource.manager
     .find(Notification, {
       where: {
-        receiverId: serviceNo,
+        receiverId: userId,
       },
     })
     .then((notifications) => {
@@ -1255,7 +1255,7 @@ const getNotifications = async (req: Request, res: Response) => {
 // add notification
 const addNotification = async (req: Request, res: Response) => {
   const { receiverId, senderId, data, type } = req.body;
-
+  console.log(receiverId, senderId, data, type, "sdfsdf");
   const notifiactions = Notification.create({
     receiverId,
     senderId,
@@ -1264,24 +1264,41 @@ const addNotification = async (req: Request, res: Response) => {
     time: new Date(),
   });
 
-  notifiactions.save().then(() => {
-    res.status(200)
-  }).catch(() => {
-    res.status(500).json({ message: "Internal Server error" });
-  });
+  notifiactions
+    .save()
+    .then(() => {
+      res.status(200).json({ message: "Notification added" });
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Internal Server error" });
+    });
 };
 
 // delete notification
 const deleteNotification = async (req: Request, res: Response) => {
-  const { notificationIds } = req.body;
-  try {
-    notificationIds.forEach(async (id: string) => {
-      await AppDataSource.manager.delete(Notification, {
-        notificationId: id,
+  const { notificationIds, all } = req.body;
+  if (all) {
+    await AppDataSource.manager
+      .delete(Notification, {
+        receiverId: (req as any).adminNo || (req as any).serviceNo,
+      })
+      .then(() => {
+        res.sendStatus(200);
+      })
+      .catch(() => {
+        res.sendStatus(500);
       });
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Internal Server error" });
+  } else {
+    await AppDataSource.manager
+      .delete(Notification, {
+        id: notificationIds,
+      })
+      .then(() => {
+        res.sendStatus(200);
+      })
+      .catch(() => {
+        res.sendStatus(500);
+      });
   }
 };
 
