@@ -1,15 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {
-  LessThan,
-  MoreThanOrEqual,
-  Like,
-  Between,
-  Not,
-  In,
-  Admin,
-} from "typeorm";
+import { LessThan, MoreThanOrEqual, Like, Between, Not, In } from "typeorm";
 import { Request, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -31,11 +23,12 @@ import { Review } from "../entities/Review";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
 import { WishList } from "../entities/WishList";
+import { Notification } from "../entities/Notification";
 import dotenv from "dotenv";
 dotenv.config();
 
 // create token
-const maxAge = 10 * 60;
+const maxAge = 2 * 60 * 60;
 const createToken = (serviceNo: String) => {
   const secretCode = process.env.JWT_SECRET;
   return jwt.sign({ serviceNo }, secretCode!, {
@@ -432,7 +425,6 @@ const resetPassword = async (req: Request, res: Response) => {
 // get user by service number
 const userById = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
-  console.log(serviceNo, "serviceNo get");
   try {
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -483,15 +475,6 @@ const updateUserDetails = async (req: Request, res: Response) => {
         service_number: serviceNo,
       },
     });
-    console.log(
-      (req as any).serviceNo,
-      contactNo,
-      image,
-      email,
-      user?.email,
-      email === user?.email,
-      "update"
-    );
     if (user && user.verified) {
       await AppDataSource.manager.update(
         HomlyUser,
@@ -1117,7 +1100,7 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
         .find(ReservedHalls, {
           select: ["hallCode"],
           where: {
-            ReservationId: reservations[i].ReservationId,
+            ReservationId: reservations[i].ReservationId ?? undefined,
           },
         })
         .then((halls) => {
@@ -1180,7 +1163,6 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
 const addtoWhishList = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
   const { holidayHomeId } = req.body;
-  console.log(serviceNo, holidayHomeId);
   const wishList = WishList.create({
     service_number: serviceNo,
     holidayHomeId: holidayHomeId,
@@ -1253,6 +1235,73 @@ const deleteFromWishList = async (req: Request, res: Response) => {
     });
 };
 
+// get notifications
+const getNotifications = async (req: Request, res: Response) => {
+  const userId = (req as any).serviceNo || (req as any).adminNo;
+  await AppDataSource.manager
+    .find(Notification, {
+      where: {
+        receiverId: userId,
+      },
+    })
+    .then((notifications) => {
+      res.status(200).json(notifications);
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Internal Server error" });
+    });
+};
+
+// add notification
+const addNotification = async (req: Request, res: Response) => {
+  const { receiverId, senderId, data, type } = req.body;
+  console.log(receiverId, senderId, data, type, "sdfsdf");
+  const notifiactions = Notification.create({
+    receiverId,
+    senderId,
+    data,
+    type,
+    time: new Date(),
+  });
+
+  notifiactions
+    .save()
+    .then(() => {
+      res.status(200).json({ message: "Notification added" });
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Internal Server error" });
+    });
+};
+
+// delete notification
+const deleteNotification = async (req: Request, res: Response) => {
+  const { notificationIds, all } = req.body;
+  if (all) {
+    await AppDataSource.manager
+      .delete(Notification, {
+        receiverId: (req as any).adminNo || (req as any).serviceNo,
+      })
+      .then(() => {
+        res.sendStatus(200);
+      })
+      .catch(() => {
+        res.sendStatus(500);
+      });
+  } else {
+    await AppDataSource.manager
+      .delete(Notification, {
+        id: notificationIds,
+      })
+      .then(() => {
+        res.sendStatus(200);
+      })
+      .catch(() => {
+        res.sendStatus(500);
+      });
+  }
+};
+
 export {
   allEmployees,
   allUsers,
@@ -1276,4 +1325,7 @@ export {
   addtoWhishList,
   getWishList,
   deleteFromWishList,
+  getNotifications,
+  addNotification,
+  deleteNotification,
 };
