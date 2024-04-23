@@ -709,4 +709,193 @@ const updateHolidayHome = async (req: Request, res: Response) => {
 };
 
 
+export const HHcount = async (req: Request, res: Response) => {
+    try {
+      const count = await HolidayHome.count();
+      res.status(200).json({ count: count });
+    } catch (error) {
+      res.status(500).json({ message: "Error in getting home count!" });
+    }
+  };
+  
+  export const Earning = async (req: Request, res: Response) => {
+    try {
+      const sum = await Reservation.sum("Price", { IsPaid: true });
+      res.status(200).json({ sum: sum });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Error in calculating earnings!" });
+    }
+  };
+  
+  export const Active_InActive_HHcount = async (req: Request, res: Response) => {
+    try {
+      const ac_count = await HolidayHome.countBy({ Status: "Active" });
+      const in_ac_count = await HolidayHome.countBy({ Status: "Inactive" });
+      res.status(200).json({ Active: ac_count, Inactive: in_ac_count });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Error in calculating active home count!" });
+    }
+  };
+  export const getBookingscounts = async (req: Request, res: Response) => {
+    try {
+      const paid_count = await Reservation.countBy({ IsPaid: true });
+      const unpaid_count = await Reservation.countBy({ IsPaid: false });
+      res.status(200).json({ Paid: paid_count, Unpaid: unpaid_count });
+    } catch (error) {
+      res.status(500).json({ message: "Error in getting bookings!" });
+    }
+  };
+  
+  export const gethallcount = async (req: Request, res: Response) => {
+    try {
+      const hall_count = await Hall.countBy({});
+      res.status(200).json({ count: hall_count });
+    } catch (error) {
+      res.status(500).json({ message: "Error in getting hall count!" });
+    }
+  };
+  
+  export const getroomcount = async (req: Request, res: Response) => {
+    try {
+      const room_count = await Room.countBy({});
+      res.status(200).json({ count: room_count });
+    } catch (error) {
+      res.status(500).json({ message: "Error in getting room count!" });
+    }
+  };
+  
+  export const Hallincome = async (req: Request, res: Response) => {
+    try {
+      const sum = await Reservation.sum("HallPrice", { IsPaid: true });
+      res.status(200).json({ hallincome: sum });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Error in calculating hall income!" });
+    }
+  };
+  
+  export const Roomincome = async (req: Request, res: Response) => {
+    try {
+      const sum = await Reservation.sum("RoomPrice", { IsPaid: true });
+      res.status(200).json({ roomincome: sum });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Error in room income!" });
+    }
+  };
+  
+  export const get_income_in_date = async (req: Request, res: Response) => {
+    const date = req.params.date;
+    //get all paid ones
+    try {
+      const reservations = await Reservation.find({
+        where: { IsPaid: true },
+        select: ["Price", "createdAt"],
+      });
+      //chnage the format of the time(to easy comparing)
+      const modifiedReservations = reservations.map((reservation) => ({
+        Price: reservation.Price,
+        createdAt: reservation.createdAt.toISOString().split("T")[0],
+      }));
+  
+      const targetDate = date;
+      //get reservations in given date
+      const reservationsForDate = modifiedReservations.filter(
+        (reservation) => reservation.createdAt === targetDate
+      );
+  
+      let sumForDate = 0;
+      reservationsForDate.forEach((reservation) => {
+        sumForDate += reservation.Price;
+      });
+  
+      res.status(200).json({ sumForDate });
+    } catch (error) {
+      res.status(500).json({ message: "error occured in get income in date" });
+    }
+  };
+  
+  export const getallHH = async (req: Request, res: Response) => {
+    try {
+      const HH = await HolidayHome.find({
+        select: {
+          Name: true,
+          HolidayHomeId: true,
+        },
+      });
+      res.status(200).json({ HH });
+    } catch (error) {
+      res.status(500).json({ message: "Error in getting all HH names " });
+    }
+  };
+  
+  export const get_income_in_date_specificHH = async (
+    req: Request,
+    res: Response
+  ) => {
+    const date = req.params.date;
+    const hhid = req.params.hhid;
+  
+    try {
+      const reservations = await Reservation.find({
+        where: { IsPaid: true, HolidayHome: hhid },
+        select: ["Price", "createdAt"],
+      });
+      const modifiedReservations = reservations.map((reservation) => ({
+        Price: reservation.Price,
+        createdAt: reservation.createdAt.toISOString().split("T")[0],
+      }));
+  
+      const targetDate = date;
+  
+      const reservationsForDate = modifiedReservations.filter(
+        (reservation) => reservation.createdAt === targetDate
+      );
+  
+      let sumForDate = 0;
+      reservationsForDate.forEach((reservation) => {
+        sumForDate += reservation.Price;
+      });
+  
+      res.status(200).json({ sumForDate });
+    } catch (error) {
+      res.status(500).json({ message: "Error " });
+    }
+  };
+  
+  export const get_not_approved_count = async (req: Request, res: Response) => {
+    try {
+      const count = await HolidayHome.count({
+        where: {
+          Approved: false,
+        },
+      });
+      res.status(200).json({ notapprovedcount: count });
+    } catch {
+      res.status(500).json({ message: "Error in getting not approved count" });
+    }
+  };
+  
+  export const get_holiday_home_rating = async (req: Request, res: Response) => {
+    const holidayhomeid = req.params.homeid;
+    try {
+      const rating = await AppDataSource.manager.find(HolidayHome, {
+        select: {
+          overall_rating: true,
+        },
+        where: {
+          HolidayHomeId: holidayhomeid,
+        },
+      });
+      res.status(200).json({ rating });
+    } catch {
+      res.status(500).json({ message: "error in getting holiday home rating" });
+    }
+  };
+  
+
+
 export { getHolidayHomes, getHolidayHomesDetails, createHolidayHome, getSelectedRooms, getRoom, getRoomRental, updateHolidayHome, getHolidayHomeNames, getReservationDetails, getReservedRooms }
