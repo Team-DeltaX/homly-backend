@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import OracleDB from "oracledb";
+import io from "./services/socketio";
 import { DataSource } from "typeorm";
 import { SpecailReservation } from "./entities/SpecialReservation";
 import { ReservedRooms } from "./entities/ReservedRooms";
@@ -29,12 +30,13 @@ import {
   UserOTPVerification,
   UserInteresed,
 } from "./entities/User";
-import { PaymentCard } from "./entities/PaymentCard";
+import { WishList } from "./entities/WishList";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { UserFeedback } from "./entities/Feedback";
 import { SelectedRooms } from "./entities/SelectedRooms";
 import { Review } from "./entities/Review";
+import { Notification } from "./entities/Notification";
 
 // routes
 import { homly_user } from "./routes/UserRouters";
@@ -88,7 +90,8 @@ export const AppDataSource = new DataSource({
     ReservedRooms,
     Review,
     ReservedHalls,
-    PaymentCard,
+    WishList,
+    Notification,
   ],
   synchronize: true,
   logging: false,
@@ -103,20 +106,23 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+io.listen(8081);
+
 AppDataSource.initialize()
   .then(() => {
     // use requireAuth middleware to users/auth all paths
-    app.use("/users/auth/*", requireAuth);
+    app.use("/user/auth/*", requireAuth);
+    app.use("/admin/auth/*", requireAuth);
     app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
     app.use("/admin/auth/locationadmin/reservations", SpecialReservationRouter);
     app.use("/admin", LocationAdminRoute);
     app.use("/admin", ReportsRouter);
     app.use("/admin", BlacklistRouter);
-    app.use("/users", homly_user);
-    app.use("/users", reg_users);
-    app.use("/users", homly_review);
+    app.use("/user", homly_user);
+    app.use("/user", reg_users);
+    app.use("/user", homly_review);
     app.use("/admin", admin_router);
-    app.use("/users", ReservationRouter);
+    app.use("/user", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
     app.use("/locationadmin", LocationAdminDashboardRouter);
     app.listen(PORT, () => {

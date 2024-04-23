@@ -27,10 +27,16 @@ export class Reservation extends BaseEntity {
   @Column()
   HolidayHome!: string;
 
-  @Column()
+  @Column({
+    type: "date",
+    nullable: true
+  })
   CheckinDate!: Date;
 
-  @Column()
+  @Column({
+    type: "date",
+    nullable: true
+  })
   CheckoutDate!: Date;
 
   @Column()
@@ -67,6 +73,11 @@ export class Reservation extends BaseEntity {
     default: false,
   })
   IsSpecial!: boolean;
+
+  @Column({
+    default: false,
+  })
+  IsCancelled!: boolean;
 
   @CreateDateColumn()
   createdAt!: Date;
