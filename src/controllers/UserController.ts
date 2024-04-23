@@ -1,44 +1,41 @@
-// unique string generator
 import { v4 as uuidv4 } from "uuid";
-
-// bycrypt
 import bcrypt from "bcrypt";
-
-// import dotenv
-import dotenv from "dotenv";
-dotenv.config();
-
-// import jwt
 import jwt from "jsonwebtoken";
-
-// import less than equal from typeORM
-import { LessThan, MoreThanOrEqual, Like, And } from "typeorm";
-
-// import html email template
+import {
+  LessThan,
+  MoreThanOrEqual,
+  Like,
+  Between,
+  Not,
+  In,
+  Admin,
+} from "typeorm";
+import { Request, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
-
 import sentEmail from "../services/sentEmal";
-
 import { AppDataSource } from "../index";
-import { Request, Response } from "express";
 import {
   HomlyUser,
   UserEmailVerification,
   UserOTPVerification,
   UserInteresed,
 } from "../entities/User";
-
 import { Employee } from "../entities/Empolyee";
-
 import { HolidayHome } from "../entities/HolidayHome";
 import { Room } from "../entities/Room";
 import { Hall } from "../entities/Hall";
 import { Rental } from "../entities/Rental";
 import { Reservation } from "../entities/Reservation";
+import { Review } from "../entities/Review";
+import { ReservedRooms } from "../entities/ReservedRooms";
+import { ReservedHalls } from "../entities/ReservedHalls";
+import { WishList } from "../entities/WishList";
+import dotenv from "dotenv";
+dotenv.config();
 
 // create token
-const maxAge = 60 * 60;
+const maxAge = 10 * 60;
 const createToken = (serviceNo: String) => {
   const secretCode = process.env.JWT_SECRET;
   return jwt.sign({ serviceNo }, secretCode!, {
@@ -50,11 +47,12 @@ const createToken = (serviceNo: String) => {
 const sendVerificationEmail = (
   email: string,
   serviceNo: string,
-  name: string
+  name: string,
+  isUpdate: boolean
 ) => {
-  const url = `http://localhost:3002/users/verify`;
+  const url = `http://localhost:8080/user/verify`;
   const verificationCode = uuidv4() + serviceNo;
-  const link = `${url}/${serviceNo}/${verificationCode}`;
+  const link = `${url}/${serviceNo}/${verificationCode}/${isUpdate}/${email}`;
 
   // hash the verification code
   const saltRound = 10;
@@ -73,17 +71,12 @@ const sendVerificationEmail = (
       userVerification
         .save()
         .then(() => {
-          console.log("verification code saved");
           // send email
           sentEmail(email, "Homly User Verification", emailVerify(link, name));
         })
-        .catch((err) => {
-          console.log("error saving verification code", err);
-        });
+        .catch((err) => {});
     })
-    .catch((err) => {
-      console.log("error hashing verification code", err);
-    });
+    .catch((err) => {});
 };
 
 const userExist = async (ServiceNo: string) => {
@@ -122,9 +115,8 @@ const userRegistration = async (req: Request, res: Response) => {
     .getOne()
     .then(async (employee) => {
       if (employee) {
-        console.log(employee);
         if (await userExist(ServiceNo)) {
-          sendVerificationEmail(Email, ServiceNo, employee.name);
+          sendVerificationEmail(Email, ServiceNo, employee.name, false);
           // bcrypt password
           const saltRounds = 10;
           bcrypt
@@ -163,62 +155,13 @@ const userRegistration = async (req: Request, res: Response) => {
     .catch((err) => {
       res.status(202).json({ message: "err ", success: false });
     });
-
-  // await AppDataSource.manager
-  //   .findOneBy(Employee, {
-  //     service_number: ServiceNo,
-  //   })
-  //   .then(async (employee) => {
-  //     if (employee) {
-  //       if (await userExist(ServiceNo)) {
-  //         sendVerificationEmail(Email, ServiceNo, employee.name);
-  //         // bcrypt password
-  //         const saltRounds = 10;
-  //         bcrypt
-  //           .hash(Password, saltRounds)
-  //           .then(async (hash) => {
-  //             const user = HomlyUser.create({
-  //               service_number: ServiceNo,
-  //               password: hash,
-  //               email: Email,
-  //               contact_number: ContactNo,
-  //               image,
-  //             });
-  //             await user.save();
-  //             return res.status(201).json({
-  //               message:
-  //                 "Check your emails,We will send you a verification link",
-  //               success: true,
-  //             });
-  //           })
-  //           .catch((err) => {
-  //             return res
-  //               .status(404)
-  //               .json({ message: "Error saving user", success: false });
-  //           });
-  //       } else {
-  //         return res
-  //           .status(201)
-  //           .json({ message: "User already exists!", success: false });
-  //       }
-  //     } else {
-  //       res
-  //         .status(202)
-  //         .json({ message: "Your are not an employee", success: false });
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     res
-  //       .status(202)
-  //       .json({ message: "Your are not an employee", success: false });
-  //   });
 };
 
 // verify email
 // url with verification code and service number
 const emailVerification = async (req: Request, res: Response) => {
-  let message, verified; // send details to frontend
-  const { serviceNo, verificationCode } = req.params;
+  let message, verified;
+  const { serviceNo, verificationCode, isUpdate, email } = req.params;
   const userVerification = await AppDataSource.createQueryBuilder()
     .select("user")
     .from(UserEmailVerification, "user")
@@ -226,12 +169,9 @@ const emailVerification = async (req: Request, res: Response) => {
     .getOne();
 
   if (userVerification) {
-    const expiresAt = userVerification?.expires_at; // Add null check here
+    const expiresAt = userVerification?.expires_at;
 
-    if (expiresAt && expiresAt < new Date()) {
-      // record has expired, then delete data
-      // delete user record from userverification table
-      console.log("verified email expired");
+    if (expiresAt && expiresAt < new Date() && !isUpdate) {
       await AppDataSource.manager
         .delete(UserEmailVerification, {
           service_number: serviceNo,
@@ -251,27 +191,29 @@ const emailVerification = async (req: Request, res: Response) => {
         .compare(verificationCode, userVerification.verification_code)
         .then((result) => {
           if (result) {
-            // update user
-            console.log("email verified");
             AppDataSource.manager
               .update(
                 HomlyUser,
                 { service_number: serviceNo },
-                { verified: true }
+                { verified: true, email: email }
               )
               .then(() => {
-                console.log(
-                  "user verified and deleted from userverification table"
-                );
                 AppDataSource.manager.delete(UserEmailVerification, {
                   service_number: serviceNo,
                 });
               });
             verified = true;
-            message = "User is Verified";
-            res.redirect(
-              `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
-            );
+            if (!isUpdate) {
+              message = "User is Verified";
+              res.redirect(
+                `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
+              );
+            } else {
+              message = "Email updated";
+              res.redirect(
+                `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
+              );
+            }
           }
         });
     }
@@ -282,19 +224,13 @@ const emailVerification = async (req: Request, res: Response) => {
       .where("user.service_number = :id", { id: serviceNo })
       .getOne();
 
-    // await AppDataSource.manager.findOneBy(HomlyUser, {
-    //   service_number: serviceNo,
-    // });
-
     if (user && user.verified) {
-      // res.status(200).json({ message: "User already verified", success: true });
       message = "User already verified";
       verified = true;
       res.redirect(
         `http://localhost:3000/Registration/Success?message=${message}&verified=${verified}`
       );
     } else {
-      // res.status(200).json({ message: "User not found or Verification link is Expired", success: false });
       message = "User not found";
       verified = false;
       res.redirect(
@@ -319,15 +255,15 @@ const userLogin = async (req: Request, res: Response) => {
         if (result) {
           await AppDataSource.manager.update(
             HomlyUser,
-            { service_number: serviceNo},
+            { service_number: serviceNo },
             {
               lastLogin: new Date(),
             }
           );
           const token = createToken(serviceNo);
-          res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-
-          res.status(200).json({ message: "Login Successful", success: true });
+          res
+            .status(200)
+            .json({ token: token, message: "Login Successful", success: true });
         } else {
           res.status(200).json({
             message: "Incorrect password or Username",
@@ -351,8 +287,6 @@ const userLogin = async (req: Request, res: Response) => {
 // generate OTP and send to email function
 const sendOTP = (email: string, serviceNo: string, name: string) => {
   const otp = Math.floor(100000 + Math.random() * 900000);
-
-  // hash the otp
   const saltRound = 10;
   bcrypt
     .hash(otp.toString(), saltRound)
@@ -362,30 +296,23 @@ const sendOTP = (email: string, serviceNo: string, name: string) => {
         service_number: serviceNo,
         otp: hashedOTP,
         created_at: new Date(),
-        // expire after 1 minites
         expires_at: new Date(Date.now() + 1 * 60000),
       });
 
       userOTPVerification
         .save()
         .then(() => {
-          console.log("OTP saved");
           // send email
           sentEmail(email, "Homly User OTP", sentOTPEmail(otp, name));
         })
-        .catch((err) => {
-          console.log("error saving otp", err);
-        });
+        .catch((err) => {});
     })
-    .catch((err) => {
-      console.log("error hashing otp", err);
-    });
+    .catch((err) => {});
 };
 
 // get user by email,serviceno
 const forgetPasswordDetails = async (req: Request, res: Response) => {
   const { serviceNo, email } = req.body;
-  console.log(serviceNo, email);
   const user = await AppDataSource.createQueryBuilder()
     .select("user")
     .from(HomlyUser, "user")
@@ -397,10 +324,6 @@ const forgetPasswordDetails = async (req: Request, res: Response) => {
     .from(Employee, "user")
     .where("user.service_number = :id", { id: serviceNo })
     .getOne();
-
-  // const employee = await AppDataSource.manager.findOneBy(Employee, {
-  //   service_number: serviceNo,
-  // });
 
   if (user && user.verified) {
     if (!user.blacklisted) {
@@ -436,17 +359,10 @@ const otpVerification = async (req: Request, res: Response) => {
     .where("otp.service_number = :id", { id: serviceNo })
     .getOne();
 
-  // const userOTP = await AppDataSource.manager.findOneBy(UserOTPVerification, {
-  //   service_number: serviceNo,
-  // });
-
   if (userOTP) {
     const expiresAt = userOTP.expires_at;
 
     if (expiresAt && expiresAt < new Date()) {
-      // record has expired, then delete data
-      // delete user record from userotpverification table
-      console.log("otp expired");
       await AppDataSource.manager.delete(UserOTPVerification, {
         service_number: serviceNo,
       });
@@ -454,7 +370,6 @@ const otpVerification = async (req: Request, res: Response) => {
     } else {
       bcrypt.compare(otp, userOTP.otp).then(async (result) => {
         if (result) {
-          console.log("OTP Verified");
           await AppDataSource.manager.update(
             UserOTPVerification,
             { service_number: serviceNo },
@@ -474,21 +389,13 @@ const otpVerification = async (req: Request, res: Response) => {
 // reset password
 const resetPassword = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
-  console.log("reset password", serviceNo, password);
 
   const user = await AppDataSource.createQueryBuilder()
     .select("user")
     .from(HomlyUser, "user")
     .where("user.service_number = :id", { id: serviceNo })
     .getOne();
-  // const user = await AppDataSource.manager.findOneBy(HomlyUser, {
-  //   service_number: serviceNo,
-  // });
   if (user && user.verified) {
-    // const otp = await AppDataSource.manager.findOneBy(UserOTPVerification, {
-    //   service_number: serviceNo,
-    // });
-
     const otp = await AppDataSource.createQueryBuilder()
       .select("otp")
       .from(UserOTPVerification, "otp")
@@ -525,7 +432,7 @@ const resetPassword = async (req: Request, res: Response) => {
 // get user by service number
 const userById = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
-  console.log(serviceNo);
+  console.log(serviceNo, "serviceNo get");
   try {
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -555,14 +462,15 @@ const userById = async (req: Request, res: Response) => {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (err: any) {
-    console.log("get user by service number", err);
     res.status(501).json({ message: "Server Error", success: false });
   }
 };
 
 // update user details
 const updateUserDetails = async (req: Request, res: Response) => {
-  const { serviceNo, email, contactNo, image } = req.body;
+  const { email, contactNo, image } = req.body;
+  const serviceNo = (req as any).serviceNo;
+
   try {
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -570,22 +478,42 @@ const updateUserDetails = async (req: Request, res: Response) => {
       .where("user.service_number = :id", { id: serviceNo })
       .getOne();
 
+    const employee = await AppDataSource.manager.find(Employee, {
+      where: {
+        service_number: serviceNo,
+      },
+    });
+    console.log(
+      (req as any).serviceNo,
+      contactNo,
+      image,
+      email,
+      user?.email,
+      email === user?.email,
+      "update"
+    );
     if (user && user.verified) {
       await AppDataSource.manager.update(
         HomlyUser,
         { service_number: serviceNo },
         {
-          email,
           contact_number: contactNo,
           image,
         }
       );
-      res.status(200).json({ message: "User details updated", success: true });
+      if (user.email !== email) {
+        sendVerificationEmail(email, serviceNo, employee[0].name, true);
+        res.status(200).json({
+          success: true,
+          emailUpdated: true,
+        });
+      } else {
+        res.status(200).json({ success: true, emailUpdated: false });
+      }
     } else {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (error: any) {
-    console.log(error);
     res
       .status(200)
       .json({ message: "Error updating user details", success: false });
@@ -640,7 +568,6 @@ const updateUserPassword = async (req: Request, res: Response) => {
       res.status(200).json({ message: "User not found", success: false });
     }
   } catch (error: any) {
-    console.log(error);
     res
       .status(200)
       .json({ message: "Error updating user password", success: false });
@@ -672,7 +599,6 @@ const calculateTotalRental = async (holidayHomeId: string) => {
     for (let i = 0; i < hallRental.length; i++) {
       totalRental += hallRental[i].hallRental;
     }
-
     const currentDate = new Date();
     const currentMonth = currentDate.toLocaleString("default", {
       month: "long",
@@ -737,7 +663,7 @@ const calculateTotalRental = async (holidayHomeId: string) => {
     }
     return totalRental;
   } catch (err) {
-    console.log(err);
+    return totalRental;
   }
 };
 
@@ -761,6 +687,12 @@ const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
     const totalRental = await calculateTotalRental(
       topRatedHolidayHomes[i].HolidayHomeId
     );
+    const isFavourite = await AppDataSource.manager.find(WishList, {
+      where: {
+        service_number: (req as any).serviceNo,
+        holidayHomeId: topRatedHolidayHomes[i].HolidayHomeId,
+      },
+    });
     topRatedHolidayHomesWithPrice.push({
       HolidayHomeId: topRatedHolidayHomes[i].HolidayHomeId,
       Name: topRatedHolidayHomes[i].Name,
@@ -768,10 +700,9 @@ const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
       overall_rating: topRatedHolidayHomes[i].overall_rating,
       TotalRental: totalRental,
       HHImage: topRatedHolidayHomes[i].MainImage,
+      isWishListed: isFavourite.length > 0 ? true : false,
     });
   }
-
-  // console.log(topRatedHolidayHomes);
   res.status(200).json(topRatedHolidayHomesWithPrice);
 };
 
@@ -804,7 +735,6 @@ const addUserIntersted = async (req: Request, res: Response) => {
   fac2 = await changeFacilityName(fac2);
   fac3 = await changeFacilityName(fac3);
 
-  // update table
   if (serviceNo) {
     const interested = UserInteresed.create({
       service_number: serviceNo,
@@ -817,10 +747,7 @@ const addUserIntersted = async (req: Request, res: Response) => {
         .status(200)
         .json({ message: "Successfully add your insterested", success: true });
     });
-    console.log("updated db");
   }
-
-  console.log(serviceNo, fac1, fac2, fac3);
 };
 
 const changeFacilityNameReturn = (facility: string) => {
@@ -862,7 +789,6 @@ const getUserIntersted = async (req: Request, res: Response) => {
       };
       res.status(200).json({ updated: true, userInterested: userInterested });
     } else {
-      console.log("not found");
       res.status(200).json({ updated: false });
     }
   } catch (err: any) {
@@ -873,7 +799,6 @@ const getUserIntersted = async (req: Request, res: Response) => {
 const updateUserIntersted = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
   let { fac1, fac2, fac3 } = req.body;
-  console.log(fac1, fac2, fac3);
 
   try {
     fac1 = changeFacilityName(fac1);
@@ -921,7 +846,7 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
           for (let i = 0; i < reservations.length; i++) {
             await AppDataSource.manager
               .find(HolidayHome, {
-                select: ["Name", "Address", "MainImage"],
+                select: ["Name", "Address", "MainImage", "AdminNo"],
                 where: {
                   HolidayHomeId: reservations[i].HolidayHome,
                 },
@@ -946,7 +871,7 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal Server error" });
       });
   } catch (err: any) {
-    console.log(err);
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
@@ -957,7 +882,6 @@ const getUserPastReservation = async (req: Request, res: Response) => {
       .find(Reservation, {
         where: {
           ServiceNO: serviceNo,
-          // get date before today + 1
           CheckoutDate: LessThan(new Date(Date.now() - 1 * 60000)),
           IsPaid: true,
         },
@@ -971,15 +895,21 @@ const getUserPastReservation = async (req: Request, res: Response) => {
           for (let i = 0; i < reservations.length; i++) {
             await AppDataSource.manager
               .find(HolidayHome, {
-                select: ["Name", "Address", "MainImage"],
+                select: ["Name", "Address", "MainImage", "AdminNo"],
                 where: {
                   HolidayHomeId: reservations[i].HolidayHome,
                 },
               })
-              .then((holidayHome) => {
+              .then(async (holidayHome) => {
+                const review = await AppDataSource.manager.find(Review, {
+                  where: {
+                    ReservationId: reservations[i].ReservationId,
+                  },
+                });
                 pastReservations.push({
                   reservation: reservations[i],
                   holidayHome: holidayHome,
+                  IsReviewed: review.length > 0 ? true : false,
                 });
               });
           }
@@ -992,126 +922,335 @@ const getUserPastReservation = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal Server error" });
       });
   } catch (err: any) {
-    console.log(err);
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
 // get holidayhomes
 const getHolidayHomes = async (req: Request, res: Response) => {
-  const {district,search} = req.query;
-  if (district && district !== "all") {
-    // serach by district or name
+  const { district, search, page } = req.query;
+  const serviceNo = (req as any).serviceNo;
 
-    await AppDataSource.manager
-      .find(HolidayHome, {
-        select: [
-          "HolidayHomeId",
-          "Name",
-          "Address",
-          "District",
-          "overall_rating",
-          "MainImage",
-        ],
-        where: 
-          {
-            Name: Like(`%${search?.toString().toLowerCase()}%`),
-            District: district.toString().toLowerCase(),
-            Approved: true,
-            Status: "Active",
-          },
-        
-        order: {
-          updatedAt: "DESC",
-        },
-      })
-      .then(async (holidayHomes) => {
-        if (holidayHomes) {
-          let holidayHomesWithPrice = [];
-          for (let i = 0; i < holidayHomes.length; i++) {
-            const totalRental = await calculateTotalRental(
-              holidayHomes[i].HolidayHomeId
-            );
-            holidayHomesWithPrice.push({
-              HolidayHomeId: holidayHomes[i].HolidayHomeId,
-              Name: holidayHomes[i].Name,
-              Address: holidayHomes[i].Address,
-              overall_rating: holidayHomes[i].overall_rating,
-              TotalRental: totalRental,
-              HHImage: holidayHomes[i].MainImage,
-            });
-          }
-          res.status(200).json(holidayHomesWithPrice);
-        } else {
-          res.status(200).json({ message: "No holiday homes found" });
-        }
-      })
-      .catch((err) => {
-        res.status(500).json({ message: "Internal Server error" });
-      });
-  } else {
-    await AppDataSource.manager
-      .find(HolidayHome, {
-        select: [
-          "HolidayHomeId",
-          "Name",
-          "Address",
-          "District",
-          "overall_rating",
-          "MainImage",
-        ],
+  let queryOptions: any = {
+    select: [
+      "HolidayHomeId",
+      "Name",
+      "Address",
+      "District",
+      "overall_rating",
+      "MainImage",
+    ],
+    where: {
+      Approved: true,
+      Status: "Active",
+      Name: Like(`%${search?.toString().toLowerCase()}%`),
+    },
+    order: {
+      updatedAt: "DESC",
+    },
+  };
+
+  if (district && district !== "all") {
+    queryOptions.where.District = district.toString().toLowerCase();
+  }
+
+  try {
+    let holidayHomes = await AppDataSource.manager.find(
+      HolidayHome,
+      queryOptions
+    );
+    let holidayHomesWithPrice = [];
+
+    for (let i = 0; i < holidayHomes.length; i++) {
+      const totalRental = await calculateTotalRental(
+        holidayHomes[i].HolidayHomeId
+      );
+      const isFavourite = AppDataSource.manager.find(WishList, {
         where: {
-          Name: Like(`%${search?.toString().toLowerCase()}%`),
-          Approved: true,
-          Status: "Active",
+          service_number: serviceNo,
+          holidayHomeId: holidayHomes[i].HolidayHomeId,
         },
-        order: {
-          updatedAt: "DESC",
-        },
-      })
-      .then(async (holidayHomes) => {
-        let holidayHomesWithPrice = [];
-        for (let i = 0; i < holidayHomes.length; i++) {
-          const totalRental = await calculateTotalRental(
-            holidayHomes[i].HolidayHomeId
-          );
-          holidayHomesWithPrice.push({
-            HolidayHomeId: holidayHomes[i].HolidayHomeId,
-            Name: holidayHomes[i].Name,
-            Address: holidayHomes[i].Address,
-            overall_rating: holidayHomes[i].overall_rating,
-            TotalRental: totalRental,
-            HHImage: holidayHomes[i].MainImage,
-            District: holidayHomes[i].District,
-          });
-        }
-        res.status(200).json(holidayHomesWithPrice);
-      })
-      .catch((err) => {
-        res.status(500).json({ message: "Internal Server error" });
       });
+      holidayHomesWithPrice.push({
+        HolidayHomeId: holidayHomes[i].HolidayHomeId,
+        Name: holidayHomes[i].Name,
+        Address: holidayHomes[i].Address,
+        overall_rating: holidayHomes[i].overall_rating,
+        TotalRental: totalRental,
+        HHImage: holidayHomes[i].MainImage,
+        District: holidayHomes[i].District,
+        AdminId: holidayHomes[i].AdminNo,
+        isWishListed:
+          isFavourite && (await isFavourite).length > 0 ? true : false,
+      });
+    }
+    const HHcount = holidayHomesWithPrice.length;
+    const slicedHH = holidayHomesWithPrice.slice(
+      (parseInt(page?.toString() || "1") - 1) * 9,
+      parseInt(page?.toString() || "1") * 9
+    );
+    res.status(200).json({ holidayHomes: slicedHH, HHcount: HHcount });
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
-// add payment card details
-const addPaymentCard = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Payment card added", success: true });
+// search holidayhomes
+const searchHolidayHomes = async (req: Request, res: Response) => {
+  const { district, startDate, endDate } = req.query;
+
+  let queryOptions: any = {
+    select: [
+      "HolidayHomeId",
+      "Name",
+      "Address",
+      "District",
+      "overall_rating",
+      "MainImage",
+    ],
+    where: {
+      Approved: true,
+      Status: "Active",
+    },
+    order: {
+      updatedAt: "DESC",
+    },
+  };
+
+  if (district && district !== "all") {
+    queryOptions.where.District = district.toString().toLowerCase();
+  }
+
+  const sDate = new Date(startDate as string);
+  const eDate = new Date(endDate as string);
+
+  try {
+    const reservations = await AppDataSource.manager.find(Reservation, {
+      where: [
+        {
+          CheckinDate: Between(sDate, eDate),
+        },
+        {
+          CheckoutDate: Between(sDate, eDate),
+        },
+        {
+          CheckinDate: LessThan(sDate),
+          CheckoutDate: MoreThanOrEqual(eDate),
+        },
+      ],
+    });
+
+    let holidayHomesIds: string[] = [];
+    for (let i = 0; i < reservations.length; i++) {
+      if (!holidayHomesIds.includes(reservations[i].HolidayHome)) {
+        holidayHomesIds.push(reservations[i].HolidayHome);
+      }
+    }
+    let availableRooms: any = [];
+    let availableHalls: any = [];
+    for (let i = 0; i < holidayHomesIds.length; i++) {
+      let room: string[] = [];
+      let hall: string[] = [];
+      await AppDataSource.manager
+        .find(Room, {
+          select: ["roomCode"],
+          where: {
+            HolidayHomeId: holidayHomesIds[i],
+          },
+        })
+        .then((rooms) => {
+          rooms.forEach((r) => {
+            room.push(r.roomCode);
+          });
+          availableRooms.push({
+            HolidayHomeId: holidayHomesIds[i],
+            Rooms: room,
+          });
+        });
+
+      await AppDataSource.manager
+        .find(Hall, {
+          select: ["hallCode"],
+          where: {
+            HolidayHomeId: holidayHomesIds[i],
+          },
+        })
+        .then((halls) => {
+          halls.forEach((h) => {
+            hall.push(h.hallCode);
+          });
+          availableHalls.push({
+            HolidayHomeId: holidayHomesIds[i],
+            Halls: hall,
+          });
+        });
+    }
+
+    for (let i = 0; i < reservations.length; i++) {
+      let room: string[] = [];
+      let hall: string[] = [];
+      await AppDataSource.manager
+        .find(ReservedRooms, {
+          select: ["roomCode"],
+          where: {
+            ReservationId: reservations[i].ReservationId,
+          },
+        })
+        .then((rooms) => {
+          rooms.forEach((r) => {
+            room.push(r.roomCode);
+          });
+
+          const index = availableRooms.findIndex(
+            (r: { HolidayHomeId: string }) =>
+              r.HolidayHomeId === reservations[i].HolidayHome
+          );
+
+          if (index != -1) {
+            availableRooms[index].Rooms = availableRooms[index].Rooms.filter(
+              (r: string) => !room.includes(r)
+            );
+          }
+        });
+
+      await AppDataSource.manager
+        .find(ReservedHalls, {
+          select: ["hallCode"],
+          where: {
+            ReservationId: reservations[i].ReservationId,
+          },
+        })
+        .then((halls) => {
+          halls.forEach((h) => {
+            hall.push(h.hallCode);
+          });
+          const index = availableHalls.findIndex(
+            (h: { HolidayHomeId: string }) =>
+              h.HolidayHomeId === reservations[i].HolidayHome
+          );
+
+          if (index != -1) {
+            availableHalls[index].Halls = availableHalls[index].Halls.filter(
+              (h: string) => !hall.includes(h)
+            );
+          }
+        });
+    }
+
+    for (let i = 0; i < holidayHomesIds.length; i++) {
+      if (
+        availableRooms[i].Rooms.length > 0 ||
+        availableHalls[i].Halls.length > 0
+      ) {
+        holidayHomesIds = holidayHomesIds.filter(
+          (id) => id !== availableRooms[i].HolidayHomeId
+        );
+      }
+    }
+
+    queryOptions.where.HolidayHomeId = Not(In(holidayHomesIds));
+    const holidayHomes = await AppDataSource.manager.find(
+      HolidayHome,
+      queryOptions
+    );
+    let holidayHomesWithPrice = [];
+
+    for (let i = 0; i < holidayHomes.length; i++) {
+      const totalRental = await calculateTotalRental(
+        holidayHomes[i].HolidayHomeId
+      );
+      holidayHomesWithPrice.push({
+        HolidayHomeId: holidayHomes[i].HolidayHomeId,
+        Name: holidayHomes[i].Name,
+        Address: holidayHomes[i].Address,
+        overall_rating: holidayHomes[i].overall_rating,
+        TotalRental: totalRental,
+        HHImage: holidayHomes[i].MainImage,
+        District: holidayHomes[i].District,
+      });
+    }
+
+    res.status(200).json(holidayHomesWithPrice);
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server error", err: err });
+  }
 };
 
-// get payment card details
-const getPaymentCard = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Payment card details", success: true });
+// add wish list details
+const addtoWhishList = async (req: Request, res: Response) => {
+  const serviceNo = (req as any).serviceNo;
+  const { holidayHomeId } = req.body;
+  console.log(serviceNo, holidayHomeId);
+  const wishList = WishList.create({
+    service_number: serviceNo,
+    holidayHomeId: holidayHomeId,
+  });
+  await wishList
+    .save()
+    .then(() => {
+      res.status(200).json({ success: true });
+    })
+    .catch(() => {
+      res.status(500).json({ success: false });
+    });
 };
 
-// update default payment card
-const updateDefaultPaymentCard = async (req: Request, res: Response) => {
-  res
-    .status(200)
-    .json({ message: "Default payment card updated", success: true });
+// get wish list details
+const getWishList = async (req: Request, res: Response) => {
+  const serviceNo = (req as any).serviceNo;
+
+  try {
+    const wishList = await AppDataSource.manager.find(WishList, {
+      where: {
+        service_number: serviceNo,
+      },
+      order: {
+        created_at: "DESC",
+      },
+    });
+
+    let wishListDetails = [];
+    for (let i = 0; i < wishList.length; i++) {
+      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+        select: ["Name", "Address", "MainImage", "overall_rating"],
+        where: {
+          HolidayHomeId: wishList[i].holidayHomeId,
+        },
+      });
+
+      const totalRental = await calculateTotalRental(wishList[i].holidayHomeId);
+      wishListDetails.push({
+        HolidayHomeId: wishList[i].holidayHomeId,
+        Name: holidayHome[0].Name,
+        Address: holidayHome[0].Address,
+        HHImage: holidayHome[0].MainImage,
+        TotalRental: totalRental,
+        overall_rating: holidayHome[0].overall_rating,
+        isWishListed: true,
+      });
+    }
+    res.status(200).json(wishListDetails);
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server error" });
+  }
 };
 
-// delete payment card
-const deletePaymentCard = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Payment card deleted", success: true });
+// delete wish list
+const deleteFromWishList = async (req: Request, res: Response) => {
+  const serviceNo = (req as any).serviceNo;
+  const { holidayHomeId } = req.body;
+
+  await AppDataSource.manager
+    .delete(WishList, {
+      service_number: serviceNo,
+      holidayHomeId: holidayHomeId,
+    })
+    .then(() => {
+      res.status(200).json({ message: "wish list deleted", success: true });
+    })
+    .catch(() => {
+      res.status(500).json({ message: "error", success: false });
+    });
 };
 
 export {
@@ -1133,8 +1272,8 @@ export {
   getUserOngoingReservation,
   getUserPastReservation,
   getHolidayHomes,
-  addPaymentCard,
-  getPaymentCard,
-  updateDefaultPaymentCard,
-  deletePaymentCard,
+  searchHolidayHomes,
+  addtoWhishList,
+  getWishList,
+  deleteFromWishList,
 };
