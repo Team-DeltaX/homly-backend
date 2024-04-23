@@ -657,12 +657,51 @@ const updateHolidayHome = async (req: Request, res: Response) => {
 
         }
 
-        // hall delete where holidayhomeid = holidayhomeid
+        // await Room.delete({ HolidayHomeId: HolidayHomeId });
+
+        // for (let i = 0; i < updatedValues.roomArray.length; i++) {
+
+        //     for (let j = 0; j < updatedValues.roomArray[i].rentalArray.length; j++) {
+        //         const rental = Rental.create({
+        //             Month: updatedValues.roomArray[i].rentalArray[j].district,
+        //             WeekRental: updatedValues.roomArray[i].rentalArray[j].weekDays,
+        //             WeekEndRental: updatedValues.roomArray[i].rentalArray[j].weekEnds,
+        //             HolidayHomeId: HolidayHomeId,
+        //             HRUId: updatedValues.roomArray[i].roomCode
+        //         })
+
+        //         await rental.save();
+
+        //     }
+
+        //     const room = Room.create({
+        //         roomCode: updatedValues.roomArray[i].roomCode,
+        //         roomAc: updatedValues.roomArray[i].roomAc,
+        //         RoomType: updatedValues.roomArray[i].RoomType,
+        //         FloorLevel: updatedValues.roomArray[i].floorLevel,
+        //         NoOfAdults: updatedValues.roomArray[i].NoOfAdults,
+        //         NoOfChildren: updatedValues.roomArray[i].NoOfChildren,
+        //         groupByUnit: updatedValues.roomArray[i].groupByUnit,
+        //         roomRemarks: updatedValues.roomArray[i].roomRemarks,
+        //         roomRental: updatedValues.roomArray[i].roomRental,
+        //         HolidayHomeId: HolidayHomeId,
+        //     })
+
+        //     await room.save();
+
+            
+        // }
+
         await Hall.delete({ HolidayHomeId: HolidayHomeId });
 
-        console.log("hall array", updatedValues.hallArray)
+        //delete relevant rentals befor create
+
+        for (let k= 0 ; k < updatedValues.hallArray.length; k++) {
+            await Rental.delete({ HolidayHomeId: HolidayHomeId, HRUId: updatedValues.hallArray[k].hallCode });
+        }
 
         for (let i = 0; i < updatedValues.hallArray.length; i++) {
+
             for (let j = 0; j < updatedValues.hallArray[i].hallRentalArray.length; j++) {
                 const rental = Rental.create({
                     Month: updatedValues.hallArray[i].hallRentalArray[j].district,
@@ -689,14 +728,6 @@ const updateHolidayHome = async (req: Request, res: Response) => {
             await hall.save();
         }
 
-       
-
-
-
-   
-
-       
-    
         
         res.json({ message: "Holiday Home updated successfully" });
 
