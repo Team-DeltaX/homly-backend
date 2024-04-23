@@ -36,7 +36,6 @@ import { HomlyAdmin } from "./entities/HomlyAdmin";
 import { UserFeedback } from "./entities/Feedback";
 import { SelectedRooms } from "./entities/SelectedRooms";
 import { Review } from "./entities/Review";
-import { Notification } from "./entities/Notification";
 
 // routes
 import { homly_user } from "./routes/UserRouters";
@@ -90,7 +89,6 @@ export const AppDataSource = new DataSource({
     Review,
     ReservedHalls,
     WishList,
-    Notification,
   ],
   synchronize: true,
   logging: false,
