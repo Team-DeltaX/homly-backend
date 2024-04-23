@@ -9,11 +9,11 @@ const getGeneratedReport = async (req: Request, res: Response) => {
   console.log(HHName, fromDate, toDate, "aaaaaaaaaaaaaaaaaaaaaaa");
   const fDate = new Date(fromDate as string);
   const tDate = new Date(toDate as string);
-  let reservation;
   try {
+    let reservations: any[] = [];
     if (HHName && HHName !== "all") {
       const hhid = HHName.toString();
-      reservation = await AppDataSource.manager.find(Reservation, {
+      reservations = await AppDataSource.manager.find(Reservation, {
         where: [
           {
             CheckinDate: Between(fDate, tDate),
@@ -30,8 +30,9 @@ const getGeneratedReport = async (req: Request, res: Response) => {
           },
         ],
       });
+      console.log(reservations, "aaaaaaaaaaaaaaaaaaa");
     } else {
-      reservation = await AppDataSource.manager.find(Reservation, {
+      reservations = await AppDataSource.manager.find(Reservation, {
         where: [
           {
             CheckinDate: Between(fDate, tDate),
@@ -46,13 +47,46 @@ const getGeneratedReport = async (req: Request, res: Response) => {
         ],
       });
     }
-    let totalPrice = []
-    reservation.forEach(r => {
-      
-      
-    });
+
+    console.log(reservations, "ffffffffff");
+
+    let totalPrice: any[] = [];
+    let HHcount = 0;
+    let tPrice = 0;
+
+    for (let i = 0; i < reservations.length; i++) {
+      console.log(reservations[i].HolidayHome, "res");
+      if (totalPrice.includes(reservations[i].HolidayHome)) {
+        totalPrice.forEach((t) => {
+          if (t.HHID === reservations[i].HolidayHome) {
+            t.TotalPrice = t.TotalPrice + reservations[i].Price;
+          }
+        });
+      } else {
+        await AppDataSource.manager
+          .find(HolidayHome, {
+            where: {
+              HolidayHomeId: reservations[i].HolidayHome,
+            },
+          })
+          .then((hhdetails) => {
+            totalPrice.push({
+              HHID: reservations[i].HolidayHome,
+              HHName: hhdetails[0].Name,
+              TotalPrice: reservations[i].Price,
+            });
+            HHcount = HHcount + 1;
+          });
+      }
+      tPrice = tPrice + reservations[i].Price;
+    }
+
+    console.log(totalPrice);
+    res
+      .status(200)
+      .json({ TotalPerHH: totalPrice, HHcount: HHcount, TotalPrice: tPrice });
   } catch (err) {
-    console.log(err);
+    res.status(500);
   }
 };
 
