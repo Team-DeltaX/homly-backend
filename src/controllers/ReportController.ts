@@ -1,55 +1,72 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "..";
 import { Reservation } from "../entities/Reservation";
-import { LessThanOrEqual, MoreThanOrEqual } from "typeorm";
+import { Between, LessThan, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
+import { HolidayHome } from "../entities/HolidayHome";
 
 const getGeneratedReport = async (req: Request, res: Response) => {
-  const dates = req.query; // Assuming from and to dates are provided in the query parameters
-
-  let checkinDate, checkoutDate;
-
-  if (dates.from) {
-    checkinDate = new Date(dates.from as string);
-  }
-  if (dates.to) {
-    checkoutDate = new Date(dates.to as string);
-  }
-  // if (!from || !to) {
-  //   return res
-  //     .status(400)
-  //     .json({ error: "Please provide both from and to dates" });
-  // }
-  // console.log(dates.from);
-  // Convert string dates to Date objects
-  // if (dates.from && dates.to) {
-  //   const fromDate = new Date(dates.from as string);
-  //   const toDate = new Date(dates.to as string);
-  if (checkinDate && checkoutDate) {
-    // Assuming AppDataSource.manager.find method supports filtering by date range
-    try {
-      // const filteredReservations = await AppDataSource.manager.find(
-      //   Reservation,
-      //   {
-      //     where: {
-      //       CheckinDate: MoreThanOrEqual(new Date(fromDate)),
-      //       CheckoutDate: LessThanOrEqual(new Date(toDate)),
-      //     },
-      //   }
-      // );
-      const reservation = await AppDataSource.manager.find(Reservation, {
+  const { HHName, fromDate, toDate } = req.query;
+  console.log(HHName, fromDate, toDate, "aaaaaaaaaaaaaaaaaaaaaaa");
+  const fDate = new Date(fromDate as string);
+  const tDate = new Date(toDate as string);
+  let reservation;
+  try {
+    if (HHName && HHName !== "all") {
+      const hhid = HHName.toString();
+      reservation = await AppDataSource.manager.find(Reservation, {
         where: [
           {
-            // HolidayHome: holidayHomeId,
-            CheckoutDate: LessThanOrEqual(new Date(checkinDate)),
+            CheckinDate: Between(fDate, tDate),
+            HolidayHome: hhid,
+          },
+          {
+            CheckinDate: Between(fDate, tDate),
+            HolidayHome: hhid,
+          },
+          {
+            CheckinDate: LessThan(fDate),
+            CheckoutDate: MoreThanOrEqual(tDate),
+            HolidayHome: hhid,
           },
         ],
       });
-      res.status(200).json({ reservation });
-    } catch (err) {
-      console.log(err);
-      res.status(400).json(err);
+    } else {
+      reservation = await AppDataSource.manager.find(Reservation, {
+        where: [
+          {
+            CheckinDate: Between(fDate, tDate),
+          },
+          {
+            CheckinDate: Between(fDate, tDate),
+          },
+          {
+            CheckinDate: LessThan(fDate),
+            CheckoutDate: MoreThanOrEqual(tDate),
+          },
+        ],
+      });
     }
+    let totalPrice = []
+    reservation.forEach(r => {
+      
+      
+    });
+  } catch (err) {
+    console.log(err);
   }
 };
 
-export { getGeneratedReport };
+const getHolidayHomeId = async (req: Request, res: Response) => {
+  await AppDataSource.manager
+    .find(HolidayHome, {
+      select: ["HolidayHomeId", "Name"],
+    })
+    .then((hhdetails) => {
+      res.status(200).json(hhdetails);
+    })
+    .catch(() => {
+      res.status(500);
+    });
+};
+
+export { getGeneratedReport, getHolidayHomeId };
