@@ -98,7 +98,6 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal Server error" });
       });
   } catch (err: any) {
-    console.log(err);
     res.status(500).json({ message: "Internal Server error" });
   }
 };
