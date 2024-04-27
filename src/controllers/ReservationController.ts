@@ -181,18 +181,26 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
     const existingReservations = await AppDataSource.manager.find(Reservation, {
       select: ["ReservationId"],
       where: {
+        IsCancelled: false,
         CheckinDate: LessThanOrEqual(new Date(CheckoutDate)),
         CheckoutDate: MoreThanOrEqual(new Date(CheckinDate)),
         HolidayHome: HolidayHome,
       },
     });
     for (const reservation of existingReservations) {
-      await AppDataSource.manager.remove(Reservation, reservation);
-      // remove them also from reservedRoom and ReservedHalls table
-      // await AppDataSource.manager.remove(ReservedRooms, {
-      //   ReservationId: reservation.ReservationId,
-      // });
+      await AppDataSource.manager.update(Reservation, {
+        ReservationId: reservation.ReservationId,
+      }, {
+        IsCancelled: true,
+      });
     }
+    //   // await AppDataSource.manager.remove(Reservation, reservation);
+
+    //   // remove them also from reservedRoom and ReservedHalls table
+    //   // await AppDataSource.manager.remove(ReservedRooms, {
+    //   //   ReservationId: reservation.ReservationId,
+    //   // });
+    // }
     console.log("existing reservationsss", existingReservations);
     // generate unique auto incrementing reservation id
     const reservationId = await AppDataSource.query(
@@ -210,6 +218,12 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
     } else {
       reserveID = "RES-00001"; // Initial reservation ID
     }
+    let checkinDate = new Date(CheckinDate);
+    checkinDate.setHours(0, 0, 0, 0);
+    console.log("checkinDate", checkinDate);
+
+    let checkoutDate = new Date(CheckoutDate);
+    checkoutDate.setHours(23, 59, 0, 0);
 
     AppDataSource.createQueryBuilder()
       .insert()
@@ -219,8 +233,8 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
           ReservationId: reserveID,
           ServiceNO,
           HolidayHome,
-          CheckinDate,
-          CheckoutDate,
+          CheckinDate: checkinDate, // Set time to 12:00 am
+          CheckoutDate: checkoutDate, // Set time to 11:59 pm
           NoOfAdults,
           NoOfChildren,
           RoomPrice,
@@ -234,23 +248,23 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
       .execute();
     // get all rooms codes in HolidayHome
     // add all roomCodes in this holidayhome to the reservedRooms table in this reservation
-    // const rooms = await AppDataSource.manager.find(Room, {
-    //   where: {
-    //     HolidayHomeId: HolidayHome,
-    //   },
-    // });
-    // for (var i = 0; i < rooms.length; i++) {
-    //   await AppDataSource.createQueryBuilder()
-    //     .insert()
-    //     .into(ReservedRooms)
-    //     .values([
-    //       {
-    //         ReservationId: reserveID,
-    //         roomCode: rooms[i].roomCode,
-    //       },
-    //     ])
-    //     .execute();
-    // }
+    const rooms = await AppDataSource.manager.find(Room, {
+      where: {
+        HolidayHomeId: HolidayHome,
+      },
+    });
+    for (var i = 0; i < rooms.length; i++) {
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(ReservedRooms)
+        .values([
+          {
+            ReservationId: reserveID,
+            roomCode: rooms[i].roomCode,
+          },
+        ])
+        .execute();
+    }
     // AppDataSource.createQueryBuilder()
     // .delete()
     // .from(Reservation)
