@@ -16,7 +16,8 @@ import {
   getWishList,
   deleteFromWishList,
   getNotifications,
-  deleteNotification
+  deleteNotification,
+  cancelReservation,
 } from "../controllers/UserController";
 import { getHolidayHomesSorted } from "../controllers/ReviewController";
 
@@ -40,5 +41,6 @@ reg_users.get("/auth/wishlist", getWishList);
 reg_users.delete("/auth/wishlist", deleteFromWishList);
 reg_users.get("/auth/notifications", getNotifications);
 reg_users.delete("/auth/notifications", deleteNotification);
+reg_users.put("/auth/userReservation", cancelReservation);
 
 export { reg_users };
