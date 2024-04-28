@@ -1249,7 +1249,8 @@ const deleteFromWishList = async (req: Request, res: Response) => {
 
 // get notifications
 const getNotifications = async (req: Request, res: Response) => {
-  const userId = (req as any).serviceNo || (req as any).adminNo;
+  const userId = (req as any).serviceNo ;
+  if(userId){ 
   await AppDataSource.manager
     .find(Notification, {
       where: {
@@ -1262,6 +1263,7 @@ const getNotifications = async (req: Request, res: Response) => {
     .catch(() => {
       res.status(500).json({ message: "Internal Server error" });
     });
+  }
 };
 
 // delete notification
