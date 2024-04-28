@@ -19,11 +19,7 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
               .status(401)
               .json({ message: "Token expired", autherized: false });
           } else {
-            if (decodedToken.role === "Admin") {
-              (req as any).adminNo = decodedToken.adminNo;
-            } else {
-              (req as any).serviceNo = decodedToken.serviceNo;
-            }
+            (req as any).serviceNo = decodedToken.serviceNo;
             return next();
           }
         }
