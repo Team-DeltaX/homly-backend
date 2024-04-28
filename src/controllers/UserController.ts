@@ -1012,13 +1012,16 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
       where: [
         {
           CheckinDate: Between(sDate, eDate),
+          IsCancelled: false,
         },
         {
           CheckoutDate: Between(sDate, eDate),
+          IsCancelled: false,
         },
         {
           CheckinDate: LessThan(sDate),
           CheckoutDate: MoreThanOrEqual(eDate),
+          IsCancelled: false,
         },
       ],
     });
@@ -1252,28 +1255,6 @@ const getNotifications = async (req: Request, res: Response) => {
     });
 };
 
-// add notification
-const addNotification = async (req: Request, res: Response) => {
-  const { receiverId, senderId, data, type } = req.body;
-  console.log(receiverId, senderId, data, type, "sdfsdf");
-  const notifiactions = Notification.create({
-    receiverId,
-    senderId,
-    type,
-    data,
-    time: new Date(),
-  });
-
-  notifiactions
-    .save()
-    .then(() => {
-      res.status(200).json({ message: "Notification added" });
-    })
-    .catch(() => {
-      res.status(500).json({ message: "Internal Server error" });
-    });
-};
-
 // delete notification
 const deleteNotification = async (req: Request, res: Response) => {
   const { notificationIds, all } = req.body;
@@ -1326,6 +1307,5 @@ export {
   getWishList,
   deleteFromWishList,
   getNotifications,
-  addNotification,
   deleteNotification,
 };
