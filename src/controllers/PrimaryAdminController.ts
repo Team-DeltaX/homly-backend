@@ -27,6 +27,7 @@ import { Hall } from "../entities/Hall";
 import { Room } from "../entities/Room";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
+const schedule = require('node-schedule');
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -318,12 +319,19 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           ReservationId: reservation[i].ReservationId,
         },
       });
+      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+        select: ["Name","MainImage"],
+        where: {
+          HolidayHomeId: reservation[i].HolidayHome,
+        },
+      });
 
       if (reservedrooms.length === 0) {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
+          holidayHome:holidayHome
         });
       }
       if (reservedhalls.length === 0) {
@@ -331,12 +339,14 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
+          holidayHome:holidayHome
         });
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
+          holidayHome:holidayHome
         });
       }
     }
@@ -730,3 +740,7 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
     res.status(500).json({ message: "error in getting holiday home rating" });
   }
 };
+
+export const everyFiveSeconds = schedule.scheduleJob('0 0 * * *', () => {
+  console.log('Task executed every 5 seconds:', new Date().toLocaleTimeString());
+});

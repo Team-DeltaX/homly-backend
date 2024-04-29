@@ -39,11 +39,10 @@ io.on("connection", (socket) => {
     async ({ senderId, receiverId, data, type, time }) => {
       
       const notifiactions = Notification.create({
-        receiverId,
-        senderId,
-        type,
-        data,
-        time: new Date(),
+        senderId: senderId,
+        receiverId: receiverId,
+        type: type,
+        data: data,
       });
 
       await notifiactions.save().then((res) => {
@@ -58,7 +57,6 @@ io.on("connection", (socket) => {
           });
         }
       });
-      
     }
   );
   socket.on("disconnect", () => {
