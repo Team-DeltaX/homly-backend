@@ -318,12 +318,19 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           ReservationId: reservation[i].ReservationId,
         },
       });
+      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+        select: ["Name","MainImage"],
+        where: {
+          HolidayHomeId: reservation[i].HolidayHome,
+        },
+      });
 
       if (reservedrooms.length === 0) {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
+          holidayHome:holidayHome
         });
       }
       if (reservedhalls.length === 0) {
@@ -331,12 +338,14 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
+          holidayHome:holidayHome
         });
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
+          holidayHome:holidayHome
         });
       }
     }

@@ -1,5 +1,5 @@
 import express from "express";
-import { getReservation, AddResrvation, AddSpecialResrvation, getHolidayHomeNames, getRooms, getHalls, AddComplaint,getAvailableRooms, getAvailableHalls, getTotalRoomRental} from "../controllers/ReservationController"
+import { getReservation, getOngoingReservationForAdmin, AddResrvation, AddSpecialResrvation, getHolidayHomeNames, getRooms, getHalls, AddComplaint,getAvailableRooms, getAvailableHalls, getTotalRoomRental} from "../controllers/ReservationController"
 import {getOngoingReservation, getPastReservation} from "../controllers/PrimaryAdminController";
 
 
@@ -13,6 +13,7 @@ ReservationRouter.get("/reservation/rooms",getRooms);
 ReservationRouter.get("/reservation/halls",getHalls);
 ReservationRouter.post("/reservation/AddComplaint",AddComplaint);
 ReservationRouter.get("/reservation/ongoing",getOngoingReservation);
+ReservationRouter.get("/reservation/ongoingLocationAdmin",getOngoingReservationForAdmin);
 ReservationRouter.get("/reservation/past",getPastReservation);
 // ReservationRouter.post("/reservation/storeReservedRooms",storeReservedRooms);
 ReservationRouter.get("/reservation/availableRooms",getAvailableRooms);
