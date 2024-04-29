@@ -46,6 +46,7 @@ import { homly_review } from "./routes/Review";
 import { requireAuth } from "./middleware/authMiddleware";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 import { ReportsRouter } from "./routes/ReportRouters";
+import PaymentRoutes  from "./routes/PaymentRoutes";
 
 import dotenv from "dotenv";
 import { ReservationRouter } from "./routes/ReservationRouter";
@@ -123,6 +124,7 @@ AppDataSource.initialize()
     app.use("/admin", admin_router);
     app.use("/user", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
+    app.use("/payment", PaymentRoutes);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
