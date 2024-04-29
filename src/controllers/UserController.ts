@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { LessThan, MoreThanOrEqual, Like, Between, Not, In } from "typeorm";
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
 import sentEmail from "../services/sentEmal";
@@ -1249,20 +1249,20 @@ const deleteFromWishList = async (req: Request, res: Response) => {
 
 // get notifications
 const getNotifications = async (req: Request, res: Response) => {
-  const userId = (req as any).serviceNo ;
-  if(userId){ 
-  await AppDataSource.manager
-    .find(Notification, {
-      where: {
-        receiverId: userId,
-      },
-    })
-    .then((notifications) => {
-      res.status(200).json(notifications);
-    })
-    .catch(() => {
-      res.status(500).json({ message: "Internal Server error" });
-    });
+  const userId = (req as any).serviceNo;
+  if (userId) {
+    await AppDataSource.manager
+      .find(Notification, {
+        where: {
+          receiverId: userId,
+        },
+      })
+      .then((notifications) => {
+        res.status(200).json(notifications);
+      })
+      .catch(() => {
+        res.status(500).json({ message: "Internal Server error" });
+      });
   }
 };
 
@@ -1317,7 +1317,21 @@ const cancelReservation = async (req: Request, res: Response) => {
       .delete(Reservation, {
         ReservationId: reservationId,
       })
-      .then(() => {
+      .then(async () => {
+        await AppDataSource.manager
+          .delete(ReservedRooms, {
+            ReservationId: reservationId,
+          })
+          .then(() => {})
+          .catch(() => {});
+
+        await AppDataSource.manager
+          .delete(ReservedHalls, {
+            ReservationId: reservationId,
+          })
+          .then(() => {})
+          .catch(() => {});
+
         res
           .status(200)
           .json({ message: "Reservation Cancelled", success: true });
@@ -1330,14 +1344,38 @@ const cancelReservation = async (req: Request, res: Response) => {
 
 // delete expire reservation
 const deleteExpireReservation = async () => {
-  const currentDate = new Date();
   const expireDate = new Date(Date.now() - +expireTime);
   await AppDataSource.manager
-    .delete(Reservation, {
-      CheckoutDate: LessThan(expireDate),
-      IsPaid: false,
+    .find(Reservation, {
+      where: {
+        CheckoutDate: LessThan(expireDate),
+        IsCancelled: false,
+      },
     })
-    .then(() => {})
+    .then(async (reservations: Reservation[]) => {
+      for (const reservation of reservations) {
+        await AppDataSource.manager
+          .delete(Reservation, {
+            ReservationId: reservation.ReservationId,
+          })
+          .then(async () => {
+            await AppDataSource.manager
+              .delete(ReservedRooms, {
+                ReservationId: reservation.ReservationId,
+              })
+              .then(() => {})
+              .catch(() => {});
+
+            await AppDataSource.manager
+              .delete(ReservedHalls, {
+                ReservationId: reservation.ReservationId,
+              })
+              .then(() => {})
+              .catch(() => {});
+          })
+          .catch(() => {});
+      }
+    })
     .catch(() => {});
 };
 
