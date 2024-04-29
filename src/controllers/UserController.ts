@@ -31,9 +31,9 @@ const expireTime = 3 * 24 * 60 * 60 * 1000;
 
 // create token
 const maxAge = 2 * 60 * 60;
-const createToken = (serviceNo: String) => {
+const createToken = (serviceNo: String, role: String) => {
   const secretCode = process.env.JWT_SECRET;
-  return jwt.sign({ serviceNo }, secretCode!, {
+  return jwt.sign({ serviceNo, role }, secretCode!, {
     expiresIn: maxAge,
   });
 };
@@ -255,7 +255,7 @@ const userLogin = async (req: Request, res: Response) => {
               lastLogin: new Date(),
             }
           );
-          const token = createToken(serviceNo);
+          const token = createToken(serviceNo, "User");
           res
             .status(200)
             .json({ token: token, message: "Login Successful", success: true });
