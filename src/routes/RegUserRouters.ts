@@ -18,6 +18,7 @@ import {
   cancelReservation,
 } from "../controllers/UserController";
 import { getHolidayHomesSorted } from "../controllers/ReviewController";
+import { getHolidayHomesDetails } from "../controllers/HolidayHomeController";
 
 const reg_users = express.Router();
 
@@ -38,5 +39,6 @@ reg_users.post("/auth/wishlist", addtoWhishList);
 reg_users.get("/auth/wishlist", getWishList);
 reg_users.delete("/auth/wishlist", deleteFromWishList);
 reg_users.put("/auth/userReservation", cancelReservation);
+reg_users.get("/auth/locationadmin/holidayhome/:HolidayHomeId", getHolidayHomesDetails);
 
 export { reg_users };

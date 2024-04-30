@@ -295,7 +295,9 @@ export const checkuserexist = async (req: Request, res: Response) => {
   }
 };
 
+//get ongoing reservations
 export const getOngoingReservation = async (req: Request, res: Response) => {
+  const adminNo = (req as any).serviceNo;
   try {
     const currentDate = new Date();
     const reservation = await AppDataSource.manager.find(Reservation, {
@@ -319,7 +321,7 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
         },
       });
       const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name","MainImage"],
+        select: ["Name","MainImage","AdminNo"],
         where: {
           HolidayHomeId: reservation[i].HolidayHome,
         },
@@ -349,8 +351,21 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
         });
       }
     }
-    console.log(reservationDetails);
-    res.status(200).json(reservationDetails);
+    if(adminNo === "HomlyPriAdmin"){
+
+      res.status(200).json(reservationDetails);
+    }else{
+      let adminReservation = [];
+      for (var i = 0; i < reservationDetails.length; i++) {
+        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
+
+          adminReservation.push(reservationDetails[i]);
+        }
+      }
+      
+      res.status(200).json(adminReservation);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
@@ -358,6 +373,7 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
 };
 
 export const getPastReservation = async (req: Request, res: Response) => {
+  const adminNo = (req as any).serviceNo;
   try {
     const currentDate = new Date();
     const reservation = await AppDataSource.manager.find(Reservation, {
@@ -365,6 +381,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
         CheckoutDate: LessThan(currentDate),
       },
     });
+
     let reservationDetails = [];
     for (var i = 0; i < reservation.length; i++) {
       const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
@@ -379,13 +396,19 @@ export const getPastReservation = async (req: Request, res: Response) => {
           ReservationId: reservation[i].ReservationId,
         },
       });
+      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+        select: ["Name","MainImage","AdminNo"],
+        where: {
+          HolidayHomeId: reservation[i].HolidayHome,
+        },
+      });
 
-      // if one of reservedrooms or reservedhalls is not found then set null for it.otherwise set like above code
       if (reservedrooms.length === 0) {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
+          holidayHome:holidayHome
         });
       }
       if (reservedhalls.length === 0) {
@@ -393,17 +416,32 @@ export const getPastReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
+          holidayHome:holidayHome
         });
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
+          holidayHome:holidayHome
         });
       }
     }
-    console.log(reservationDetails);
-    res.status(200).json(reservationDetails);
+    if(adminNo === "HomlyPriAdmin"){
+
+      res.status(200).json(reservationDetails);
+    }else{
+      let adminReservation = [];
+      for (var i = 0; i < reservationDetails.length; i++) {
+        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
+
+          adminReservation.push(reservationDetails[i]);
+        }
+      }
+      
+      res.status(200).json(adminReservation);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
