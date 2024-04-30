@@ -295,7 +295,6 @@ export const checkuserexist = async (req: Request, res: Response) => {
   }
 };
 
-//get ongoing reservations
 export const getOngoingReservation = async (req: Request, res: Response) => {
   const adminNo = (req as any).serviceNo;
   try {
@@ -379,6 +378,82 @@ export const getPastReservation = async (req: Request, res: Response) => {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         CheckoutDate: LessThan(currentDate),
+      },
+    });
+
+    let reservationDetails = [];
+    for (var i = 0; i < reservation.length; i++) {
+      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
+        select: ["roomCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
+        select: ["hallCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+        select: ["Name","MainImage","AdminNo"],
+        where: {
+          HolidayHomeId: reservation[i].HolidayHome,
+        },
+      });
+
+      if (reservedrooms.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: [],
+          reservedhalls: reservedhalls,
+          holidayHome:holidayHome
+        });
+      }
+      if (reservedhalls.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: [],
+          holidayHome:holidayHome
+        });
+      } else {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: reservedhalls,
+          holidayHome:holidayHome
+        });
+      }
+    }
+    if(adminNo === "HomlyPriAdmin"){
+
+      res.status(200).json(reservationDetails);
+    }else{
+      let adminReservation = [];
+      for (var i = 0; i < reservationDetails.length; i++) {
+        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
+
+          adminReservation.push(reservationDetails[i]);
+        }
+      }
+      
+      res.status(200).json(adminReservation);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
+export const getSpecialReservation = async (req: Request, res: Response) => {
+  const adminNo = (req as any).serviceNo;
+  try {
+    const currentDate = new Date();
+    const reservation = await AppDataSource.manager.find(Reservation, {
+      where: {
+        IsSpecial:true,
       },
     });
 
