@@ -9,9 +9,14 @@ import { AppDataSource } from "../index";
 import { HolidayHome } from "../entities/HolidayHome";
 import { Room } from "../entities/Room";
 import { Hall } from "../entities/Hall";
-import { Between, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
+import SendReciptEmail from "../template/SendRecipt";
+import sentEmail from "../services/sentEmal";
+import { Between, LessThanOrEqual, MoreThan, MoreThanOrEqual } from "typeorm";
 
 const router = express.Router();
+
+
+    
 
 const AddComplaint = async (req: Request, res: Response) => {
   console.log(req.body);
@@ -67,7 +72,8 @@ const AddResrvation = async (req: Request, res: Response) => {
   console.log("arunaaa", ServiceNO);
 
   // add roomcodes array to database
-
+  let reserveID;
+  let TotalPrice = RoomPrice + HallPrice;
   try {
     // generate unique auto incrementing reservation id
     const reservationId = await AppDataSource.query(
@@ -76,7 +82,7 @@ const AddResrvation = async (req: Request, res: Response) => {
     console.log("reservation id", reservationId[0].MAXVAL);
     let maxvalue = reservationId[0].MAXVAL;
 
-    let reserveID;
+    
     if (maxvalue) {
       // Extract the numeric part and increment by 1
       let num = parseInt(maxvalue.split("-")[1]);
@@ -142,7 +148,8 @@ const AddResrvation = async (req: Request, res: Response) => {
               hallCode: HallCodes[i],
             },
           ])
-          .execute();
+          .execute()
+          
       }
     }
     res.status(200).json({ message: "Reservation added successfully" });
@@ -150,7 +157,15 @@ const AddResrvation = async (req: Request, res: Response) => {
     console.log(`error is ${error}`);
     res.status(500).json({ message: "Internal Server Error!" });
   }
-  console.log(ServiceNO, HolidayHome, CheckinDate, CheckoutDate);
+  //const reserveId = (req as any).reserveID; // Declare the 'reserveID' variable
+  console.log("reservation id", reserveID);
+  const sendRecipt = (email: string, employeeName: string, holidayHome: string, reservationNumber: string, checkinDate: Date, checkoutDate: Date, maxAdults: string, maxChildren: string, rooms: string, halls: string, roomPrice: string, hallPrice: string, TotalPrice: string) => {
+    const subject = "Reservation Recipt";
+    const message = SendReciptEmail(employeeName, holidayHome, reservationNumber, checkinDate, checkoutDate, maxAdults, maxChildren, rooms, halls, roomPrice, hallPrice, TotalPrice);
+    sentEmail(email, subject, message);
+  };
+  console.log("reservation id", reserveID);
+  sendRecipt("booshiwork@gmail.com", ServiceNO, HolidayHome, reserveID ?? '', CheckinDate, CheckoutDate, NoOfAdults, NoOfChildren, RoomCodes, HallCodes, RoomPrice, HallPrice, TotalPrice);
 };
 
 //return all reservations in between given checkinDate and Checkout date
@@ -181,18 +196,26 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
     const existingReservations = await AppDataSource.manager.find(Reservation, {
       select: ["ReservationId"],
       where: {
+        IsCancelled: false,
         CheckinDate: LessThanOrEqual(new Date(CheckoutDate)),
         CheckoutDate: MoreThanOrEqual(new Date(CheckinDate)),
         HolidayHome: HolidayHome,
       },
     });
     for (const reservation of existingReservations) {
-      await AppDataSource.manager.remove(Reservation, reservation);
-      // remove them also from reservedRoom and ReservedHalls table
-      // await AppDataSource.manager.remove(ReservedRooms, {
-      //   ReservationId: reservation.ReservationId,
-      // });
+      await AppDataSource.manager.update(Reservation, {
+        ReservationId: reservation.ReservationId,
+      }, {
+        IsCancelled: true,
+      });
     }
+    //   // await AppDataSource.manager.remove(Reservation, reservation);
+
+    //   // remove them also from reservedRoom and ReservedHalls table
+    //   // await AppDataSource.manager.remove(ReservedRooms, {
+    //   //   ReservationId: reservation.ReservationId,
+    //   // });
+    // }
     console.log("existing reservationsss", existingReservations);
     // generate unique auto incrementing reservation id
     const reservationId = await AppDataSource.query(
@@ -210,6 +233,12 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
     } else {
       reserveID = "RES-00001"; // Initial reservation ID
     }
+    let checkinDate = new Date(CheckinDate);
+    checkinDate.setHours(0, 0, 0, 0);
+    console.log("checkinDate", checkinDate);
+
+    let checkoutDate = new Date(CheckoutDate);
+    checkoutDate.setHours(23, 59, 0, 0);
 
     AppDataSource.createQueryBuilder()
       .insert()
@@ -219,8 +248,8 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
           ReservationId: reserveID,
           ServiceNO,
           HolidayHome,
-          CheckinDate,
-          CheckoutDate,
+          CheckinDate: checkinDate, // Set time to 12:00 am
+          CheckoutDate: checkoutDate, // Set time to 11:59 pm
           NoOfAdults,
           NoOfChildren,
           RoomPrice,
@@ -234,23 +263,23 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
       .execute();
     // get all rooms codes in HolidayHome
     // add all roomCodes in this holidayhome to the reservedRooms table in this reservation
-    // const rooms = await AppDataSource.manager.find(Room, {
-    //   where: {
-    //     HolidayHomeId: HolidayHome,
-    //   },
-    // });
-    // for (var i = 0; i < rooms.length; i++) {
-    //   await AppDataSource.createQueryBuilder()
-    //     .insert()
-    //     .into(ReservedRooms)
-    //     .values([
-    //       {
-    //         ReservationId: reserveID,
-    //         roomCode: rooms[i].roomCode,
-    //       },
-    //     ])
-    //     .execute();
-    // }
+    const rooms = await AppDataSource.manager.find(Room, {
+      where: {
+        HolidayHomeId: HolidayHome,
+      },
+    });
+    for (var i = 0; i < rooms.length; i++) {
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(ReservedRooms)
+        .values([
+          {
+            ReservationId: reserveID,
+            roomCode: rooms[i].roomCode,
+          },
+        ])
+        .execute();
+    }
     // AppDataSource.createQueryBuilder()
     // .delete()
     // .from(Reservation)
@@ -315,6 +344,16 @@ const getRooms = async (req: Request, res: Response) => {
   }
 };
 
+const getHalls = async (req: Request, res: Response) => {
+  try {
+    const halls = await AppDataSource.manager.find(Hall);
+    res.status(200).json(halls);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+}
+
 //get total room rental in paticular holidayhome
 const getTotalRoomRental = async (req: Request, res: Response) => {
   const holidayHomeId = req.params.HolidayHomeId;
@@ -357,6 +396,78 @@ const getReservation = async (req: Request, res: Response) => {
   try {
     const reservation = await AppDataSource.manager.find(Reservation);
     res.status(200).json(reservation);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
+const getOngoingReservationForAdmin = async (req: Request, res: Response) => {
+  // const adminNo = (req as any).serviceNo;
+  const adminNo = "2"
+  try {
+    const currentDate = new Date();
+    const reservation = await AppDataSource.manager.find(Reservation, {
+      where: {
+        CheckoutDate: MoreThan(currentDate),
+      },
+    });
+
+    let reservationDetails = [];
+    for (var i = 0; i < reservation.length; i++) {
+      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
+        select: ["roomCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
+        select: ["hallCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+        select: ["Name","MainImage","AdminNo"],
+        where: {
+          HolidayHomeId: reservation[i].HolidayHome,
+        },
+      });
+
+      if (reservedrooms.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: [],
+          reservedhalls: reservedhalls,
+          holidayHome:holidayHome
+        });
+      }
+      if (reservedhalls.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: [],
+          holidayHome:holidayHome
+        });
+      } else {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: reservedhalls,
+          holidayHome:holidayHome
+        });
+      }
+    }
+
+    // select admin reservation from reservationDetails
+    let adminReservation = [];
+    for (var i = 0; i < reservationDetails.length; i++) {
+      if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
+        adminReservation.push(reservationDetails[i]);
+      }
+    }
+    
+    res.status(200).json(adminReservation);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
@@ -558,12 +669,18 @@ const getAvailableHalls = async (req: Request, res: Response) => {
 };
 export {
   getReservation,
+  getOngoingReservationForAdmin,
   AddResrvation,
   AddSpecialResrvation,
   getHolidayHomeNames,
   getRooms,
+  getHalls,
   AddComplaint,
   getAvailableRooms,
   getAvailableHalls,
   getTotalRoomRental,
 };
+  function then(arg0: (res: any) => void) {
+    throw new Error("Function not implemented.");
+  }
+
