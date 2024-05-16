@@ -43,9 +43,13 @@ import { homly_user } from "./routes/UserRouters";
 import { reg_users } from "./routes/RegUserRouters";
 import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
-import { requireAuth } from "./middleware/authMiddleware";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 import { ReportsRouter } from "./routes/ReportRouters";
+import PaymentRoutes from "./routes/PaymentRoutes";
+import { requireAuth } from "./middleware/authMiddleware";
+import { requireUserAuth } from "./middleware/authUserMiddleware";
+import { requireAdminAuth } from "./middleware/authAdminMiddleware";
+import { common_router } from "./routes/Common";
 
 import dotenv from "dotenv";
 import { ReservationRouter } from "./routes/ReservationRouter";
@@ -110,9 +114,9 @@ io.listen(8081);
 
 AppDataSource.initialize()
   .then(() => {
-    // use requireAuth middleware to users/auth all paths
-    app.use("/user/auth/*", requireAuth);
-    app.use("/admin/auth/*", requireAuth);
+    app.use("/common/auth/*", requireAuth);
+    app.use("/user/auth/*", requireUserAuth);
+    app.use("/admin/auth/*", requireAdminAuth);
     app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
     app.use("/admin/auth/locationadmin/reservations", SpecialReservationRouter);
     app.use("/admin", LocationAdminRoute);
@@ -125,6 +129,8 @@ AppDataSource.initialize()
     app.use("/user", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
     app.use("/locationadmin", LocationAdminDashboardRouter);
+    app.use("/payment", PaymentRoutes);
+    app.use("/common", common_router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });

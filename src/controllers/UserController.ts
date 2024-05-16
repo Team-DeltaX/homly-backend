@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { LessThan, MoreThanOrEqual, Like, Between, Not, In } from "typeorm";
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
 import sentEmail from "../services/sentEmal";
@@ -25,13 +25,16 @@ import { ReservedHalls } from "../entities/ReservedHalls";
 import { WishList } from "../entities/WishList";
 import { Notification } from "../entities/Notification";
 import dotenv from "dotenv";
+import sentSms from "../services/sentSms";
 dotenv.config();
+
+const expireTime = 3 * 24 * 60 * 60 * 1000;
 
 // create token
 const maxAge = 2 * 60 * 60;
-const createToken = (serviceNo: String) => {
+const createToken = (serviceNo: String, role: String) => {
   const secretCode = process.env.JWT_SECRET;
-  return jwt.sign({ serviceNo }, secretCode!, {
+  return jwt.sign({ serviceNo, role }, secretCode!, {
     expiresIn: maxAge,
   });
 };
@@ -236,6 +239,7 @@ const emailVerification = async (req: Request, res: Response) => {
 // user login
 const userLogin = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
+  sentSms("+94764112542", `User logged in with service number ${serviceNo}`);
   const user = await AppDataSource.createQueryBuilder()
     .select("user")
     .from(HomlyUser, "user")
@@ -253,7 +257,7 @@ const userLogin = async (req: Request, res: Response) => {
               lastLogin: new Date(),
             }
           );
-          const token = createToken(serviceNo);
+          const token = createToken(serviceNo, "User");
           res
             .status(200)
             .json({ token: token, message: "Login Successful", success: true });
@@ -788,7 +792,6 @@ const updateUserIntersted = async (req: Request, res: Response) => {
     fac2 = changeFacilityName(fac2);
     fac3 = changeFacilityName(fac3);
 
-    // update table
     if (serviceNo) {
       await AppDataSource.manager.update(
         UserInteresed,
@@ -813,11 +816,13 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
 
   try {
+    deleteExpireReservation();
     await AppDataSource.manager
       .find(Reservation, {
         where: {
           ServiceNO: serviceNo,
           CheckoutDate: MoreThanOrEqual(new Date(Date.now() - 1 * 60000)),
+          IsCancelled: false,
         },
         order: {
           CheckinDate: "ASC",
@@ -836,7 +841,7 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
               })
               .then((holidayHome) => {
                 const expireDate = new Date(
-                  reservations[i].updatedAt.getTime() + 3 * 24 * 60 * 60 * 1000
+                  reservations[i].updatedAt.getTime() + expireTime
                 );
                 ongoingReservations.push({
                   reservation: reservations[i],
@@ -863,11 +868,17 @@ const getUserPastReservation = async (req: Request, res: Response) => {
   try {
     await AppDataSource.manager
       .find(Reservation, {
-        where: {
-          ServiceNO: serviceNo,
-          CheckoutDate: LessThan(new Date(Date.now() - 1 * 60000)),
-          IsPaid: true,
-        },
+        where: [
+          {
+            ServiceNO: serviceNo,
+            CheckoutDate: LessThan(new Date(Date.now() - 1 * 60000)),
+            IsPaid: true,
+          },
+          {
+            ServiceNO: serviceNo,
+            IsCancelled: true,
+          },
+        ],
         order: {
           CheckinDate: "DESC",
         },
@@ -1012,13 +1023,16 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
       where: [
         {
           CheckinDate: Between(sDate, eDate),
+          IsCancelled: false,
         },
         {
           CheckoutDate: Between(sDate, eDate),
+          IsCancelled: false,
         },
         {
           CheckinDate: LessThan(sDate),
           CheckoutDate: MoreThanOrEqual(eDate),
+          IsCancelled: false,
         },
       ],
     });
@@ -1237,41 +1251,21 @@ const deleteFromWishList = async (req: Request, res: Response) => {
 
 // get notifications
 const getNotifications = async (req: Request, res: Response) => {
-  const userId = (req as any).serviceNo || (req as any).adminNo;
-  await AppDataSource.manager
-    .find(Notification, {
-      where: {
-        receiverId: userId,
-      },
-    })
-    .then((notifications) => {
-      res.status(200).json(notifications);
-    })
-    .catch(() => {
-      res.status(500).json({ message: "Internal Server error" });
-    });
-};
-
-// add notification
-const addNotification = async (req: Request, res: Response) => {
-  const { receiverId, senderId, data, type } = req.body;
-  console.log(receiverId, senderId, data, type, "sdfsdf");
-  const notifiactions = Notification.create({
-    receiverId,
-    senderId,
-    data,
-    type,
-    time: new Date(),
-  });
-
-  notifiactions
-    .save()
-    .then(() => {
-      res.status(200).json({ message: "Notification added" });
-    })
-    .catch(() => {
-      res.status(500).json({ message: "Internal Server error" });
-    });
+  const userId = (req as any).serviceNo;
+  if (userId) {
+    await AppDataSource.manager
+      .find(Notification, {
+        where: {
+          receiverId: userId,
+        },
+      })
+      .then((notifications) => {
+        res.status(200).json(notifications);
+      })
+      .catch(() => {
+        res.status(500).json({ message: "Internal Server error" });
+      });
+  }
 };
 
 // delete notification
@@ -1302,6 +1296,91 @@ const deleteNotification = async (req: Request, res: Response) => {
   }
 };
 
+// cancelled reservation
+const cancelReservation = async (req: Request, res: Response) => {
+  const { reservationId, isPaid } = req.body;
+  if (isPaid) {
+    await AppDataSource.manager
+      .update(
+        Reservation,
+        { ReservationId: reservationId },
+        { IsCancelled: true }
+      )
+      .then(() => {
+        res
+          .status(200)
+          .json({ message: "Reservation Cancelled", success: true });
+      })
+      .catch(() => {
+        res.status(500).json({ message: "Internal Server error" });
+      });
+  } else {
+    await AppDataSource.manager
+      .delete(Reservation, {
+        ReservationId: reservationId,
+      })
+      .then(async () => {
+        await AppDataSource.manager
+          .delete(ReservedRooms, {
+            ReservationId: reservationId,
+          })
+          .then(() => {})
+          .catch(() => {});
+
+        await AppDataSource.manager
+          .delete(ReservedHalls, {
+            ReservationId: reservationId,
+          })
+          .then(() => {})
+          .catch(() => {});
+
+        res
+          .status(200)
+          .json({ message: "Reservation Cancelled", success: true });
+      })
+      .catch(() => {
+        res.status(500).json({ message: "Internal Server error" });
+      });
+  }
+};
+
+// delete expire reservation
+const deleteExpireReservation = async () => {
+  const expireDate = new Date(Date.now() - +expireTime);
+  await AppDataSource.manager
+    .find(Reservation, {
+      where: {
+        CheckoutDate: LessThan(expireDate),
+        IsCancelled: false,
+      },
+    })
+    .then(async (reservations: Reservation[]) => {
+      for (const reservation of reservations) {
+        await AppDataSource.manager
+          .delete(Reservation, {
+            ReservationId: reservation.ReservationId,
+          })
+          .then(async () => {
+            await AppDataSource.manager
+              .delete(ReservedRooms, {
+                ReservationId: reservation.ReservationId,
+              })
+              .then(() => {})
+              .catch(() => {});
+
+            await AppDataSource.manager
+              .delete(ReservedHalls, {
+                ReservationId: reservation.ReservationId,
+              })
+              .then(() => {})
+              .catch(() => {});
+          })
+          .catch(() => {});
+      }
+    })
+    .catch(() => {});
+};
+
 export {
   allEmployees,
   allUsers,
@@ -1326,6 +1405,7 @@ export {
   getWishList,
   deleteFromWishList,
   getNotifications,
-  addNotification,
   deleteNotification,
+  cancelReservation,
+  deleteExpireReservation,
 };

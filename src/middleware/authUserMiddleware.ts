@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 dotenv.config();
 
-const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+const requireUserAuth = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (token) {
     const secretCode = process.env.JWT_SECRET;
@@ -23,6 +23,13 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
               role: "User",
             });
           } else {
+            if (decodedToken.role !== "User") {
+              return res.status(401).json({
+                message: "Unauthorized",
+                autherized: false,
+                role: "User",
+              });
+            }
             (req as any).serviceNo = decodedToken.serviceNo;
             return next();
           }
@@ -36,4 +43,4 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { requireAuth };
+export { requireUserAuth };
