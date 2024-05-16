@@ -239,7 +239,7 @@ const emailVerification = async (req: Request, res: Response) => {
 // user login
 const userLogin = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
-  sentSms("+94764112542", `User logged in with service number ${serviceNo}`);
+  // sentSms("+94764112542", `User logged in with service number ${serviceNo}`);
   const user = await AppDataSource.createQueryBuilder()
     .select("user")
     .from(HomlyUser, "user")
