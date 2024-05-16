@@ -48,6 +48,7 @@ export class Reservation extends BaseEntity {
   @Column({ nullable: true })
   NoOfRooms!: number;
 
+<<<<<<< Updated upstream
   @Column({ nullable: true })
   NoOfHalls!: number;
 
@@ -55,6 +56,17 @@ export class Reservation extends BaseEntity {
     nullable: true,
   })
   RoomPrice!: number;
+=======
+    @Column({
+        nullable:true
+    })
+    RoomPrice!: number ;
+
+    @Column({
+        nullable:true
+    })
+    HallPrice!: number ;
+>>>>>>> Stashed changes
 
   @Column({
     nullable: true,
