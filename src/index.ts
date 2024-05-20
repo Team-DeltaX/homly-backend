@@ -109,7 +109,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-io.listen(8081);
+io.listen(8080);
 
 AppDataSource.initialize()
   .then(() => {
