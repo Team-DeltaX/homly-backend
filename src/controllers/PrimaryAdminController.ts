@@ -27,6 +27,8 @@ import { Hall } from "../entities/Hall";
 import { Room } from "../entities/Room";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
+
+
 dotenv.config();
 
 var transporter = nodemailer.createTransport({
@@ -302,6 +304,7 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         CheckoutDate: MoreThan(currentDate),
+        IsCancelled:false,
       },
     });
 
@@ -325,13 +328,26 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           HolidayHomeId: reservation[i].HolidayHome,
         },
       });
-
+      const employeeName = await AppDataSource.manager.find(Employee, {
+        select: ["name"],
+        where: {
+          service_number: reservation[i].ServiceNO,
+        },
+      });
+      const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
+        select: ["contact_number", "email"],
+        where: {
+          service_number: reservation[i].ServiceNO,
+        },
+      });
       if (reservedrooms.length === 0) {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome
+          holidayHome:holidayHome,
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
         });
       }
       if (reservedhalls.length === 0) {
@@ -339,14 +355,19 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
-          holidayHome:holidayHome
+          holidayHome:holidayHome,
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
         });
+      
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome
+          holidayHome:holidayHome,
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
         });
       }
     }
@@ -401,13 +422,19 @@ export const getPastReservation = async (req: Request, res: Response) => {
           HolidayHomeId: reservation[i].HolidayHome,
         },
       });
-
+      const employeeName = await AppDataSource.manager.find(Employee, {
+        select: ["name"],
+        where: {
+          service_number: reservation[i].ServiceNO,
+        },
+      });  
       if (reservedrooms.length === 0) {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome
+          holidayHome:holidayHome,
+          employeeName:employeeName
         });
       }
       if (reservedhalls.length === 0) {
@@ -415,14 +442,16 @@ export const getPastReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
-          holidayHome:holidayHome
+          holidayHome:holidayHome,
+          employeeName:employeeName
         });
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome
+          holidayHome:holidayHome,
+          employeeName:employeeName
         });
       }
     }
@@ -450,7 +479,6 @@ export const getPastReservation = async (req: Request, res: Response) => {
 export const getSpecialReservation = async (req: Request, res: Response) => {
   const adminNo = (req as any).serviceNo;
   try {
-    const currentDate = new Date();
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         IsSpecial:true,
@@ -477,13 +505,26 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
           HolidayHomeId: reservation[i].HolidayHome,
         },
       });
-
+      const employeeName = await AppDataSource.manager.find(Employee, {
+        select: ["name"],
+        where: {
+          service_number: reservation[i].ServiceNO,
+        },
+      });
+      const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
+        select: ["contact_number", "email"],
+        where: {
+          service_number: reservation[i].ServiceNO,
+        },
+      });
       if (reservedrooms.length === 0) {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome
+          holidayHome:holidayHome,
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
         });
       }
       if (reservedhalls.length === 0) {
@@ -491,14 +532,110 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
-          holidayHome:holidayHome
+          holidayHome:holidayHome,
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
         });
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome
+          holidayHome:holidayHome,
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
+        });
+      }
+    }
+    if(adminNo === "HomlyPriAdmin"){
+
+      res.status(200).json(reservationDetails);
+    }else{
+      let adminReservation = [];
+      for (var i = 0; i < reservationDetails.length; i++) {
+        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
+
+          adminReservation.push(reservationDetails[i]);
+        }
+      }
+      
+      res.status(200).json(adminReservation);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
+export const getCanceledReservation = async (req: Request, res: Response) => {
+  const adminNo = (req as any).serviceNo;
+  try {
+    const reservation = await AppDataSource.manager.find(Reservation, {
+      where: {
+        IsCancelled:true,
+      },
+    });
+
+    let reservationDetails = [];
+    for (var i = 0; i < reservation.length; i++) {
+      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
+        select: ["roomCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
+        select: ["hallCode"],
+        where: {
+          ReservationId: reservation[i].ReservationId,
+        },
+      });
+      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+        select: ["Name","MainImage","AdminNo"],
+        where: {
+          HolidayHomeId: reservation[i].HolidayHome,
+        },
+      });
+      const employeeName = await AppDataSource.manager.find(Employee, {
+        select: ["name"],
+        where: {
+          service_number: reservation[i].ServiceNO,
+        },
+      });
+      const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
+        select: ["contact_number", "email"],
+        where: {
+          service_number: reservation[i].ServiceNO,
+        },
+      });
+      if (reservedrooms.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: [],
+          reservedhalls: reservedhalls,
+          holidayHome:holidayHome,
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
+        });
+      }
+      if (reservedhalls.length === 0) {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: [],
+          holidayHome:holidayHome,
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
+        });
+      } else {
+        reservationDetails.push({
+          reservation: reservation[i],
+          reservedrooms: reservedrooms,
+          reservedhalls: reservedhalls,
+          holidayHome:holidayHome,
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
         });
       }
     }
