@@ -100,11 +100,22 @@ const getHolidayHomeNames = async (req: Request, res: Response) => {
 
 const getSelectedRooms = async (req: Request, res: Response) => {
   const { HolidayHomeId, unitCode } = req.params;
+  console.log(HolidayHomeId, unitCode);
+
   const selectedRoom = await AppDataSource.manager.find(SelectedRooms, {
     where: { HolidayHomeId, unitCode },
   });
 
-  res.json({ selectedRoom: selectedRoom });
+  const selectedRooms = [];
+  for (let i = 0; i < selectedRoom.length; i++) {
+    const room = await AppDataSource.manager.find(Room, {
+      where: { HolidayHomeId, roomCode: selectedRoom[i].roomCode },
+    });
+
+    selectedRooms.push(room[0]);
+  }
+
+  res.json({ selectedRooms: selectedRooms });
 };
 
 const getRoom = async (req: Request, res: Response) => {
@@ -963,6 +974,95 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         });
 
         await room.save();
+      }
+    }
+
+    // ............... Unit Editing .........................
+    // get all the unitcode that available in database realated to HolidayHomeId
+
+    const unitCodes = await AppDataSource.manager.find(Unit, {
+      where: { HolidayHomeId },
+      select: ["unitCode"],
+    });
+
+    const unitCodesArray = unitCodes.map((unit) => unit.unitCode);
+
+    //making a array of unitcodes coming from updatedValues.unitArray
+    const unitCodesArray1 = updatedValues.unitArray.map(
+      (unit: any) => unit.unitCode
+    );
+
+    //deleting the units which are not in updatedValues.unitArray
+
+    const unitCodesToDelete = unitCodesArray.filter(
+      (unitCode) => !unitCodesArray1.includes(unitCode)
+    );
+
+    //deleting the units related to holidayhomeid and unitCode
+
+    for (let i = 0; i < unitCodesToDelete.length; i++) {
+      await Unit.delete({
+        HolidayHomeId: HolidayHomeId,
+        unitCode: unitCodesToDelete[i],
+      });
+    }
+
+    for (let i = 0; i < updatedValues.unitArray.length; i++) {
+      if (unitCodesArray.includes(updatedValues.unitArray[i].unitCode)) {
+        console.log("inclued in database");
+        await Unit.update(
+          { unitCode: updatedValues.unitArray[i].unitCode },
+          {
+            unitAc: updatedValues.unitArray[i].unitAc,
+            floorLevel: updatedValues.unitArray[i].floorLevel,
+            unitRemark: updatedValues.unitArray[i].unitRemark,
+            roomAttached: updatedValues.unitArray[i].roomAttached,
+          }
+        );
+        if (updatedValues.unitArray[i].selectedRooms !== undefined) {
+          console.log("selectedRooms array not undefined");
+          for (
+            let j = 0;
+            j < updatedValues.unitArray[i].selectedRooms.length;
+            j++
+          ) {
+            await SelectedRooms.update(
+              {
+                unitCode: updatedValues.unitArray[i].unitCode,
+                roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
+              },
+              {
+                unitCode: updatedValues.unitArray[i].unitCode,
+                roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
+              }
+            );
+          }
+        }
+      } else {
+        for (
+          let j = 0;
+          j < updatedValues.unitArray[i].selectedRooms.length;
+          j++
+        ) {
+          console.log("first");
+          const selectedRoom = SelectedRooms.create({
+            roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
+            unitCode: updatedValues.unitArray[i].unitCode,
+            HolidayHomeId: HolidayHomeId,
+          });
+
+          await selectedRoom.save();
+        }
+        const unit = Unit.create({
+          unitCode: updatedValues.unitArray[i].unitCode,
+          unitAc: updatedValues.unitArray[i].unitAc,
+          floorLevel: updatedValues.unitArray[i].floorLevel,
+          unitRemark: updatedValues.unitArray[i].unitRemark,
+          roomAttached: updatedValues.unitArray[i].roomAttached,
+          HolidayHomeId: HolidayHomeId,
+        });
+
+        await unit.save();
       }
     }
 
