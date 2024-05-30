@@ -1032,8 +1032,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
                 roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
               },
               {
-                unitCode: updatedValues.unitArray[i].unitCode,
-                roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
+                HolidayHomeId: HolidayHomeId,
               }
             );
           }
