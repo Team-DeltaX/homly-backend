@@ -683,30 +683,19 @@ const getAvailableRooms = async (req: Request, res: Response) => {
           {
             HolidayHome: holidayHomeId,
             IsCancelled: false,
-            CheckoutDate: Between(
-              new Date(checkinDate),
-              new Date(checkoutDate)
-            ),
+            CheckoutDate: Between(new Date(checkinDate), new Date(checkoutDate)),
+          },
+          {
+            HolidayHome: holidayHomeId,
+            IsCancelled: false,
+            CheckinDate: LessThanOrEqual(new Date(checkinDate)),
+            CheckoutDate: MoreThanOrEqual(new Date(checkoutDate)),
           },
         ],
       });
       console.log("reservation", reservation);
-      const onedayReservation = null;
-      // const onedayReservation = await AppDataSource.manager.find(Reservation, {
-      //   where: {
-      //     HolidayHome: holidayHomeId,
-      //     CheckinDate: LessThanOrEqual(new Date(checkinDate)),
-      //     CheckoutDate: MoreThanOrEqual(new Date(checkoutDate)),
-      //   },
-      // });
-
-      // console.log("onedayReservation", onedayReservation);
 
       let availableRooms = await getReservedRooms(allRooms, reservation);
-      // availableRooms = await getReservedRooms(
-      //   availableRooms,
-      //   onedayReservation
-      // );
       console.log({ availableRooms });
       res.status(200).json({ availableRooms });
     }
@@ -740,14 +729,19 @@ const getAvailableHalls = async (req: Request, res: Response) => {
         where: [
           {
             HolidayHome: holidayHomeId,
+            IsCancelled: false,
             CheckinDate: Between(new Date(checkinDate), new Date(checkoutDate)),
           },
           {
             HolidayHome: holidayHomeId,
-            CheckoutDate: Between(
-              new Date(checkinDate),
-              new Date(checkoutDate)
-            ),
+            IsCancelled: false,
+            CheckoutDate: Between(new Date(checkinDate), new Date(checkoutDate)),
+          },
+          {
+            HolidayHome: holidayHomeId,
+            IsCancelled: false,
+            CheckinDate: LessThanOrEqual(new Date(checkinDate)),
+            CheckoutDate: MoreThanOrEqual(new Date(checkoutDate)),
           },
         ],
       });
