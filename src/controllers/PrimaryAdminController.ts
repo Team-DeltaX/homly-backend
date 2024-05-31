@@ -28,6 +28,7 @@ import { Room } from "../entities/Room";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
 
+const schedule = require('node-schedule');
 
 dotenv.config();
 
@@ -989,3 +990,7 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
     res.status(500).json({ message: "error in getting holiday home rating" });
   }
 };
+
+export const everyFiveSeconds = schedule.scheduleJob('0 0 * * *', () => {
+  console.log('Task executed every 5 seconds:', new Date().toLocaleTimeString());
+});
