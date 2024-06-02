@@ -428,6 +428,12 @@ export const getPastReservation = async (req: Request, res: Response) => {
         where: {
           service_number: reservation[i].ServiceNO,
         },
+      });
+      const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
+        select: ["contact_number", "email"],
+        where: {
+          service_number: reservation[i].ServiceNO,
+        },
       });  
       if (reservedrooms.length === 0) {
         reservationDetails.push({
@@ -435,7 +441,8 @@ export const getPastReservation = async (req: Request, res: Response) => {
           reservedrooms: [],
           reservedhalls: reservedhalls,
           holidayHome:holidayHome,
-          employeeName:employeeName
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
         });
       }
       if (reservedhalls.length === 0) {
@@ -444,7 +451,8 @@ export const getPastReservation = async (req: Request, res: Response) => {
           reservedrooms: reservedrooms,
           reservedhalls: [],
           holidayHome:holidayHome,
-          employeeName:employeeName
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
         });
       } else {
         reservationDetails.push({
@@ -452,7 +460,8 @@ export const getPastReservation = async (req: Request, res: Response) => {
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
           holidayHome:holidayHome,
-          employeeName:employeeName
+          employeeName:employeeName,
+          employeeDetails:employeeDetails
         });
       }
     }
