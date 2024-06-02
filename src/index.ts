@@ -54,6 +54,7 @@ import { common_router } from "./routes/Common";
 import dotenv from "dotenv";
 import { ReservationRouter } from "./routes/ReservationRouter";
 import { PrimaryAdminDashboardRouter } from "./routes/ParimayAdminDashboardRouters";
+import { LocationAdminDashboardRouter } from "./routes/LocationAdminDashboardRouter";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -127,6 +128,7 @@ AppDataSource.initialize()
     app.use("/admin", admin_router);
     app.use("/user", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
+    app.use("/admin", LocationAdminDashboardRouter);
     app.use("/payment", PaymentRoutes);
     app.use("/common", common_router);
     app.listen(PORT, () => {

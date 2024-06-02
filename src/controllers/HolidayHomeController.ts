@@ -14,14 +14,17 @@ import { Reservation } from "../entities/Reservation";
 import { ReservedRooms } from "../entities/ReservedRooms";
 
 const getHolidayHomes = async (req: Request, res: Response) => {
+  const serviceNo = (req as any).serviceNo;
+  console.log("admin no got from middleware", serviceNo);
   const pending = await AppDataSource.manager.find(HolidayHome, {
-    where: { Approved: false },
+    where: { Approved: false, AdminNo: serviceNo },
   });
 
   const acitve = await AppDataSource.manager.find(HolidayHome, {
     where: {
       Status: "Active",
       Approved: true,
+      AdminNo: serviceNo,
     },
   });
 
@@ -29,6 +32,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
     where: {
       Status: "Inactive",
       Approved: true,
+      AdminNo: serviceNo,
     },
   });
 
@@ -88,7 +92,9 @@ const getHolidayHomesDetails = async (req: Request, res: Response) => {
 };
 
 const getHolidayHomeNames = async (req: Request, res: Response) => {
+  const serviceNo = (req as any).serviceNo;
   const holidayHomeNames = await AppDataSource.manager.find(HolidayHome, {
+    where: { AdminNo: serviceNo },
     select: ["Name", "HolidayHomeId"],
   });
   const names = holidayHomeNames.map((holidayHome) => ({
@@ -158,6 +164,8 @@ const getReservedRooms = async (req: Request, res: Response) => {
       select: ["roomCode"],
     });
 
+    console.log("reserved rooms", reservedRooms);
+
     for (let i = 0; reservedRooms.length > i; i++) {
       roomCodes.push(reservedRooms[i].roomCode);
     }
@@ -168,6 +176,8 @@ const getReservedRooms = async (req: Request, res: Response) => {
 
 const createHolidayHome = async (req: Request, res: Response) => {
   try {
+    const serviceNo = (req as any).serviceNo;
+
     const hhId = await AppDataSource.query(
       `SELECT MAX("HolidayHomeId") as maxval FROM "INOADMIN"."holiday_home"`
     );
@@ -205,7 +215,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
       District: allValues.holidayHomeDetails.district.toLowerCase(),
       Pool: allValues.homeBreakDown.bdValue.pool,
       Bar: allValues.homeBreakDown.bdValue.bar,
-      AdminNo: "1",
+      AdminNo: serviceNo,
       MainImage: allValues.mainImage,
       Image1: allValues.iamge1,
       Image2: allValues.image2,
@@ -238,6 +248,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
       Address: allValues.caretaker1.caretakerAddress,
       Description: allValues.caretaker1.caretakerDescription,
       HolidayHomeId: holidayHomeId,
+      Image: allValues.caretaker1Image,
       // HolidayHomeId: holidayHome.HolidayHomeId
     });
 
@@ -270,6 +281,7 @@ const createHolidayHome = async (req: Request, res: Response) => {
         Address: allValues.caretaker2.caretakerAddress,
         Description: allValues.caretaker2.caretakerDescription,
         HolidayHomeId: holidayHomeId,
+        Image: allValues.caretaker2Image,
         // HolidayHomeId: holidayHome.HolidayHomeId
       });
 
@@ -483,6 +495,10 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         District: updatedValues.holidayHomeDetails.district.toLowerCase(),
         Pool: updatedValues.homeBreakDown.bdValue.pool,
         Bar: updatedValues.homeBreakDown.bdValue.bar,
+        MainImage: updatedValues.mainImage,
+        Image1: updatedValues.iamge1,
+        Image2: updatedValues.image2,
+        Image3: updatedValues.image3,
       }
     );
 
@@ -1074,7 +1090,19 @@ const updateHolidayHome = async (req: Request, res: Response) => {
 
 export const HHcount = async (req: Request, res: Response) => {
   try {
-    const count = await HolidayHome.count();
+    const serviceNo = (req as any).serviceNo;
+    // const count = await HolidayHome.count();
+    const count = await HolidayHome.countBy({
+      AdminNo: serviceNo,
+    });
+    // const serviceNo = (req as any).serviceNo;
+    // console.log("first", serviceNo);
+    // const homes = await HolidayHome.find({
+    //   where: { AdminNo: serviceNo },
+    // });
+
+    // const count = homes.length;
+    console.log("holidayhome count", count);
     res.status(200).json({ count: count });
   } catch (error) {
     res.status(500).json({ message: "Error in getting home count!" });
@@ -1083,7 +1111,22 @@ export const HHcount = async (req: Request, res: Response) => {
 
 export const Earning = async (req: Request, res: Response) => {
   try {
-    const sum = await Reservation.sum("Price", { IsPaid: true });
+    const serviceNo = (req as any).serviceNo;
+    const HidList = await HolidayHome.find({
+      where: { AdminNo: serviceNo },
+    });
+    const HidArray = HidList.map((holidayhome) => holidayhome.HolidayHomeId);
+    let sum = 0;
+    for (let i = 0; i < HidArray.length; i++) {
+      const sum1 = await Reservation.sum("Price", {
+        IsPaid: true,
+        HolidayHome: HidArray[i],
+      });
+      if (sum1 !== null) {
+        sum += sum1;
+      }
+    }
+    // const sum = await Reservation.sum("Price", { IsPaid: true });
     res.status(200).json({ sum: sum });
   } catch (error) {
     console.log(error);
@@ -1093,8 +1136,28 @@ export const Earning = async (req: Request, res: Response) => {
 
 export const Active_InActive_HHcount = async (req: Request, res: Response) => {
   try {
-    const ac_count = await HolidayHome.countBy({ Status: "Active" });
-    const in_ac_count = await HolidayHome.countBy({ Status: "Inactive" });
+    const serviceNo = (req as any).serviceNo;
+    const HidList = await HolidayHome.find({
+      where: { AdminNo: serviceNo },
+    });
+    const HidArray = HidList.map((holidayhome) => holidayhome.HolidayHomeId);
+    let ac_count = 0;
+    let in_ac_count = 0;
+
+    for (let i = 0; i < HidArray.length; i++) {
+      const ac_count1 = await HolidayHome.countBy({
+        Status: "Active",
+        HolidayHomeId: HidArray[i],
+      });
+      const in_ac_count1 = await HolidayHome.countBy({
+        Status: "Inactive",
+        HolidayHomeId: HidArray[i],
+      });
+      ac_count += ac_count1;
+      in_ac_count += in_ac_count1;
+    }
+    // const ac_count = await HolidayHome.countBy({ Status: "Active" });
+    // const in_ac_count = await HolidayHome.countBy({ Status: "Inactive" });
     res.status(200).json({ Active: ac_count, Inactive: in_ac_count });
   } catch (error) {
     res
@@ -1104,8 +1167,30 @@ export const Active_InActive_HHcount = async (req: Request, res: Response) => {
 };
 export const getBookingscounts = async (req: Request, res: Response) => {
   try {
-    const paid_count = await Reservation.countBy({ IsPaid: true });
-    const unpaid_count = await Reservation.countBy({ IsPaid: false });
+    const serviceNo = (req as any).serviceNo;
+    const HidList = await HolidayHome.find({
+      where: { AdminNo: serviceNo },
+    });
+    const HidArray = HidList.map((holidayhome) => holidayhome.HolidayHomeId);
+
+    let paid_count = 0;
+    let unpaid_count = 0;
+
+    for (let i = 0; i < HidArray.length; i++) {
+      const paid_count1 = await Reservation.countBy({
+        IsPaid: true,
+        HolidayHome: HidArray[i],
+      });
+      const unpaid_count1 = await Reservation.countBy({
+        IsPaid: false,
+        HolidayHome: HidArray[i],
+      });
+      paid_count += paid_count1;
+      unpaid_count += unpaid_count1;
+    }
+
+    // const paid_count = await Reservation.countBy({ IsPaid: true });
+    // const unpaid_count = await Reservation.countBy({ IsPaid: false });
     res.status(200).json({ Paid: paid_count, Unpaid: unpaid_count });
   } catch (error) {
     res.status(500).json({ message: "Error in getting bookings!" });
@@ -1114,7 +1199,21 @@ export const getBookingscounts = async (req: Request, res: Response) => {
 
 export const gethallcount = async (req: Request, res: Response) => {
   try {
-    const hall_count = await Hall.countBy({});
+    const serviceNo = (req as any).serviceNo;
+    const HidList = await HolidayHome.find({
+      where: { AdminNo: serviceNo },
+    });
+    const HidArray = HidList.map((holidayhome) => holidayhome.HolidayHomeId);
+
+    let hall_count = 0;
+
+    for (let i = 0; i < HidArray.length; i++) {
+      const hall_count1 = await Hall.countBy({
+        HolidayHomeId: HidArray[i],
+      });
+      hall_count += hall_count1;
+    }
+    // const hall_count = await Hall.countBy({});
     res.status(200).json({ count: hall_count });
   } catch (error) {
     res.status(500).json({ message: "Error in getting hall count!" });
@@ -1123,7 +1222,21 @@ export const gethallcount = async (req: Request, res: Response) => {
 
 export const getroomcount = async (req: Request, res: Response) => {
   try {
-    const room_count = await Room.countBy({});
+    const serviceNo = (req as any).serviceNo;
+    const HidList = await HolidayHome.find({
+      where: { AdminNo: serviceNo },
+    });
+    const HidArray = HidList.map((holidayhome) => holidayhome.HolidayHomeId);
+
+    let room_count = 0;
+
+    for (let i = 0; i < HidArray.length; i++) {
+      const room_count1 = await Room.countBy({
+        HolidayHomeId: HidArray[i],
+      });
+      room_count += room_count1;
+    }
+    // const room_count = await Room.countBy({});
     res.status(200).json({ count: room_count });
   } catch (error) {
     res.status(500).json({ message: "Error in getting room count!" });
@@ -1132,7 +1245,24 @@ export const getroomcount = async (req: Request, res: Response) => {
 
 export const Hallincome = async (req: Request, res: Response) => {
   try {
-    const sum = await Reservation.sum("HallPrice", { IsPaid: true });
+    const serviceNo = (req as any).serviceNo;
+    const HidList = await HolidayHome.find({
+      where: { AdminNo: serviceNo },
+    });
+    const HidArray = HidList.map((holidayhome) => holidayhome.HolidayHomeId);
+
+    let sum = 0;
+    for (let i = 0; i < HidArray.length; i++) {
+      const sum1 = await Reservation.sum("HallPrice", {
+        IsPaid: true,
+        HolidayHome: HidArray[i],
+      });
+      if (sum1 !== null) {
+        sum += sum1;
+      }
+    }
+
+    // const sum = await Reservation.sum("HallPrice", { IsPaid: true });
     res.status(200).json({ hallincome: sum });
   } catch (error) {
     console.log(error);
@@ -1142,7 +1272,25 @@ export const Hallincome = async (req: Request, res: Response) => {
 
 export const Roomincome = async (req: Request, res: Response) => {
   try {
-    const sum = await Reservation.sum("RoomPrice", { IsPaid: true });
+    const serviceNo = (req as any).serviceNo;
+    const HidList = await HolidayHome.find({
+      where: { AdminNo: serviceNo },
+    });
+    const HidArray = HidList.map((holidayhome) => holidayhome.HolidayHomeId);
+
+    let sum = 0;
+
+    for (let i = 0; i < HidArray.length; i++) {
+      const sum1 = await Reservation.sum("RoomPrice", {
+        IsPaid: true,
+        HolidayHome: HidArray[i],
+      });
+      if (sum1 !== null) {
+        sum += sum1;
+      }
+    }
+
+    // const sum = await Reservation.sum("RoomPrice", { IsPaid: true });
     res.status(200).json({ roomincome: sum });
   } catch (error) {
     console.log(error);
@@ -1180,6 +1328,31 @@ export const get_income_in_date = async (req: Request, res: Response) => {
     res.status(500).json({ message: "error occured in get income in date" });
   }
 };
+
+export const holidayHomeRatings = async (req: Request, res: Response) => {
+  try {
+    const serviceNo = (req as any).serviceNo;
+    const HidList = await HolidayHome.find({
+      where: { AdminNo: serviceNo },
+    });
+    const HidArray = HidList.map((holidayhome) => holidayhome.HolidayHomeId);
+    const ratings: any[] = [];
+
+    for (let i = 0; i < HidArray.length; i++) {
+      const rating = await HolidayHome.find({
+        where: { HolidayHomeId: HidArray[i] },
+        select: ["Name", "overall_rating"],
+      });
+      ratings.push(rating);
+    }
+
+    res.status(200).json({ ratings });
+  } catch (error) {
+    res.status(500).json({ message: "Error in getting holiday home ratings" });
+  }
+};
+
+// .................... remove..............................
 
 export const getallHH = async (req: Request, res: Response) => {
   try {
@@ -1242,6 +1415,8 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
   }
 };
 
+//..................................................................................................
+
 export const get_holiday_home_rating = async (req: Request, res: Response) => {
   const holidayhomeid = req.params.homeid;
   try {
@@ -1253,7 +1428,7 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
         HolidayHomeId: holidayhomeid,
       },
     });
-    res.status(200).json({ rating });
+    res.status(200).json({ rating: rating });
   } catch {
     res.status(500).json({ message: "error in getting holiday home rating" });
   }
