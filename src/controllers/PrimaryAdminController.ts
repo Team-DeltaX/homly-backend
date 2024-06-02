@@ -747,7 +747,26 @@ export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => 
   console.log('Task executed every day 12 am ', new Date().toLocaleTimeString());
   const blacklist = await AppDataSource.manager.find(BlackListedUser);
   blacklist.map((user)=>{
-    console.log(user)
+    const dateString = user.Date.toISOString().split('T')[0];
+    
+
+
+    const today = new Date();
+    const target = new Date(dateString);
+  
+    // Convert both dates to milliseconds
+    const todayMillis = today.getTime();
+    const targetMillis = target.getTime();
+  
+    // Calculate the difference in milliseconds
+    const differenceMillis = targetMillis - todayMillis;
+  
+    // Convert milliseconds to days (1 day = 24 * 60 * 60 * 1000 milliseconds)
+    const differenceDays = Math.round(differenceMillis / (1000 * 60 * 60 * 24));
+
+
+    console.log(differenceDays)
+    console.log(dateString)
   })
 
 
