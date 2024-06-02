@@ -220,6 +220,8 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
     HolidayHome,
     CheckinDate,
     CheckoutDate,
+    NoOfRooms,
+    NoOfHalls,
     NoOfAdults,
     NoOfChildren,
     RoomPrice,
@@ -324,6 +326,17 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
     let checkoutDate = new Date(CheckoutDate);
     checkoutDate.setHours(23, 59, 0, 0);
 
+    const rooms = await AppDataSource.manager.find(Room, {
+      where: {
+        HolidayHomeId: HolidayHome,
+      },
+    });
+    const halls = await AppDataSource.manager.find(Hall, {
+      where: {
+        HolidayHomeId: HolidayHome,
+      },
+    });
+
     AppDataSource.createQueryBuilder()
       .insert()
       .into(Reservation)
@@ -336,6 +349,8 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
           CheckoutDate: checkoutDate, // Set time to 11:59 pm
           NoOfAdults,
           NoOfChildren,
+          NoOfRooms,
+          NoOfHalls,
           RoomPrice,
           HallPrice,
           Price,
@@ -344,11 +359,7 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
         },
       ])
       .execute();
-    const rooms = await AppDataSource.manager.find(Room, {
-      where: {
-        HolidayHomeId: HolidayHome,
-      },
-    });
+
     for (var i = 0; i < rooms.length; i++) {
       await AppDataSource.createQueryBuilder()
         .insert()
@@ -361,11 +372,7 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
         ])
         .execute();
     }
-    const halls = await AppDataSource.manager.find(Hall, {
-      where: {
-        HolidayHomeId: HolidayHome,
-      },
-    });
+
     for (var i = 0; i < halls.length; i++) {
       await AppDataSource.createQueryBuilder()
         .insert()
@@ -456,16 +463,20 @@ const getTotalRoomRental = async (req: Request, res: Response) => {
     },
   });
   try {
+    let NoofRooms = 0;
     let totalRoomRental = 0;
     let maxAdults = 0;
     let maxChildren = 0;
+    let NoofHalls = 0;
     let totalHallRental = 0;
     for (var i = 0; i < rooms.length; i++) {
+      NoofRooms++;
       totalRoomRental += rooms[i].roomRental;
       maxAdults += rooms[i].NoOfAdults;
       maxChildren += rooms[i].NoOfChildren;
     }
     for (var i = 0; i < halls.length; i++) {
+      NoofHalls++;
       totalHallRental += Number(halls[i].hallRental);
       maxAdults += Number(halls[i].hallNoOfAdults);
       maxChildren += Number(halls[i].hallNoOfChildren);
@@ -473,7 +484,7 @@ const getTotalRoomRental = async (req: Request, res: Response) => {
     //console.log(totalRental);
     res
       .status(200)
-      .json({ totalRoomRental, totalHallRental, maxAdults, maxChildren });
+      .json({ NoofRooms, NoofHalls, totalRoomRental, totalHallRental, maxAdults, maxChildren });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
@@ -729,19 +740,14 @@ const getAvailableHalls = async (req: Request, res: Response) => {
         where: [
           {
             HolidayHome: holidayHomeId,
-            IsCancelled: false,
             CheckinDate: Between(new Date(checkinDate), new Date(checkoutDate)),
           },
           {
             HolidayHome: holidayHomeId,
-            IsCancelled: false,
-            CheckoutDate: Between(new Date(checkinDate), new Date(checkoutDate)),
-          },
-          {
-            HolidayHome: holidayHomeId,
-            IsCancelled: false,
-            CheckinDate: LessThanOrEqual(new Date(checkinDate)),
-            CheckoutDate: MoreThanOrEqual(new Date(checkoutDate)),
+            CheckoutDate: Between(
+              new Date(checkinDate),
+              new Date(checkoutDate)
+            ),
           },
         ],
       });
