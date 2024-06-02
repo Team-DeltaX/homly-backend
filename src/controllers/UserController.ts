@@ -25,6 +25,7 @@ import { ReservedHalls } from "../entities/ReservedHalls";
 import { WishList } from "../entities/WishList";
 import { Notification } from "../entities/Notification";
 import dotenv from "dotenv";
+import sentSms from "../services/sentSms";
 dotenv.config();
 
 const expireTime = 3 * 24 * 60 * 60 * 1000;
@@ -238,6 +239,7 @@ const emailVerification = async (req: Request, res: Response) => {
 // user login
 const userLogin = async (req: Request, res: Response) => {
   const { serviceNo, password } = req.body;
+  // sentSms("+94764112542", `User logged in with service number ${serviceNo}`);
   const user = await AppDataSource.createQueryBuilder()
     .select("user")
     .from(HomlyUser, "user")
