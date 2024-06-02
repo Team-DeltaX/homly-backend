@@ -765,8 +765,9 @@ export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => 
     const differenceDays = Math.round(differenceMillis / (1000 * 60 * 60 * 24));
 
 
-    console.log(differenceDays)
-    console.log(dateString)
+    if(differenceDays==30){
+      //add to notification table 
+    }
   })
 
 
