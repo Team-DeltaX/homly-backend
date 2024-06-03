@@ -509,83 +509,6 @@ const getReservation = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
-
-// //get ongoing reservations
-// const getOngoingReservationForAdmin = async (req: Request, res: Response) => {
-//   const adminNo = (req as any).serviceNo;
-//   try {
-//     const currentDate = new Date();
-//     const reservation = await AppDataSource.manager.find(Reservation, {
-//       where: {
-//         CheckoutDate: MoreThan(currentDate),
-//       },
-//     });
-
-//     let reservationDetails = [];
-//     for (var i = 0; i < reservation.length; i++) {
-//       const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
-//         select: ["roomCode"],
-//         where: {
-//           ReservationId: reservation[i].ReservationId,
-//         },
-//       });
-//       const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
-//         select: ["hallCode"],
-//         where: {
-//           ReservationId: reservation[i].ReservationId,
-//         },
-//       });
-//       const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-//         select: ["Name","MainImage","AdminNo"],
-//         where: {
-//           HolidayHomeId: reservation[i].HolidayHome,
-//         },
-//       });
-
-//       if (reservedrooms.length === 0) {
-//         reservationDetails.push({
-//           reservation: reservation[i],
-//           reservedrooms: [],
-//           reservedhalls: reservedhalls,
-//           holidayHome:holidayHome
-//         });
-//       }
-//       if (reservedhalls.length === 0) {
-//         reservationDetails.push({
-//           reservation: reservation[i],
-//           reservedrooms: reservedrooms,
-//           reservedhalls: [],
-//           holidayHome:holidayHome
-//         });
-//       } else {
-//         reservationDetails.push({
-//           reservation: reservation[i],
-//           reservedrooms: reservedrooms,
-//           reservedhalls: reservedhalls,
-//           holidayHome:holidayHome
-//         });
-//       }
-//     }
-
-//     // select admin reservation from reservationDetails
-//     let adminReservation = [];
-//     for (var i = 0; i < reservationDetails.length; i++) {
-//       if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-//         adminReservation.push(reservationDetails[i]);
-//       }
-//     }
-    
-//     res.status(200).json(adminReservation);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ error: "Internal Server Error!!" });
-//   }
-// };
-
-// // get paet reservations
-
-
-// get rooms
 const getReservedRooms = async (
   allRooms: Room[],
   reservation: Reservation[]
@@ -627,7 +550,6 @@ const getReservedRooms = async (
 
   return availableRooms;
 };
-// get halls
 const getReservedHalls = async (
   allHalls: Hall[],
   reservation: Reservation[]
@@ -669,22 +591,16 @@ const getReservedHalls = async (
 
   return availableHalls;
 };
-{
-  /* available rooms for paticular holidayHome for paticular checkin and checkout date */
-}
 const getAvailableRooms = async (req: Request, res: Response) => {
   try {
     let { holidayHomeId, checkinDate, checkoutDate } = req.query;
     holidayHomeId = holidayHomeId?.toString();
     if (checkinDate) {
       checkinDate = new Date(checkinDate as string).toISOString();
-      // let checkinDate = new Date(CheckinDate);
-      //checkinDate.setHours(0,0,0,0);
     }
     if (checkoutDate) {
       checkoutDate = new Date(checkoutDate as string).toISOString();
     }
-
     if (checkinDate && checkoutDate) {
       console.log("holidayHomeId", holidayHomeId, checkinDate, checkoutDate);
       const allRooms = await AppDataSource.manager.find(Room, {
@@ -692,7 +608,6 @@ const getAvailableRooms = async (req: Request, res: Response) => {
           HolidayHomeId: holidayHomeId,
         },
       });
-
       const reservation = await AppDataSource.manager.find(Reservation, {
         where: [
           {
@@ -713,8 +628,6 @@ const getAvailableRooms = async (req: Request, res: Response) => {
           },
         ],
       });
-      console.log("reservation", reservation);
-
       let availableRooms = await getReservedRooms(allRooms, reservation);
       console.log({ availableRooms });
       res.status(200).json({ availableRooms });
@@ -724,8 +637,6 @@ const getAvailableRooms = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
-
-/* available halls for paticular holidayHome for paticular checkin and checkout date */
 const getAvailableHalls = async (req: Request, res: Response) => {
   try {
     let { holidayHomeId, checkinDate, checkoutDate } = req.query;
@@ -769,7 +680,6 @@ const getAvailableHalls = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
-
 const CompletePayment = async (req: Request, res: Response) => {
   const { reservationId, status } = req.body;
   try {
