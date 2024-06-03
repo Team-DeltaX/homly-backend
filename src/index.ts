@@ -45,7 +45,7 @@ import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 import { ReportsRouter } from "./routes/ReportRouters";
-import PaymentRoutes  from "./routes/PaymentRoutes";
+import PaymentRoutes from "./routes/PaymentRoutes";
 import { requireAuth } from "./middleware/authMiddleware";
 import { requireUserAuth } from "./middleware/authUserMiddleware";
 import { requireAdminAuth } from "./middleware/authAdminMiddleware";
@@ -54,6 +54,7 @@ import { common_router } from "./routes/Common";
 import dotenv from "dotenv";
 import { ReservationRouter } from "./routes/ReservationRouter";
 import { PrimaryAdminDashboardRouter } from "./routes/ParimayAdminDashboardRouters";
+import { LocationAdminDashboardRouter } from "./routes/LocationAdminDashboardRouter";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -113,7 +114,7 @@ io.listen(8081);
 
 AppDataSource.initialize()
   .then(() => {
-    app.use("/common/auth/*",requireAuth);
+    app.use("/common/auth/*", requireAuth);
     app.use("/user/auth/*", requireUserAuth);
     app.use("/admin/auth/*", requireAdminAuth);
     app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
@@ -127,6 +128,7 @@ AppDataSource.initialize()
     app.use("/admin", admin_router);
     app.use("/", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
+    app.use("/admin", LocationAdminDashboardRouter);
     app.use("/payment", PaymentRoutes);
     app.use("/common", common_router);
     app.listen(PORT, () => {

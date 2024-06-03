@@ -25,7 +25,6 @@ export class CareTaker extends BaseEntity {
     Description!: string;
 
     @Column({
-        type: "clob",
         default: null
     })
     Image!: string;
