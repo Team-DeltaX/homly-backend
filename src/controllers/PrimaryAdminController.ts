@@ -400,6 +400,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         CheckoutDate: LessThan(currentDate),
+        IsPaid:true,
       },
     });
 
@@ -466,14 +467,12 @@ export const getPastReservation = async (req: Request, res: Response) => {
       }
     }
     if(adminNo === "HomlyPriAdmin"){
-
       res.status(200).json(reservationDetails);
     }else{
       let adminReservation = [];
       for (var i = 0; i < reservationDetails.length; i++) {
         console.log(reservationDetails[i].holidayHome[0].AdminNo)
         if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-
           adminReservation.push(reservationDetails[i]);
         }
       }
