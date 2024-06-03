@@ -248,6 +248,7 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
   employeeName = await getEmployeeName(ServiceNO);
   const holidayHomeName = await getHolidayHomeName(HolidayHome);
   let VictimAdminNo;
+  VictimAdminNo = await adminNo(HolidayHome);
   try {
     const existingReservations = await AppDataSource.manager.find(Reservation, {
       select: ["ReservationId","ServiceNO","CheckinDate","HolidayHome"],
@@ -293,7 +294,6 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
         reservation.CheckinDate,
         "Special Reservation Allocated"
       );
-      VictimAdminNo = await adminNo(HolidayHome);
       console.log("victim emails :",employeeEmail);
       console.log("victim service no :",reservation.ServiceNO);
       console.log("Admin No : ", VictimAdminNo);
