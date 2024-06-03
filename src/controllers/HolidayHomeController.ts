@@ -510,6 +510,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         Status: updatedValues.caretaker1.caretakerStatus,
         Address: updatedValues.caretaker1.caretakerAddress,
         Description: updatedValues.caretaker1.caretakerDescription,
+        Image: updatedValues.careTakerImage1,
       }
     );
 
@@ -523,6 +524,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
           Status: updatedValues.caretaker2.caretakerStatus,
           Address: updatedValues.caretaker2.caretakerAddress,
           Description: updatedValues.caretaker2.caretakerDescription,
+          Image: updatedValues.careTakerImage2,
         }
       );
     } else {
