@@ -467,7 +467,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
       }
     }
     if(adminNo === "HomlyPriAdmin"){
-      res.status(200).json(reservationDetails);
+      res.status(200).json({reservationDetails:reservationDetails, adminNo: adminNo});
     }else{
       let adminReservation = [];
       for (var i = 0; i < reservationDetails.length; i++) {
@@ -477,7 +477,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
         }
       }
       
-      res.status(200).json(adminReservation);
+      res.status(200).json({reservationDetails:adminReservation, adminNo: adminNo});
     }
   } catch (error) {
     console.log(error);
