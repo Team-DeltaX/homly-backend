@@ -10,8 +10,6 @@ export class Room extends BaseEntity {
     })
     roomCode!: string;
 
-
-
     @Column()
     roomAc!: String;
 
