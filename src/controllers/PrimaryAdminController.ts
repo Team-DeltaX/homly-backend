@@ -1026,9 +1026,10 @@ export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => 
 
     if(differenceDays==30){
       //add to notification table 
-      console.log('')
+      console.log('C')
     }
   })
+
 
 
 
