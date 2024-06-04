@@ -336,7 +336,7 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
         },
       });
       const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email"],
+        select: ["contact_number", "email", "image"],
         where: {
           service_number: reservation[i].ServiceNO,
         },
@@ -431,7 +431,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
         },
       });
       const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email"],
+        select: ["contact_number", "email", "image"],
         where: {
           service_number: reservation[i].ServiceNO,
         },
@@ -521,7 +521,7 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
         },
       });
       const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email"],
+        select: ["contact_number", "email", "image"],
         where: {
           service_number: reservation[i].ServiceNO,
         },
@@ -613,7 +613,7 @@ export const getCanceledReservation = async (req: Request, res: Response) => {
         },
       });
       const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email"],
+        select: ["contact_number", "email", "image"],
         where: {
           service_number: reservation[i].ServiceNO,
         },

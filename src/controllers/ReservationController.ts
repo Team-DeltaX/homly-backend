@@ -62,7 +62,6 @@ const AddComplaint = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal Server Error!" });
   }
 };
-
 const adminNo = async (holidayHomeId: string): Promise<string> => {
   try{
     const holidayHome = await AppDataSource.manager.find(HolidayHome, {
@@ -77,6 +76,34 @@ const adminNo = async (holidayHomeId: string): Promise<string> => {
   catch(error){
     console.log(`error is ${error}`);
     return "Holiday Home";
+};
+}
+const getEmployee = async (serviceNo: string): Promise<Employee[]> => {
+  try{
+    const employee = await AppDataSource.manager.find(Employee, {
+      where: {
+        service_number: serviceNo,
+      },
+    });
+    return employee;
+  }
+  catch(error){
+    console.log(`error is ${error}`);
+    return [];
+};
+}
+const getHomlyUser = async (serviceNo: string): Promise<HomlyUser[]> => {
+  try{
+    const homlyUser = await AppDataSource.manager.find(HomlyUser, {
+      where: {
+        service_number: serviceNo,
+      },
+    });
+    return homlyUser;
+  }
+  catch(error){
+    console.log(`error is ${error}`);
+    return [];
 };
 }
 //get employee name by service number
@@ -115,6 +142,8 @@ const AddResrvation = async (req: Request, res: Response) => {
   const ServiceNO = (req as any).serviceNo;
   let employeeName = await getEmployeeName(ServiceNO);
   let VictimAdminNo = await adminNo(HolidayHome);
+  let employee = await getEmployee(ServiceNO);
+  let homlyUser = await getHomlyUser(ServiceNO);
   const holidayHomeName = await getHolidayHomeName(HolidayHome);
   const emailCheckinDate = dayjs(CheckinDate).format("YYYY-MM-DD");
   const emailCheckoutDate = dayjs(CheckoutDate).format("YYYY-MM-DD");
@@ -167,8 +196,6 @@ const AddResrvation = async (req: Request, res: Response) => {
         },
       ])
       .execute();
-    //console.log("anujaaaaaaaaaaaaaaaa"+reservationData.reserveID);
-    // add room code array to reserved room table
     if (RoomCodes) {
       for (var i = 0; i < RoomCodes.length; i++) {
         await AppDataSource.createQueryBuilder()
@@ -183,7 +210,6 @@ const AddResrvation = async (req: Request, res: Response) => {
           .execute();
       }
     }
-    // add hall code array to reserved hall table
     if (HallCodes) {
       for (var i = 0; i < HallCodes.length; i++) {
         await AppDataSource.createQueryBuilder()
@@ -199,7 +225,7 @@ const AddResrvation = async (req: Request, res: Response) => {
           
       }
     }
-    res.status(200).json({ message: "Reservation added successfully", reservationId: reserveID, adminNumber: VictimAdminNo, serviceNo: ServiceNO, empName: employeeName, holidayHomeName: holidayHomeName});
+    res.status(200).json({ message: "Reservation added successfully", reservationId: reserveID, adminNumber: VictimAdminNo, serviceNo: ServiceNO, empName: employeeName, holidayHomeName: holidayHomeName, employeeDetails: employee, userDetails: homlyUser});
   } catch (error) {
     console.log(`error is ${error}`);
     res.status(500).json({ message: "Internal Server Error!" });
@@ -698,7 +724,10 @@ const CompletePayment = async (req: Request, res: Response) => {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error!!" });
   }
-}
+};
+
+
+
 export {
   getReservation,
   AddResrvation,
@@ -710,7 +739,7 @@ export {
   getAvailableRooms,
   getAvailableHalls,
   getTotalRoomRental,
-  CompletePayment
+  CompletePayment,
 };
 
 
