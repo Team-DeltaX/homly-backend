@@ -10,7 +10,7 @@ import {
   In,
   MoreThan,
 } from "typeorm";
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
 import sentEmail from "../services/sentEmal";
