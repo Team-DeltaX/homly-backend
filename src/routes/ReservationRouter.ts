@@ -13,14 +13,12 @@ ReservationRouter.get("/user/reservation/rooms",getRooms);
 ReservationRouter.get("/user/reservation/halls",getHalls);
 ReservationRouter.post("/admin/auth/reservation/AddComplaint",AddComplaint);
 ReservationRouter.get("/admin/auth/reservation/ongoing",getOngoingReservation);
-//ReservationRouter.get("/admin/auth/reservation/ongoingLocationAdmin",getOngoingReservationForAdmin);
 ReservationRouter.get("/admin/auth/reservation/past",getPastReservation);
 ReservationRouter.get("/admin/auth/reservation/special",getSpecialReservation);
 ReservationRouter.get("/admin/auth/reservation/cancelled",getCanceledReservation);
-// ReservationRouter.post("/reservation/storeReservedRooms",storeReservedRooms);
 ReservationRouter.get("/user/reservation/availableRooms",getAvailableRooms);
 ReservationRouter.get("/user/reservation/availableHalls",getAvailableHalls);
 ReservationRouter.get("/user/reservation/getTotalRoomRental/:HolidayHomeId",getTotalRoomRental);
 ReservationRouter.put("/user/auth/reservation/completePayment",CompletePayment);
-//getTotalRoomRental
+
 export {ReservationRouter}
