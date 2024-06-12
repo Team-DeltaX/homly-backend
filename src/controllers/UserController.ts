@@ -517,7 +517,8 @@ const updateUserDetails = async (req: Request, res: Response) => {
 // update user password
 const updateUserPassword = async (req: Request, res: Response) => {
   try {
-    const { serviceNo, oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
+    const serviceNo = (req as any).serviceNo;
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
       .from(HomlyUser, "user")
