@@ -816,7 +816,6 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
 
   try {
-    deleteExpireReservation();
     await AppDataSource.manager
       .find(Reservation, {
         where: {
@@ -1258,6 +1257,9 @@ const getNotifications = async (req: Request, res: Response) => {
         where: {
           receiverId: userId,
         },
+        order: {
+          time: "DESC",
+        },
       })
       .then((notifications) => {
         res.status(200).json(notifications);
@@ -1346,7 +1348,7 @@ const cancelReservation = async (req: Request, res: Response) => {
 
 // delete expire reservation
 const deleteExpireReservation = async () => {
-  const expireDate = new Date(Date.now() - +expireTime);
+  const expireDate = new Date(Date.now() - expireTime);
   await AppDataSource.manager
     .find(Reservation, {
       where: {
