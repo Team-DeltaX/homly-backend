@@ -1,7 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { LessThan, MoreThanOrEqual, Like, Between, Not, In } from "typeorm";
+import {
+  LessThan,
+  MoreThanOrEqual,
+  Like,
+  Between,
+  Not,
+  In,
+  MoreThan,
+} from "typeorm";
 import { Request, response, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -1352,8 +1360,8 @@ const deleteExpireReservation = async () => {
   await AppDataSource.manager
     .find(Reservation, {
       where: {
-        CheckoutDate: LessThan(expireDate),
-        IsCancelled: false,
+        createdAt: MoreThan(expireDate),
+        IsPaid: false,
       },
     })
     .then(async (reservations: Reservation[]) => {
