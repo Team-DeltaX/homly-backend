@@ -11,15 +11,14 @@ import { Room } from "../entities/Room";
 import { Hall } from "../entities/Hall";
 import SendReciptEmail from "../template/SendRecipt";
 import sentEmail from "../services/sentEmal";
-import { Between, LessThanOrEqual, MoreThan, LessThan, MoreThanOrEqual } from "typeorm";
-import { HomlyAdmin } from "../entities/HomlyAdmin";
+import { Between, LessThanOrEqual, LessThan, MoreThanOrEqual } from "typeorm";
 import SendCancelReservationEmail from "../template/SendCancelReservation";
 import { HomlyUser } from "../entities/User";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 
 const router = express.Router();
 const schedule = require('node-schedule');
-const expireTime = 3 * 24 * 60 * 60 * 1000;
+const expireTime = 6 * 24 * 60 * 60 * 1000;
 const getHolidayHomeName = async (holidayHomeId: string): Promise<string> => {
   try{
     const holidayHome = await AppDataSource.manager.find(HolidayHome, {
@@ -108,7 +107,6 @@ const getHomlyUser = async (serviceNo: string): Promise<HomlyUser[]> => {
     return [];
 };
 }
-//get employee name by service number
 const getEmployeeName = async (serviceNo: string): Promise<string> => {
   try{
     const employee = await AppDataSource.manager.find(Employee, {
@@ -722,8 +720,9 @@ const CompletePayment = async (req: Request, res: Response) => {
   }
 };
 
+//every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
-export const every_Day_12AM_reservation = schedule.scheduleJob('*/10 * * * * *', async() => {
+export const every_Day_12AM_reservation = schedule.scheduleJob('0 0 * * *', async() => {
   console.log('Task executed every day 12 am ', new Date().toLocaleTimeString());
     const expireDate = new Date(Date.now() - expireTime);
     console.log('Expiration date', expireDate);
