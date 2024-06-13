@@ -727,6 +727,7 @@ const CompletePayment = async (req: Request, res: Response) => {
 export const every_Day_12AM_reservation = schedule.scheduleJob('*/10 * * * * *', async() => {
   console.log('Task executed every day 12 am ', new Date().toLocaleTimeString());
     const expireDate = new Date(Date.now() - expireTime);
+    console.log('Expiration date', expireDate);
     await AppDataSource.manager
       .find(Reservation, {
         where: {
@@ -736,6 +737,7 @@ export const every_Day_12AM_reservation = schedule.scheduleJob('*/10 * * * * *',
       })
       .then(async (reservations: Reservation[]) => {
         for (const reservation of reservations) {
+          console.log("reservation", reservation.ReservationId);
           await AppDataSource.manager
             .delete(Reservation, {
               ReservationId: reservation.ReservationId,
