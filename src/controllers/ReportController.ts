@@ -103,4 +103,37 @@ const getHolidayHomeId = async (req: Request, res: Response) => {
     });
 };
 
-export { getGeneratedReport, getHolidayHomeId };
+const getReservationReport = async (req: Request, res: Response) => {
+  const { fromDate, toDate } = req.query;
+  console.log(fromDate, toDate, "aaaaaaaaaa");
+  const fDate = new Date(fromDate as string);
+  const tDate = new Date(toDate as string);
+  try {
+    let reservations: any[] = [];
+    reservations = await AppDataSource.manager.find(Reservation, {
+      where: [
+        {
+          CheckinDate: Between(fDate, tDate),
+          IsPaid: true,
+        },
+        {
+          CheckinDate: Between(fDate, tDate),
+          IsPaid: true,
+        },
+        {
+          CheckinDate: LessThan(fDate),
+          CheckoutDate: MoreThanOrEqual(tDate),
+          IsPaid: true,
+        },
+      ],
+    });
+
+    console.log(reservations, "aaaaaaaaaaaaaaaaaaa");
+    console.log(reservations, "ffffffffff");
+  } catch (err) {
+    console.log(err);
+    res.status(400).json(err);
+  }
+};
+
+export { getGeneratedReport, getHolidayHomeId, getReservationReport };
