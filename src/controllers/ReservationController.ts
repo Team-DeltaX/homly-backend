@@ -724,9 +724,8 @@ const CompletePayment = async (req: Request, res: Response) => {
 //shuduler function runs in every day 12 am 
 //every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
-export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
+export const every_Day_12AM_reservation = schedule.scheduleJob('*/10 * * * * *', async() => {
   console.log('Task executed every day 12 am ', new Date().toLocaleTimeString());
-  const deleteExpireReservation = async () => {
     const expireDate = new Date(Date.now() - expireTime);
     await AppDataSource.manager
       .find(Reservation, {
@@ -760,7 +759,6 @@ export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => 
         }
       })
       .catch(() => {});
-  };
 });
 
 
