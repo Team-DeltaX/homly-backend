@@ -18,6 +18,8 @@ import { HomlyUser } from "../entities/User";
 import dayjs, { Dayjs } from "dayjs";
 
 const router = express.Router();
+const schedule = require('node-schedule');
+const expireTime = 3 * 24 * 60 * 60 * 1000;
 const getHolidayHomeName = async (holidayHomeId: string): Promise<string> => {
   try{
     const holidayHome = await AppDataSource.manager.find(HolidayHome, {
@@ -719,7 +721,47 @@ const CompletePayment = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
-
+//shuduler function runs in every day 12 am 
+//every 10s- */10 * * * * *
+//every day 12am-0 0 * * *
+export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
+  console.log('Task executed every day 12 am ', new Date().toLocaleTimeString());
+  const deleteExpireReservation = async () => {
+    const expireDate = new Date(Date.now() - expireTime);
+    await AppDataSource.manager
+      .find(Reservation, {
+        where: {
+          createdAt: MoreThan(expireDate),
+          IsPaid: false,
+        },
+      })
+      .then(async (reservations: Reservation[]) => {
+        for (const reservation of reservations) {
+          await AppDataSource.manager
+            .delete(Reservation, {
+              ReservationId: reservation.ReservationId,
+            })
+            .then(async () => {
+              await AppDataSource.manager
+                .delete(ReservedRooms, {
+                  ReservationId: reservation.ReservationId,
+                })
+                .then(() => {})
+                .catch(() => {});
+  
+              await AppDataSource.manager
+                .delete(ReservedHalls, {
+                  ReservationId: reservation.ReservationId,
+                })
+                .then(() => {})
+                .catch(() => {});
+            })
+            .catch(() => {});
+        }
+      })
+      .catch(() => {});
+  };
+});
 
 
 export {
