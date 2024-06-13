@@ -4,9 +4,6 @@ import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyT
 
 @Entity()
 export class BlackListedUser extends BaseEntity{
-    Save() {
-        throw new Error("Method not implemented.");
-    }
   @PrimaryGeneratedColumn('uuid')
   BlackListId!: number ;
 

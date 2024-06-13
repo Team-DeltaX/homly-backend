@@ -1013,7 +1013,7 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
 //shuduler function runs in every day 12 am 
 //every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
-export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
+export const every_Day_12AM = schedule.scheduleJob('0 0 * * *', async() => {
   console.log('Task executed every day 12 am ', new Date().toLocaleTimeString());
   const blacklist = await AppDataSource.manager.find(BlackListedUser);
   blacklist.map((user)=>{
