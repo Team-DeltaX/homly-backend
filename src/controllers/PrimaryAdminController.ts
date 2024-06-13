@@ -27,6 +27,7 @@ import { Hall } from "../entities/Hall";
 import { Room } from "../entities/Room";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
+import { Notification } from "../entities/Notification";
 
 const schedule = require('node-schedule');
 
@@ -1014,9 +1015,10 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
 //every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
 export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
-  console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
+  // console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
   const blacklist = await AppDataSource.manager.find(BlackListedUser);
   blacklist.map((user)=>{
+    
     const dateString = user.Date.toISOString().split('T')[0];
     const today = new Date();
     const target = new Date(dateString);  
@@ -1029,7 +1031,26 @@ export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => 
     const differenceDays = Math.round(differenceMillis / (1000 * 60 * 60 * 24));
     if(differenceDays==30){
       //add to notification table 
-      console.log('C') 
+      const addnotification = Notification.create({
+        id:"id1",
+        receiverId:"HomlyPriAdmin",
+        senderId:"System",
+        type:"reminder",
+        data:`${user.ServiceNo} user 30  days on the blacklist`
+
+      
+      });
+      addnotification
+        .save()
+        .then(() => {
+          console.log('black list 30 days reminder sent')
+         
+        })
+        .catch((err) => {
+          console.log(`error is ${error}`);
+        
+        });
+      
     }
   })
 
