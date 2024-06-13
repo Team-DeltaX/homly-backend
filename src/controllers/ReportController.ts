@@ -127,9 +127,11 @@ const getReservationReport = async (req: Request, res: Response) => {
         },
       ],
     });
-
     console.log(reservations, "aaaaaaaaaaaaaaaaaaa");
     console.log(reservations, "ffffffffff");
+    res
+    .status(200)
+    .json({filteredreservations:reservations});
   } catch (err) {
     console.log(err);
     res.status(400).json(err);
