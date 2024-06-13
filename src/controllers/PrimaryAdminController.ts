@@ -307,6 +307,9 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
         CheckoutDate: MoreThan(currentDate),
         IsCancelled:false,
       },
+      order: {
+        CheckinDate: 'ASC',
+      },
     });
 
     let reservationDetails = [];
@@ -402,6 +405,9 @@ export const getPastReservation = async (req: Request, res: Response) => {
         CheckoutDate: LessThan(currentDate),
         IsPaid:true,
       },
+      order: {
+        CheckinDate: 'ASC',
+      },
     });
 
     let reservationDetails = [];
@@ -491,6 +497,9 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         IsSpecial:true,
+      },
+      order: {
+        CheckinDate: 'ASC',
       },
     });
 
@@ -583,6 +592,9 @@ export const getCanceledReservation = async (req: Request, res: Response) => {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         IsCancelled:true,
+      },
+      order: {
+        CheckinDate: 'ASC',
       },
     });
 
