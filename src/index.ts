@@ -126,7 +126,7 @@ AppDataSource.initialize()
     app.use("/user", reg_users);
     app.use("/user", homly_review);
     app.use("/admin", admin_router);
-    app.use("/user", ReservationRouter);
+    app.use("/", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
     app.use("/admin", LocationAdminDashboardRouter);
     app.use("/payment", PaymentRoutes);

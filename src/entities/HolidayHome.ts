@@ -113,7 +113,7 @@ export class HolidayHome extends BaseEntity {
   location_rating!: number;
 
   @Column({
-    default: 0,
+    default: 0.0,
     type: "float"
   })
   furniture_rating!: number;

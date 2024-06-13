@@ -1,8 +1,16 @@
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { LessThan, MoreThanOrEqual, Like, Between, Not, In } from "typeorm";
-import { Request, response, Response } from "express";
+import {
+  LessThan,
+  MoreThanOrEqual,
+  Like,
+  Between,
+  Not,
+  In,
+  MoreThan,
+} from "typeorm";
+import { Request, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
 import sentEmail from "../services/sentEmal";
@@ -509,7 +517,8 @@ const updateUserDetails = async (req: Request, res: Response) => {
 // update user password
 const updateUserPassword = async (req: Request, res: Response) => {
   try {
-    const { serviceNo, oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
+    const serviceNo = (req as any).serviceNo;
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
       .from(HomlyUser, "user")
@@ -816,7 +825,6 @@ const getUserOngoingReservation = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
 
   try {
-    deleteExpireReservation();
     await AppDataSource.manager
       .find(Reservation, {
         where: {
@@ -1258,6 +1266,9 @@ const getNotifications = async (req: Request, res: Response) => {
         where: {
           receiverId: userId,
         },
+        order: {
+          time: "DESC",
+        },
       })
       .then((notifications) => {
         res.status(200).json(notifications);
@@ -1346,12 +1357,12 @@ const cancelReservation = async (req: Request, res: Response) => {
 
 // delete expire reservation
 const deleteExpireReservation = async () => {
-  const expireDate = new Date(Date.now() - +expireTime);
+  const expireDate = new Date(Date.now() - expireTime);
   await AppDataSource.manager
     .find(Reservation, {
       where: {
-        CheckoutDate: LessThan(expireDate),
-        IsCancelled: false,
+        createdAt: MoreThan(expireDate),
+        IsPaid: false,
       },
     })
     .then(async (reservations: Reservation[]) => {
