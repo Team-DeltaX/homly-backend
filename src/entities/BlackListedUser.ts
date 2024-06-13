@@ -4,8 +4,9 @@ import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyT
 
 @Entity()
 export class BlackListedUser extends BaseEntity{
+
   @PrimaryGeneratedColumn('uuid')
-  BlackListId!: number ;
+  BlackListId!: String ;
 
   @Column()
   BlackListReason!:String;
@@ -14,7 +15,7 @@ export class BlackListedUser extends BaseEntity{
   @CreateDateColumn({
     nullable: false,
   })
-  Date!: Date;
+  Date!: Date; 
 
   @Column()
   ServiceNo!:String;
