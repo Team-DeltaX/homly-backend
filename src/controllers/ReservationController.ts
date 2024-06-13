@@ -720,8 +720,9 @@ const CompletePayment = async (req: Request, res: Response) => {
   }
 };
 
+//every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
-export const every_Day_12AM_reservation = schedule.scheduleJob('*/60 * * * * *', async() => {
+export const every_Day_12AM_reservation = schedule.scheduleJob('0 0 * * *', async() => {
   console.log('Task executed every day 12 am ', new Date().toLocaleTimeString());
     const expireDate = new Date(Date.now() - expireTime);
     console.log('Expiration date', expireDate);
