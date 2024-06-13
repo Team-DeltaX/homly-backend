@@ -496,7 +496,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         Pool: updatedValues.homeBreakDown.bdValue.pool,
         Bar: updatedValues.homeBreakDown.bdValue.bar,
         MainImage: updatedValues.mainImage,
-        Image1: updatedValues.iamge1,
+        Image1: updatedValues.image1,
         Image2: updatedValues.image2,
         Image3: updatedValues.image3,
       }
@@ -1037,39 +1037,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
             roomAttached: updatedValues.unitArray[i].roomAttached,
           }
         );
-        if (updatedValues.unitArray[i].selectedRooms !== undefined) {
-          console.log("selectedRooms array not undefined");
-          for (
-            let j = 0;
-            j < updatedValues.unitArray[i].selectedRooms.length;
-            j++
-          ) {
-            await SelectedRooms.update(
-              {
-                unitCode: updatedValues.unitArray[i].unitCode,
-                roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
-              },
-              {
-                HolidayHomeId: HolidayHomeId,
-              }
-            );
-          }
-        }
       } else {
-        for (
-          let j = 0;
-          j < updatedValues.unitArray[i].selectedRooms.length;
-          j++
-        ) {
-          console.log("first");
-          const selectedRoom = SelectedRooms.create({
-            roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
-            unitCode: updatedValues.unitArray[i].unitCode,
-            HolidayHomeId: HolidayHomeId,
-          });
-
-          await selectedRoom.save();
-        }
         const unit = Unit.create({
           unitCode: updatedValues.unitArray[i].unitCode,
           unitAc: updatedValues.unitArray[i].unitAc,
@@ -1080,6 +1048,39 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         });
 
         await unit.save();
+      }
+    }
+
+    // ............... SelectedRooms Editing .........................
+
+    //get the keys of a object to an array
+
+    const SelectedUnitsArray = Object.keys(updatedValues.selectedRoomDetails);
+
+    //deleting the selected rooms related to holidayhomeid and unitCode
+
+    await SelectedRooms.delete({ HolidayHomeId: HolidayHomeId });
+
+    for (let i = 0; i < SelectedUnitsArray.length; i++) {
+      for (
+        let j = 0;
+        j < updatedValues.selectedRoomDetails[SelectedUnitsArray[i]].length;
+        j++
+      ) {
+        console.log(SelectedUnitsArray[i]);
+        console.log(
+          updatedValues.selectedRoomDetails[SelectedUnitsArray[i]][j].roomCode
+        );
+
+        const selectedRooms = SelectedRooms.create({
+          roomCode:
+            updatedValues.selectedRoomDetails[SelectedUnitsArray[i]][j]
+              .roomCode,
+          unitCode: SelectedUnitsArray[i],
+          HolidayHomeId: HolidayHomeId,
+        });
+
+        await selectedRooms.save();
       }
     }
 
