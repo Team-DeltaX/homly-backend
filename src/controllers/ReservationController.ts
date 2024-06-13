@@ -444,7 +444,6 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
   sendRecipt(employeeEmail, ServiceNO, HolidayHome, reserveID ?? '', new Date(emailCheckinDate), new Date(emailCheckoutDate), NoOfAdults, NoOfChildren, "All Rooms", "All Halls", RoomPrice, HallPrice, TotalPrice);
 
 };
-
 const getHolidayHomeNames = async (req: Request, res: Response) => {
   try {
     const holidayHomes = await AppDataSource.manager.find(HolidayHome, {
@@ -463,7 +462,6 @@ const getHolidayHomeNames = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal Server Error!" });
   }
 };
-
 const getRooms = async (req: Request, res: Response) => {
   try {
     const rooms = await AppDataSource.manager.find(Room);
@@ -473,7 +471,6 @@ const getRooms = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
-
 const getHalls = async (req: Request, res: Response) => {
   try {
     const halls = await AppDataSource.manager.find(Hall);
@@ -483,8 +480,6 @@ const getHalls = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 }
-
-
 const getTotalRoomRental = async (req: Request, res: Response) => {
   const holidayHomeId = req.params.HolidayHomeId;
   const rooms = await AppDataSource.manager.find(Room, {
@@ -525,7 +520,6 @@ const getTotalRoomRental = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
-
 const getReservation = async (req: Request, res: Response) => {
   try {
     const reservation = await AppDataSource.manager.find(Reservation);
