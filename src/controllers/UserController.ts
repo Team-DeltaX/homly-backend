@@ -1355,43 +1355,6 @@ const cancelReservation = async (req: Request, res: Response) => {
   }
 };
 
-// delete expire reservation
-const deleteExpireReservation = async () => {
-  const expireDate = new Date(Date.now() - expireTime);
-  await AppDataSource.manager
-    .find(Reservation, {
-      where: {
-        createdAt: MoreThan(expireDate),
-        IsPaid: false,
-      },
-    })
-    .then(async (reservations: Reservation[]) => {
-      for (const reservation of reservations) {
-        await AppDataSource.manager
-          .delete(Reservation, {
-            ReservationId: reservation.ReservationId,
-          })
-          .then(async () => {
-            await AppDataSource.manager
-              .delete(ReservedRooms, {
-                ReservationId: reservation.ReservationId,
-              })
-              .then(() => {})
-              .catch(() => {});
-
-            await AppDataSource.manager
-              .delete(ReservedHalls, {
-                ReservationId: reservation.ReservationId,
-              })
-              .then(() => {})
-              .catch(() => {});
-          })
-          .catch(() => {});
-      }
-    })
-    .catch(() => {});
-};
-
 export {
   allEmployees,
   allUsers,
@@ -1418,5 +1381,4 @@ export {
   getNotifications,
   deleteNotification,
   cancelReservation,
-  deleteExpireReservation,
 };

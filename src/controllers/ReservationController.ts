@@ -11,7 +11,7 @@ import { Room } from "../entities/Room";
 import { Hall } from "../entities/Hall";
 import SendReciptEmail from "../template/SendRecipt";
 import sentEmail from "../services/sentEmal";
-import { Between, LessThanOrEqual, MoreThan, MoreThanOrEqual } from "typeorm";
+import { Between, LessThanOrEqual, MoreThan, LessThan, MoreThanOrEqual } from "typeorm";
 import { HomlyAdmin } from "../entities/HomlyAdmin";
 import SendCancelReservationEmail from "../template/SendCancelReservation";
 import { HomlyUser } from "../entities/User";
@@ -721,8 +721,7 @@ const CompletePayment = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
-//shuduler function runs in every day 12 am 
-//every 10s- */10 * * * * *
+
 //every day 12am-0 0 * * *
 export const every_Day_12AM_reservation = schedule.scheduleJob('*/10 * * * * *', async() => {
   console.log('Task executed every day 12 am ', new Date().toLocaleTimeString());
@@ -731,7 +730,7 @@ export const every_Day_12AM_reservation = schedule.scheduleJob('*/10 * * * * *',
     await AppDataSource.manager
       .find(Reservation, {
         where: {
-          createdAt: MoreThan(expireDate),
+          createdAt: LessThan(expireDate),
           IsPaid: false,
         },
       })
