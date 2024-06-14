@@ -496,7 +496,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         Pool: updatedValues.homeBreakDown.bdValue.pool,
         Bar: updatedValues.homeBreakDown.bdValue.bar,
         MainImage: updatedValues.mainImage,
-        Image1: updatedValues.iamge1,
+        Image1: updatedValues.image1,
         Image2: updatedValues.image2,
         Image3: updatedValues.image3,
       }
@@ -1037,39 +1037,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
             roomAttached: updatedValues.unitArray[i].roomAttached,
           }
         );
-        if (updatedValues.unitArray[i].selectedRooms !== undefined) {
-          console.log("selectedRooms array not undefined");
-          for (
-            let j = 0;
-            j < updatedValues.unitArray[i].selectedRooms.length;
-            j++
-          ) {
-            await SelectedRooms.update(
-              {
-                unitCode: updatedValues.unitArray[i].unitCode,
-                roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
-              },
-              {
-                HolidayHomeId: HolidayHomeId,
-              }
-            );
-          }
-        }
       } else {
-        for (
-          let j = 0;
-          j < updatedValues.unitArray[i].selectedRooms.length;
-          j++
-        ) {
-          console.log("first");
-          const selectedRoom = SelectedRooms.create({
-            roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
-            unitCode: updatedValues.unitArray[i].unitCode,
-            HolidayHomeId: HolidayHomeId,
-          });
-
-          await selectedRoom.save();
-        }
         const unit = Unit.create({
           unitCode: updatedValues.unitArray[i].unitCode,
           unitAc: updatedValues.unitArray[i].unitAc,
@@ -1080,6 +1048,39 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         });
 
         await unit.save();
+      }
+    }
+
+    // ............... SelectedRooms Editing .........................
+
+    //get the keys of a object to an array
+
+    const SelectedUnitsArray = Object.keys(updatedValues.selectedRoomDetails);
+
+    //deleting the selected rooms related to holidayhomeid and unitCode
+
+    await SelectedRooms.delete({ HolidayHomeId: HolidayHomeId });
+
+    for (let i = 0; i < SelectedUnitsArray.length; i++) {
+      for (
+        let j = 0;
+        j < updatedValues.selectedRoomDetails[SelectedUnitsArray[i]].length;
+        j++
+      ) {
+        console.log(SelectedUnitsArray[i]);
+        console.log(
+          updatedValues.selectedRoomDetails[SelectedUnitsArray[i]][j].roomCode
+        );
+
+        const selectedRooms = SelectedRooms.create({
+          roomCode:
+            updatedValues.selectedRoomDetails[SelectedUnitsArray[i]][j]
+              .roomCode,
+          unitCode: SelectedUnitsArray[i],
+          HolidayHomeId: HolidayHomeId,
+        });
+
+        await selectedRooms.save();
       }
     }
 
@@ -1343,7 +1344,7 @@ export const holidayHomeRatings = async (req: Request, res: Response) => {
     for (let i = 0; i < HidArray.length; i++) {
       const rating = await HolidayHome.find({
         where: { HolidayHomeId: HidArray[i] },
-        select: ["Name", "overall_rating"],
+        select: ["Name", "overall_rating", "HolidayHomeId"],
       });
       ratings.push(rating);
     }
@@ -1433,6 +1434,37 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
     res.status(200).json({ rating: rating });
   } catch {
     res.status(500).json({ message: "error in getting holiday home rating" });
+  }
+};
+
+export const ratingCatogeries = async (req: Request, res: Response) => {
+  const homeId = req.params.homeId;
+  console.log(homeId, "homeId");
+  try {
+    const ratings = await HolidayHome.find({
+      where: { HolidayHomeId: homeId },
+      select: [
+        "food_rating",
+        "value_for_money_rating",
+        "wifi_rating",
+        "location_rating",
+        "furniture_rating",
+        "staff_rating",
+      ],
+    });
+
+    const ratingCatogeries = {
+      food: ratings[0].food_rating * 10,
+      value: ratings[0].value_for_money_rating * 10,
+      wifi: ratings[0].wifi_rating * 10,
+      location: ratings[0].location_rating * 10,
+      furniture: ratings[0].furniture_rating * 10,
+      staff: ratings[0].staff_rating * 10,
+    };
+
+    res.status(200).json({ ratingCatogeries });
+  } catch {
+    res.status(500).json({ message: "error in getting rating catogeries" });
   }
 };
 

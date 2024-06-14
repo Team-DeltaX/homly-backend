@@ -14,6 +14,7 @@ import {
   gethallcount,
   getroomcount,
   holidayHomeRatings,
+  ratingCatogeries,
 } from "../controllers/HolidayHomeController";
 const LocationAdminDashboardRouter = express.Router();
 
@@ -58,6 +59,11 @@ LocationAdminDashboardRouter.get(
 LocationAdminDashboardRouter.get(
   "/auth/locationadmin/holidayhomerating/:homeid",
   get_holiday_home_rating
+);
+
+LocationAdminDashboardRouter.get(
+  "/auth/locationadmin/ratingcatogeries/:homeId",
+  ratingCatogeries
 );
 
 export { LocationAdminDashboardRouter };

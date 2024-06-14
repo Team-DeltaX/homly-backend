@@ -2,22 +2,13 @@ import {
   Entity,
   PrimaryColumn,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
-  OneToMany,
-  ManyToOne,
-  JoinColumn,
 } from "typeorm";
-import { Employee } from "./Empolyee";
 
 @Entity()
 export class Reservation extends BaseEntity {
-  Save() {
-    throw new Error("Method not implemented.");
-  }
-
   @PrimaryColumn()
   ReservationId!: string;
 

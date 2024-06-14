@@ -4,10 +4,8 @@ import cors from "cors";
 import OracleDB from "oracledb";
 import io from "./services/socketio";
 import { DataSource } from "typeorm";
-import { SpecailReservation } from "./entities/SpecialReservation";
 import { ReservedRooms } from "./entities/ReservedRooms";
 import { ReservedHalls } from "./entities/ReservedHalls";
-import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
 import { HolidayHome } from "./entities/HolidayHome";
@@ -86,7 +84,6 @@ export const AppDataSource = new DataSource({
     ContactNo,
     LocationAdmin,
     Rental,
-    SpecailReservation,
     UserFeedback,
     SelectedRooms,
     RoomRentalSettings,
@@ -118,7 +115,6 @@ AppDataSource.initialize()
     app.use("/user/auth/*", requireUserAuth);
     app.use("/admin/auth/*", requireAdminAuth);
     app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
-    app.use("/admin/auth/locationadmin/reservations", SpecialReservationRouter);
     app.use("/admin", LocationAdminRoute);
     app.use("/admin", ReportsRouter);
     app.use("/admin", BlacklistRouter);
