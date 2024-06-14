@@ -28,7 +28,7 @@ import { Room } from "../entities/Room";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
 
-const schedule = require('node-schedule');
+const schedule = require("node-schedule");
 
 dotenv.config();
 
@@ -305,7 +305,10 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         CheckoutDate: MoreThan(currentDate),
-        IsCancelled:false,
+        IsCancelled: false,
+      },
+      order: {
+        CheckinDate: "ASC",
       },
     });
 
@@ -324,7 +327,7 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
         },
       });
       const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name","MainImage","AdminNo"],
+        select: ["Name", "MainImage", "AdminNo"],
         where: {
           HolidayHomeId: reservation[i].HolidayHome,
         },
@@ -336,7 +339,7 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
         },
       });
       const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email"],
+        select: ["contact_number", "email", "image"],
         where: {
           service_number: reservation[i].ServiceNO,
         },
@@ -346,9 +349,9 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       }
       if (reservedhalls.length === 0) {
@@ -356,35 +359,32 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
-      
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       }
     }
-    if(adminNo === "HomlyPriAdmin"){
-
+    if (adminNo === "HomlyPriAdmin") {
       res.status(200).json(reservationDetails);
-    }else{
+    } else {
       let adminReservation = [];
       for (var i = 0; i < reservationDetails.length; i++) {
-        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        console.log(reservationDetails[i].holidayHome[0].AdminNo);
         if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-
           adminReservation.push(reservationDetails[i]);
         }
       }
-      
+
       res.status(200).json(adminReservation);
     }
   } catch (error) {
@@ -400,6 +400,10 @@ export const getPastReservation = async (req: Request, res: Response) => {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         CheckoutDate: LessThan(currentDate),
+        IsPaid: true,
+      },
+      order: {
+        CheckinDate: "ASC",
       },
     });
 
@@ -418,7 +422,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
         },
       });
       const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name","MainImage","AdminNo"],
+        select: ["Name", "MainImage", "AdminNo"],
         where: {
           HolidayHomeId: reservation[i].HolidayHome,
         },
@@ -430,19 +434,19 @@ export const getPastReservation = async (req: Request, res: Response) => {
         },
       });
       const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email"],
+        select: ["contact_number", "email", "image"],
         where: {
           service_number: reservation[i].ServiceNO,
         },
-      });  
+      });
       if (reservedrooms.length === 0) {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       }
       if (reservedhalls.length === 0) {
@@ -450,35 +454,37 @@ export const getPastReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       }
     }
-    if(adminNo === "HomlyPriAdmin"){
-
-      res.status(200).json(reservationDetails);
-    }else{
+    if (adminNo === "HomlyPriAdmin") {
+      res
+        .status(200)
+        .json({ reservationDetails: reservationDetails, adminNo: adminNo });
+    } else {
       let adminReservation = [];
       for (var i = 0; i < reservationDetails.length; i++) {
-        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        console.log(reservationDetails[i].holidayHome[0].AdminNo);
         if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-
           adminReservation.push(reservationDetails[i]);
         }
       }
-      
-      res.status(200).json(adminReservation);
+
+      res
+        .status(200)
+        .json({ reservationDetails: adminReservation, adminNo: adminNo });
     }
   } catch (error) {
     console.log(error);
@@ -491,7 +497,10 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
   try {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
-        IsSpecial:true,
+        IsSpecial: true,
+      },
+      order: {
+        CheckinDate: "ASC",
       },
     });
 
@@ -510,7 +519,7 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
         },
       });
       const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name","MainImage","AdminNo"],
+        select: ["Name", "MainImage", "AdminNo"],
         where: {
           HolidayHomeId: reservation[i].HolidayHome,
         },
@@ -522,7 +531,7 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
         },
       });
       const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email"],
+        select: ["contact_number", "email", "image"],
         where: {
           service_number: reservation[i].ServiceNO,
         },
@@ -532,9 +541,9 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       }
       if (reservedhalls.length === 0) {
@@ -542,34 +551,32 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       }
     }
-    if(adminNo === "HomlyPriAdmin"){
-
+    if (adminNo === "HomlyPriAdmin") {
       res.status(200).json(reservationDetails);
-    }else{
+    } else {
       let adminReservation = [];
       for (var i = 0; i < reservationDetails.length; i++) {
-        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        console.log(reservationDetails[i].holidayHome[0].AdminNo);
         if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-
           adminReservation.push(reservationDetails[i]);
         }
       }
-      
+
       res.status(200).json(adminReservation);
     }
   } catch (error) {
@@ -583,7 +590,10 @@ export const getCanceledReservation = async (req: Request, res: Response) => {
   try {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
-        IsCancelled:true,
+        IsCancelled: true,
+      },
+      order: {
+        CheckinDate: "ASC",
       },
     });
 
@@ -602,7 +612,7 @@ export const getCanceledReservation = async (req: Request, res: Response) => {
         },
       });
       const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name","MainImage","AdminNo"],
+        select: ["Name", "MainImage", "AdminNo"],
         where: {
           HolidayHomeId: reservation[i].HolidayHome,
         },
@@ -614,7 +624,7 @@ export const getCanceledReservation = async (req: Request, res: Response) => {
         },
       });
       const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email"],
+        select: ["contact_number", "email", "image"],
         where: {
           service_number: reservation[i].ServiceNO,
         },
@@ -624,9 +634,9 @@ export const getCanceledReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: [],
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       }
       if (reservedhalls.length === 0) {
@@ -634,34 +644,32 @@ export const getCanceledReservation = async (req: Request, res: Response) => {
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: [],
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       } else {
         reservationDetails.push({
           reservation: reservation[i],
           reservedrooms: reservedrooms,
           reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
+          holidayHome: holidayHome,
+          employeeName: employeeName,
+          employeeDetails: employeeDetails,
         });
       }
     }
-    if(adminNo === "HomlyPriAdmin"){
-
+    if (adminNo === "HomlyPriAdmin") {
       res.status(200).json(reservationDetails);
-    }else{
+    } else {
       let adminReservation = [];
       for (var i = 0; i < reservationDetails.length; i++) {
-        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        console.log(reservationDetails[i].holidayHome[0].AdminNo);
         if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-
           adminReservation.push(reservationDetails[i]);
         }
       }
-      
+
       res.status(200).json(adminReservation);
     }
   } catch (error) {
@@ -913,7 +921,6 @@ export const get_income_in_date = async (req: Request, res: Response) => {
       sumForDate += reservation.Price;
     });
 
-   
     res.status(200).json({ sumForDate });
   } catch (error) {
     res.status(500).json({ message: "error occured in get income in date" });
@@ -982,7 +989,6 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
 };
 
 export const get_holiday_home_rating = async (req: Request, res: Response) => {
-  
   const holidayhomeid = req.params.homeid;
   try {
     const rating = await AppDataSource.manager.find(HolidayHome, {
@@ -993,13 +999,40 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
         HolidayHomeId: holidayhomeid,
       },
     });
-    
+
     res.status(200).json({ rating });
   } catch {
     res.status(500).json({ message: "error in getting holiday home rating" });
   }
 };
+//shuduler function runs in every day 12 am
+//every 10s- */10 * * * * *
+//every day 12am-0 0 * * *
 
-export const everyFiveSeconds = schedule.scheduleJob('0 0 * * *', () => {
-  console.log('Task executed every 5 seconds:', new Date().toLocaleTimeString());
+export const every_Day_12AM = schedule.scheduleJob('0 0 * * *', async() => {
+  console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
+
+
+  const blacklist = await AppDataSource.manager.find(BlackListedUser);
+  blacklist.map((user)=>{
+    const dateString = user.Date.toISOString().split('T')[0];
+    const today = new Date();
+    const target = new Date(dateString);  
+    // Convert both dates to milliseconds
+    const todayMillis = today.getTime();
+    const targetMillis = target.getTime();  
+    // Calculate the difference in milliseconds
+    const differenceMillis = targetMillis - todayMillis;  
+    // Convert milliseconds to days (1 day = 24 * 60 * 60 * 1000 milliseconds)
+    const differenceDays = Math.round(differenceMillis / (1000 * 60 * 60 * 24));
+    if(differenceDays==30){
+      //add to notification table 
+      console.log('C') 
+    }
+  })
+
+
+
+
+
 });
