@@ -830,43 +830,43 @@ const CompletePayment = async (req: Request, res: Response) => {
   }
 };
 
-const deleteExpiredReservations = async () => {
-  const expireDate = new Date(Date.now() - expireTime);
-  console.log("Expiration date", expireDate);
-  await AppDataSource.manager
-    .find(Reservation, {
-      where: {
-        createdAt: LessThan(expireDate),
-        IsPaid: false,
-      },
-    })
-    .then(async (reservations: Reservation[]) => {
-      for (const reservation of reservations) {
-        console.log("reservation", reservation.ReservationId);
-        await AppDataSource.manager
-          .delete(Reservation, {
-            ReservationId: reservation.ReservationId,
-          })
-          .then(async () => {
-            await AppDataSource.manager
-              .delete(ReservedRooms, {
-                ReservationId: reservation.ReservationId,
-              })
-              .then(() => {})
-              .catch(() => {});
+// const deleteExpiredReservations = async () => {
+//   const expireDate = new Date(Date.now() - expireTime);
+//   console.log("Expiration date", expireDate);
+//   await AppDataSource.manager
+//     .find(Reservation, {
+//       where: {
+//         createdAt: LessThan(expireDate),
+//         IsPaid: false,
+//       },
+//     })
+//     .then(async (reservations: Reservation[]) => {
+//       for (const reservation of reservations) {
+//         console.log("reservation", reservation.ReservationId);
+//         await AppDataSource.manager
+//           .delete(Reservation, {
+//             ReservationId: reservation.ReservationId,
+//           })
+//           .then(async () => {
+//             await AppDataSource.manager
+//               .delete(ReservedRooms, {
+//                 ReservationId: reservation.ReservationId,
+//               })
+//               .then(() => {})
+//               .catch(() => {});
 
-            await AppDataSource.manager
-              .delete(ReservedHalls, {
-                ReservationId: reservation.ReservationId,
-              })
-              .then(() => {})
-              .catch(() => {});
-          })
-          .catch(() => {});
-      }
-    })
-    .catch(() => {});
-};
+//             await AppDataSource.manager
+//               .delete(ReservedHalls, {
+//                 ReservationId: reservation.ReservationId,
+//               })
+//               .then(() => {})
+//               .catch(() => {});
+//           })
+//           .catch(() => {});
+//       }
+//     })
+//     .catch(() => {});
+// };
 
 export {
   getReservation,
@@ -880,5 +880,5 @@ export {
   getAvailableHalls,
   getTotalRoomRental,
   CompletePayment,
-  deleteExpiredReservations,
+  // deleteExpiredReservations,
 };
