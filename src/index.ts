@@ -4,10 +4,8 @@ import cors from "cors";
 import OracleDB from "oracledb";
 import io from "./services/socketio";
 import { DataSource } from "typeorm";
-import { SpecailReservation } from "./entities/SpecialReservation";
 import { ReservedRooms } from "./entities/ReservedRooms";
 import { ReservedHalls } from "./entities/ReservedHalls";
-import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
 import { HolidayHome } from "./entities/HolidayHome";
@@ -45,7 +43,7 @@ import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 import { ReportsRouter } from "./routes/ReportRouters";
-import PaymentRoutes  from "./routes/PaymentRoutes";
+import PaymentRoutes from "./routes/PaymentRoutes";
 import { requireAuth } from "./middleware/authMiddleware";
 import { requireUserAuth } from "./middleware/authUserMiddleware";
 import { requireAdminAuth } from "./middleware/authAdminMiddleware";
@@ -54,6 +52,7 @@ import { common_router } from "./routes/Common";
 import dotenv from "dotenv";
 import { ReservationRouter } from "./routes/ReservationRouter";
 import { PrimaryAdminDashboardRouter } from "./routes/ParimayAdminDashboardRouters";
+import { LocationAdminDashboardRouter } from "./routes/LocationAdminDashboardRouter";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -85,7 +84,6 @@ export const AppDataSource = new DataSource({
     ContactNo,
     LocationAdmin,
     Rental,
-    SpecailReservation,
     UserFeedback,
     SelectedRooms,
     RoomRentalSettings,
@@ -113,11 +111,10 @@ io.listen(8081);
 
 AppDataSource.initialize()
   .then(() => {
-    app.use("/common/auth/*",requireAuth);
+    app.use("/common/auth/*", requireAuth);
     app.use("/user/auth/*", requireUserAuth);
     app.use("/admin/auth/*", requireAdminAuth);
     app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
-    app.use("/admin/auth/locationadmin/reservations", SpecialReservationRouter);
     app.use("/admin", LocationAdminRoute);
     app.use("/admin", ReportsRouter);
     app.use("/admin", BlacklistRouter);
@@ -127,6 +124,7 @@ AppDataSource.initialize()
     app.use("/admin", admin_router);
     app.use("/", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
+    app.use("/admin", LocationAdminDashboardRouter);
     app.use("/payment", PaymentRoutes);
     app.use("/common", common_router);
     app.listen(PORT, () => {

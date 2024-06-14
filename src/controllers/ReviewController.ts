@@ -200,7 +200,7 @@ const addUserReview = async (req: Request, res: Response) => {
                 rev[0].overall_rating,
                 overallRating
               );
-            
+
               await AppDataSource.manager.update(
                 HolidayHome,
                 { HolidayHomeId: res[0].HolidayHome },
@@ -235,14 +235,74 @@ const addUserReview = async (req: Request, res: Response) => {
 
 // get user review
 const getUserReview = async (req: Request, res: Response) => {
-  res.status(200).json("get user details");
+  const serviceNo = (req as any).serviceNo;
+  const { reservationId } = req.query;
+
+  await AppDataSource.manager
+    .find(Review, {
+      where: {
+        ReservationId: reservationId?.toString(),
+        ServiceNo: serviceNo,
+      },
+    })
+    .then((review) => {
+      res.status(200).json({ review });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal Server Error" });
+    });
 };
 
+//get review count for paaticular holidayHome
+const getReviewCount = async (holidayHomeId: string) => {
+  let reviewCount = 0;
+  await AppDataSource.manager
+    .find(Review, {
+      where: {
+        HolidayHomeId: holidayHomeId,
+      },
+    })
+    .then((rev) => {
+      reviewCount = rev.length;
+    });
 
+  return reviewCount;
+};
 
+const updateUserReview = async (req: Request, res: Response) => {
+  const { reservationID, review } = req.body;
+  await AppDataSource.manager
+    .update(Review, { ReservationId: reservationID }, { UserReview: review })
+    .then(() => {
+      res.status(200).json({ message: "Successfully updated", success: true });
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Internal Server Error" });
+    });
+};
 
+// get user review for a holiday home
+const getUserReviewForHolidayHome = async (req: Request, res: Response) => {
+  const { holidayHomeId } = req.query;
 
+  await AppDataSource.manager
+    .find(Review, {
+      where: {
+        HolidayHomeId: holidayHomeId?.toString(),
+      },
+    })
+    .then((review) => {
+      res.status(200).json({ review });
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Internal Server Error" });
+    });
+};
 
-
-
-export { getHolidayHomesSorted, addUserReview, getUserReview };
+export {
+  getHolidayHomesSorted,
+  addUserReview,
+  getUserReview,
+  updateUserReview,
+  getUserReviewForHolidayHome,
+};
