@@ -839,10 +839,10 @@ const CompletePayment = async (req: Request, res: Response) => {
 };
 
 const NotifyPayment = async (req: Request, res: Response) => {
-  const { merchant_id, order_id, payment_id, payhere_amount, payhere_currency, status_code, md5sig } = req.body;
+  const { merchant_id, order_id, payment_id, payhere_amount, payhere_currency, status_code, md5sig } = req.params;
   console.log(merchant_id, order_id, payment_id, payhere_amount, payhere_currency, status_code, md5sig);
   // Validate MD5 signature
-  const expectedSignature = crypto.MD5(`${merchant_id}${order_id}${payment_id}${payhere_amount}${payhere_currency}${status_code}${merchantSecret}`).toString().toUpperCase();
+  const expectedSignature = crypto.MD5(`${merchantId}${order_id}${payment_id}${payhere_amount}${payhere_currency}${status_code}${merchantSecret}`).toString().toUpperCase();
 
   if (md5sig !== expectedSignature) {
     console.error('Invalid MD5 signature. Possible tampering.');
@@ -856,7 +856,7 @@ const NotifyPayment = async (req: Request, res: Response) => {
     await AppDataSource.manager.update(
       Reservation,
       { ReservationId: order_id }, // Assuming 'Reservation' is your model/entity
-      { IsPaid: status_code === '2' } // Set IsPaid to true if status_code is '2' (success)
+      { IsSpecial: status_code === '2' } // Set IsPaid to true if status_code is '2' (success)
     );
 
     console.log(`Payment status updated for order ${order_id}`);

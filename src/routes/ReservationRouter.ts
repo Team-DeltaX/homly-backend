@@ -20,6 +20,6 @@ ReservationRouter.get("/user/reservation/availableRooms",getAvailableRooms);
 ReservationRouter.get("/user/reservation/availableHalls",getAvailableHalls);
 ReservationRouter.get("/user/reservation/getTotalRoomRental/:HolidayHomeId",getTotalRoomRental);
 ReservationRouter.put("/user/auth/reservation/completePayment",CompletePayment);
-ReservationRouter.post("/user/auth/reservation/notifyPayment",NotifyPayment);
+ReservationRouter.post("/user/auth/reservation/notifyPayment/:payment_id",NotifyPayment);
 
 export {ReservationRouter}
