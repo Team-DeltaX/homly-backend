@@ -1009,29 +1009,27 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
 //every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
 
-export const every_Day_12AM = schedule.scheduleJob(
-  "*/10 * * * * *",
-  async () => {
-    // console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
+export const every_Day_12AM = schedule.scheduleJob("0 0 * * *", async () => {
+  console.log(
+    "Task executed every day 12 am 🚀",
+    new Date().toLocaleTimeString()
+  );
 
-    const blacklist = await BlackListedUser.find();
-    blacklist.map((user) => {
-      const dateString = user.Date.toISOString().split("T")[0];
-      const today = new Date();
-      const target = new Date(dateString);
-      // Convert both dates to milliseconds
-      const todayMillis = today.getTime();
-      const targetMillis = target.getTime();
-      // Calculate the difference in milliseconds
-      const differenceMillis = targetMillis - todayMillis;
-      // Convert milliseconds to days (1 day = 24 * 60 * 60 * 1000 milliseconds)
-      const differenceDays = Math.round(
-        differenceMillis / (1000 * 60 * 60 * 24)
-      );
-      if (differenceDays == 30) {
-        //add to notification table
-        console.log("C");
-      }
-    });
-  }
-);
+  const blacklist = await BlackListedUser.find();
+  blacklist.map((user) => {
+    const dateString = user.Date.toISOString().split("T")[0];
+    const today = new Date();
+    const target = new Date(dateString);
+    // Convert both dates to milliseconds
+    const todayMillis = today.getTime();
+    const targetMillis = target.getTime();
+    // Calculate the difference in milliseconds
+    const differenceMillis = targetMillis - todayMillis;
+    // Convert milliseconds to days (1 day = 24 * 60 * 60 * 1000 milliseconds)
+    const differenceDays = Math.round(differenceMillis / (1000 * 60 * 60 * 24));
+    if (differenceDays == 30) {
+      //add to notification table
+      console.log("C");
+    }
+  });
+});

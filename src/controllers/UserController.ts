@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {
@@ -33,7 +33,7 @@ import { ReservedHalls } from "../entities/ReservedHalls";
 import { WishList } from "../entities/WishList";
 import { Notification } from "../entities/Notification";
 import dotenv from "dotenv";
-import sentSms from "../services/sentSms";
+const schedule = require("node-schedule");
 dotenv.config();
 
 const expireTime = 3 * 24 * 60 * 60 * 1000;
@@ -140,7 +140,7 @@ const userRegistration = async (req: Request, res: Response) => {
                 success: true,
               });
             })
-            .catch((err) => {
+            .catch(() => {
               return res
                 .status(404)
                 .json({ message: "Error saving user", success: false });
@@ -156,8 +156,8 @@ const userRegistration = async (req: Request, res: Response) => {
           .json({ message: "Your are not an employee", success: false });
       }
     })
-    .catch((err) => {
-      res.status(202).json({ message: "err ", success: false });
+    .catch(() => {
+      res.status(404).json({ message: "Error saving user", success: false });
     });
 };
 
@@ -180,7 +180,7 @@ const emailVerification = async (req: Request, res: Response) => {
         .delete(UserEmailVerification, {
           service_number: serviceNo,
         })
-        .then((result) => {
+        .then(() => {
           AppDataSource.manager.delete(HomlyUser, {
             service_number: serviceNo,
           });
@@ -1260,6 +1260,7 @@ const deleteFromWishList = async (req: Request, res: Response) => {
 // get notifications
 const getNotifications = async (req: Request, res: Response) => {
   const userId = (req as any).serviceNo;
+
   if (userId) {
     await AppDataSource.manager
       .find(Notification, {
@@ -1355,6 +1356,42 @@ const cancelReservation = async (req: Request, res: Response) => {
   }
 };
 
+// delete expired verification codes
+const deleteExpiredVerificationCodes = async () => {
+  await AppDataSource.manager
+    .find(UserEmailVerification, {
+      where: {
+        expires_at: LessThan(new Date()),
+      },
+    })
+    .then((expiredCodes) => {
+      if (expiredCodes.length > 0) {
+        AppDataSource.manager.delete(UserEmailVerification, expiredCodes);
+        for (let i = 0; i < expiredCodes.length; i++) {
+          AppDataSource.manager.delete(HomlyUser, {
+            service_number: expiredCodes[i].service_number,
+            validated: false,
+          });
+        }
+      }
+    });
+};
+
+// delete expired OTPs
+const deleteExpiredOTPs = async () => {
+  await AppDataSource.manager
+    .find(UserOTPVerification, {
+      where: {
+        expires_at: LessThan(new Date()),
+      },
+    })
+    .then((expiredOTPs) => {
+      if (expiredOTPs.length > 0) {
+        AppDataSource.manager.delete(UserOTPVerification, expiredOTPs);
+      }
+    });
+};
+
 export {
   allEmployees,
   allUsers,
@@ -1381,4 +1418,6 @@ export {
   getNotifications,
   deleteNotification,
   cancelReservation,
+  deleteExpiredOTPs,
+  deleteExpiredVerificationCodes,
 };
