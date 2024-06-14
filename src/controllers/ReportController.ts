@@ -1,8 +1,15 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "..";
 import { Reservation } from "../entities/Reservation";
-import { Between, LessThan, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
+import {
+  Any,
+  Between,
+  LessThan,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+} from "typeorm";
 import { HolidayHome } from "../entities/HolidayHome";
+import { Employee } from "../entities/Empolyee";
 
 const getGeneratedReport = async (req: Request, res: Response) => {
   const { HHName, fromDate, toDate } = req.query;
@@ -104,34 +111,76 @@ const getHolidayHomeId = async (req: Request, res: Response) => {
 };
 
 const getReservationReport = async (req: Request, res: Response) => {
-  const { fromDate, toDate } = req.query;
-  console.log(fromDate, toDate, "aaaaaaaaaa");
+  const { HHName, fromDate, toDate } = req.query;
+  console.log(fromDate, toDate, "date");
   const fDate = new Date(fromDate as string);
   const tDate = new Date(toDate as string);
   try {
     let reservations: any[] = [];
-    reservations = await AppDataSource.manager.find(Reservation, {
-      where: [
-        {
-          CheckinDate: Between(fDate, tDate),
-          IsPaid: true,
-        },
-        {
-          CheckinDate: Between(fDate, tDate),
-          IsPaid: true,
-        },
-        {
-          CheckinDate: LessThan(fDate),
-          CheckoutDate: MoreThanOrEqual(tDate),
-          IsPaid: true,
-        },
-      ],
-    });
-    console.log(reservations, "aaaaaaaaaaaaaaaaaaa");
-    console.log(reservations, "ffffffffff");
-    res
-    .status(200)
-    .json({filteredreservations:reservations});
+    if (HHName && HHName !== "all") {
+      const hhid = HHName.toString();
+      reservations = await AppDataSource.manager.find(Reservation, {
+        where: [
+          {
+            CheckinDate: Between(fDate, tDate),
+            HolidayHome: hhid,
+          },
+          {
+            CheckinDate: Between(fDate, tDate),
+            HolidayHome: hhid,
+          },
+          {
+            CheckinDate: LessThan(fDate),
+            CheckoutDate: MoreThanOrEqual(tDate),
+            HolidayHome: hhid,
+          },
+        ],
+      });
+    } else {
+      reservations = await AppDataSource.manager.find(Reservation, {
+        where: [
+          {
+            CheckinDate: Between(fDate, tDate),
+          },
+          {
+            CheckinDate: Between(fDate, tDate),
+          },
+          {
+            CheckinDate: LessThan(fDate),
+            CheckoutDate: MoreThanOrEqual(tDate),
+          },
+        ],
+      });
+    }
+
+    const reservationWithHH: any[] = [];
+    for (let i = 0; i < reservations.length; i++) {
+      await AppDataSource.manager
+        .find(HolidayHome, {
+          select: ["Name"],
+          where: {
+            HolidayHomeId: reservations[i].HolidayHome,
+          },
+        })
+        .then(async (hhdetails) => {
+          await AppDataSource.manager
+            .find(Employee, {
+              select: ["name"],
+              where: {
+                service_number: reservations[i].ServiceNO,
+              },
+            })
+            .then((empDetails) => {
+              reservationWithHH.push({
+                reservations: reservations[i],
+                hhName: hhdetails[0].Name,
+                empName: empDetails[0].name,
+              });
+            });
+        });
+    }
+    console.log(reservationWithHH, "res");
+    res.status(200).json(reservationWithHH);
   } catch (err) {
     console.log(err);
     res.status(400).json(err);

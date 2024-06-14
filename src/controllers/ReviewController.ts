@@ -200,7 +200,7 @@ const addUserReview = async (req: Request, res: Response) => {
                 rev[0].overall_rating,
                 overallRating
               );
-
+            
               await AppDataSource.manager.update(
                 HolidayHome,
                 { HolidayHomeId: res[0].HolidayHome },
@@ -237,5 +237,12 @@ const addUserReview = async (req: Request, res: Response) => {
 const getUserReview = async (req: Request, res: Response) => {
   res.status(200).json("get user details");
 };
+
+
+
+
+
+
+
 
 export { getHolidayHomesSorted, addUserReview, getUserReview };
