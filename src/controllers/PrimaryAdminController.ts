@@ -1015,48 +1015,49 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
 //every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
 
-export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
-  console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
-  const blacklist = await AppDataSource.manager.find(BlackListedUser);
-  blacklist.map((user)=>{
+// export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
+//   console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
+//   const blacklist = await BlackListedUser.find()
+ 
+//   blacklist.map((user)=>{
     
-    const dateString = user.Date.toISOString().split('T')[0];
-    const today = new Date();
-    const target = new Date(dateString);  
-    // Convert both dates to milliseconds
-    const todayMillis = today.getTime();
-    const targetMillis = target.getTime();  
-    // Calculate the difference in milliseconds
-    const differenceMillis = targetMillis - todayMillis;  
-    // Convert milliseconds to days (1 day = 24 * 60 * 60 * 1000 milliseconds)
-    const differenceDays = Math.round(differenceMillis / (1000 * 60 * 60 * 24));
-    if(differenceDays==30){
-      //add to notification table 
-      const addnotification = Notification.create({
-        id:"id1",
-        receiverId:"HomlyPriAdmin",
-        senderId:"System",
-        type:"reminder",
-        data:`${user.ServiceNo} user 30  days on the blacklist`
+//     const dateString = user.Date.toISOString().split('T')[0];
+//     const today = new Date();
+//     const target = new Date(dateString);  
+//     // Convert both dates to milliseconds
+//     const todayMillis = today.getTime();
+//     const targetMillis = target.getTime();  
+//     // Calculate the difference in milliseconds
+//     const differenceMillis = targetMillis - todayMillis;  
+//     // Convert milliseconds to days (1 day = 24 * 60 * 60 * 1000 milliseconds)
+//     const differenceDays = Math.round(differenceMillis / (1000 * 60 * 60 * 24));
+//     if(differenceDays==30){
+//       //add to notification table 
+//       const addnotification = Notification.create({
+//         id:"id1",
+//         receiverId:"HomlyPriAdmin",
+//         senderId:"System",
+//         type:"reminder",
+//         data:`${user.ServiceNo} user 30  days on the blacklist`
 
       
-      });
-      addnotification
-        .save()
-        .then(() => {
-          console.log('black list 30 days reminder sent')
+//       });
+//       addnotification
+//         .save()
+//         .then(() => {
+//           console.log('black list 30 days reminder sent')
          
-        })
-        .catch((err) => {
-          console.log(`error is ${error}`);
+//         })
+//         .catch((err) => {
+//           console.log(`error is ${error}`);
         
-        });
+//         });
       
-    }
-  })
+//     }
+//   })
 
 
 
 
 
-});
+// });
