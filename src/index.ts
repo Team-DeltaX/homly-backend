@@ -4,6 +4,7 @@ import cors from "cors";
 import OracleDB from "oracledb";
 import io from "./services/socketio";
 import { DataSource } from "typeorm";
+import { json, urlencoded } from 'body-parser';
 import { ReservedRooms } from "./entities/ReservedRooms";
 import { ReservedHalls } from "./entities/ReservedHalls";
 import { Hall } from "./entities/Hall";
@@ -100,6 +101,8 @@ export const AppDataSource = new DataSource({
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(json());
+app.use(urlencoded({ extended: true }));
 const corsOptions = {
   origin: "http://localhost:3000",
   credentials: true,
@@ -125,7 +128,7 @@ AppDataSource.initialize()
     app.use("/", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
     app.use("/admin", LocationAdminDashboardRouter);
-    app.use("/payment", PaymentRoutes);
+    app.use("/api", PaymentRoutes);
     app.use("/common", common_router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);

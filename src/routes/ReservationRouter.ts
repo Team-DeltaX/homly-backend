@@ -1,5 +1,5 @@
 import express from "express";
-import { getReservation, AddResrvation, AddSpecialResrvation, getHolidayHomeNames, getRooms, getHalls, AddComplaint,getAvailableRooms, getAvailableHalls, getTotalRoomRental, CompletePayment} from "../controllers/ReservationController"
+import { getReservation, AddResrvation, AddSpecialResrvation, getHolidayHomeNames, getRooms, getHalls, AddComplaint,getAvailableRooms, getAvailableHalls, getTotalRoomRental, CompletePayment, NotifyPayment} from "../controllers/ReservationController"
 import {getOngoingReservation, getPastReservation, getSpecialReservation, getCanceledReservation} from "../controllers/PrimaryAdminController";
 
 
@@ -20,5 +20,6 @@ ReservationRouter.get("/user/reservation/availableRooms",getAvailableRooms);
 ReservationRouter.get("/user/reservation/availableHalls",getAvailableHalls);
 ReservationRouter.get("/user/reservation/getTotalRoomRental/:HolidayHomeId",getTotalRoomRental);
 ReservationRouter.put("/user/auth/reservation/completePayment",CompletePayment);
+ReservationRouter.post("/user/auth/reservation/notifyPayment",NotifyPayment);
 
 export {ReservationRouter}

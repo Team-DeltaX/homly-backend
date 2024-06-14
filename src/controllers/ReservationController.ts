@@ -15,6 +15,10 @@ import { Between, LessThanOrEqual, LessThan, MoreThanOrEqual } from "typeorm";
 import SendCancelReservationEmail from "../template/SendCancelReservation";
 import { HomlyUser } from "../entities/User";
 import dayjs from "dayjs";
+import bodyParser from 'body-parser';
+import crypto from 'crypto-js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const router = express.Router();
 const schedule = require("node-schedule");
@@ -810,6 +814,10 @@ const getAvailableHalls = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+
+const merchantId = process.env.PAYHERE_MERCHANT_ID as string;
+const merchantSecret = process.env.PAYHERE_MERCHANT_SECRET as string;
+
 const CompletePayment = async (req: Request, res: Response) => {
   const { reservationId, status } = req.body;
   try {
@@ -829,6 +837,36 @@ const CompletePayment = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+
+const NotifyPayment = async (req: Request, res: Response) => {
+  const { merchant_id, order_id, payment_id, payhere_amount, payhere_currency, status_code, md5sig } = req.body;
+  console.log(merchant_id, order_id, payment_id, payhere_amount, payhere_currency, status_code, md5sig);
+  // Validate MD5 signature
+  const expectedSignature = crypto.MD5(`${merchant_id}${order_id}${payment_id}${payhere_amount}${payhere_currency}${status_code}${merchantSecret}`).toString().toUpperCase();
+
+  if (md5sig !== expectedSignature) {
+    console.error('Invalid MD5 signature. Possible tampering.');
+    return res.status(400).send('Invalid MD5 signature');
+  }
+
+  // Update database with payment status
+  try {
+    // Assuming you have a database manager or ORM (e.g., TypeORM, Sequelize)
+    // Replace this with your actual database update logic
+    await AppDataSource.manager.update(
+      Reservation,
+      { ReservationId: order_id }, // Assuming 'Reservation' is your model/entity
+      { IsPaid: status_code === '2' } // Set IsPaid to true if status_code is '2' (success)
+    );
+
+    console.log(`Payment status updated for order ${order_id}`);
+    return res.status(200).json({ message: 'Payment status updated successfully' });
+  } catch (error) {
+    console.error('Failed to update payment status:', error);
+    return res.status(500).json({ error: 'Internal Server Error!!' });
+  }
+};
+
 
 const deleteExpiredReservations = async () => {
   const expireDate = new Date(Date.now() - expireTime);
@@ -880,5 +918,6 @@ export {
   getAvailableHalls,
   getTotalRoomRental,
   CompletePayment,
+  NotifyPayment,
   deleteExpiredReservations,
 };

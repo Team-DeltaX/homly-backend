@@ -73,4 +73,6 @@ export class Reservation extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+  PaymentStatus: any;
+  PaymentId: any;
 }
