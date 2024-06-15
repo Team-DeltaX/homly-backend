@@ -1011,26 +1011,15 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
 //every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
 
-// export const every_Day_12AM = schedule.scheduleJob('0 0 * * *', async() => {
+// export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
 //   console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
-
-      
-//       });
-//       addnotification
-//         .save()
-//         .then(() => {
-//           console.log('black list 30 days reminder sent')
-         
-//         })
-//         .catch((err) => {
-//           console.log(`error is ${error}`);
-        
-//         });
-      
-//     }
+//   const blacklist=await BlackListedUser.find()
+//   // console.log(blacklist)
+//   blacklist.map((item)=>{
+//     console.log(item.Date)
 //   })
 
-
+      
 
 
 
