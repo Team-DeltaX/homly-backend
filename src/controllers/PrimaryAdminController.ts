@@ -29,7 +29,8 @@ import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
 import { Notification } from "../entities/Notification";
 
-const schedule = require("node-schedule");
+// const schedule = require("node-schedule");
+import schedule from "node-schedule";
 
 dotenv.config();
 
