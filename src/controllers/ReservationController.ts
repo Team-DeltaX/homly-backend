@@ -232,8 +232,68 @@ const AddResrvation = async (req: Request, res: Response) => {
           employeeDetails: employee,
           userDetails: homlyUser,
         });
+        console.log("reservation id", reserveID);
+        console.log("holidayHome id", HolidayHome);
+        console.log("holidayhomename" + holidayHomeName);
+        // get the email from serviceNO
+        const employeeEmail = (
+          await AppDataSource.manager.find(HomlyUser, {
+            select: ["email"],
+            where: {
+              service_number: ServiceNO,
+            },
+          })
+        )[0]?.email;
+        const sendRecipt = (
+          email: string,
+          employeeName: string,
+          holidayHome: string,
+          reservationNumber: string,
+          checkinDate: Date,
+          checkoutDate: Date,
+          maxAdults: string,
+          maxChildren: string,
+          rooms: string,
+          halls: string,
+          roomPrice: string,
+          hallPrice: string,
+          TotalPrice: string
+        ) => {
+          const subject = "Reservation Recipt";
+          const message = SendReciptEmail(
+            employeeName,
+            holidayHomeName,
+            reservationNumber,
+            checkinDate,
+            checkoutDate,
+            maxAdults,
+            maxChildren,
+            rooms,
+            halls,
+            roomPrice,
+            hallPrice,
+            TotalPrice
+          );
+          sentEmail(email, subject, message);
+        };
+        console.log("reservation id", reserveID);
+        sendRecipt(
+          employeeEmail,
+          ServiceNO,
+          HolidayHome,
+          reserveID ?? "",
+          new Date(emailCheckinDate),
+          new Date(emailCheckoutDate),
+          NoOfAdults,
+          NoOfChildren,
+          RoomCodes,
+          HallCodes,
+          RoomPrice,
+          HallPrice,
+          TotalPrice
+        );
     } else{
-      res.status(400).json({ message: "Invalid Holiday Home!" });
+      res.status(500).json({ text: "Invalid Holiday Home!" });
     }
     // generate unique auto incrementing reservation id
     
@@ -241,66 +301,7 @@ const AddResrvation = async (req: Request, res: Response) => {
     console.log(`error is ${error}`);
     res.status(500).json({ message: "Internal Server Error!" });
   }
-  console.log("reservation id", reserveID);
-  console.log("holidayHome id", HolidayHome);
-  console.log("holidayhomename" + holidayHomeName);
-  // get the email from serviceNO
-  const employeeEmail = (
-    await AppDataSource.manager.find(HomlyUser, {
-      select: ["email"],
-      where: {
-        service_number: ServiceNO,
-      },
-    })
-  )[0]?.email;
-  const sendRecipt = (
-    email: string,
-    employeeName: string,
-    holidayHome: string,
-    reservationNumber: string,
-    checkinDate: Date,
-    checkoutDate: Date,
-    maxAdults: string,
-    maxChildren: string,
-    rooms: string,
-    halls: string,
-    roomPrice: string,
-    hallPrice: string,
-    TotalPrice: string
-  ) => {
-    const subject = "Reservation Recipt";
-    const message = SendReciptEmail(
-      employeeName,
-      holidayHomeName,
-      reservationNumber,
-      checkinDate,
-      checkoutDate,
-      maxAdults,
-      maxChildren,
-      rooms,
-      halls,
-      roomPrice,
-      hallPrice,
-      TotalPrice
-    );
-    sentEmail(email, subject, message);
-  };
-  console.log("reservation id", reserveID);
-  sendRecipt(
-    employeeEmail,
-    ServiceNO,
-    HolidayHome,
-    reserveID ?? "",
-    new Date(emailCheckinDate),
-    new Date(emailCheckoutDate),
-    NoOfAdults,
-    NoOfChildren,
-    RoomCodes,
-    HallCodes,
-    RoomPrice,
-    HallPrice,
-    TotalPrice
-  );
+
 };
 const AddSpecialResrvation = async (req: Request, res: Response) => {
   console.log(req.body);
@@ -855,6 +856,7 @@ const checkHolidayHomeValidation = async (holidayHomeId: string) => {
       Status: "Active",
     },
   });
+  console.log("holiday home check ", holidayHome);
   return holidayHome;
 };
 
