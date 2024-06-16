@@ -390,6 +390,7 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
         },
         {
           IsCancelled: true,
+          CancelledBy: "PriAdmin",
         }
       );
       await AppDataSource.manager.delete(ReservedRooms, {
