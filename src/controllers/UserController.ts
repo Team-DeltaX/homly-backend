@@ -528,12 +528,10 @@ const updateUserPassword = async (req: Request, res: Response) => {
   try {
     const { oldPassword, newPassword } = req.body;
     if (oldPassword === newPassword) {
-      res
-        .status(200)
-        .json({
-          message: "Old password and new password are same",
-          success: false,
-        });
+      res.status(200).json({
+        message: "Old password and new password are same",
+        success: false,
+      });
       return;
     }
     const serviceNo = (req as any).serviceNo;
@@ -966,7 +964,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
       Name: Like(`%${search?.toString().toLowerCase()}%`),
     },
     order: {
-      updatedAt: "DESC",
+      Name: "ASC",
     },
   };
 
@@ -1033,7 +1031,7 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
       Status: "Active",
     },
     order: {
-      updatedAt: "DESC",
+      overall_rating: "DESC",
     },
   };
 
