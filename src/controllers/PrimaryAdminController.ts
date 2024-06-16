@@ -297,7 +297,7 @@ export const checkuserexist = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error in check user exist!" });
   }
 };
-const getReservationDetails = async (reservation:any, type:string) => {
+const getReservationDetails = async (reservation:any) => {
   let reservationDetails = [];
   for (var i = 0; i < reservation.length; i++) {
     const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
@@ -330,7 +330,11 @@ const getReservationDetails = async (reservation:any, type:string) => {
         service_number: reservation[i].ServiceNO,
       },
     });
-    
+    const isComplaint = await AppDataSource.manager.find(Complaints, {
+      where: {
+        ReservationNo: reservation[i].ReservationId,
+      },
+    });
     if (reservedrooms.length === 0) {
       reservationDetails.push({
         reservation: reservation[i],
@@ -339,6 +343,7 @@ const getReservationDetails = async (reservation:any, type:string) => {
         holidayHome: holidayHome,
         employeeName: employeeName,
         employeeDetails: employeeDetails,
+        Complaints: isComplaint,
       });
     }
     else if (reservedhalls.length === 0) {
@@ -349,6 +354,7 @@ const getReservationDetails = async (reservation:any, type:string) => {
         holidayHome: holidayHome,
         employeeName: employeeName,
         employeeDetails: employeeDetails,
+        Complaints: isComplaint,
       });
     } else {
       reservationDetails.push({
@@ -358,6 +364,7 @@ const getReservationDetails = async (reservation:any, type:string) => {
         holidayHome: holidayHome,
         employeeName: employeeName,
         employeeDetails: employeeDetails,
+        complaints: isComplaint,
       });
     }
   }
@@ -378,7 +385,7 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
       },
     });
 
-    let reservationDetails = await getReservationDetails(reservation, "ongoing");
+    let reservationDetails = await getReservationDetails(reservation);
     if (adminNo === "HomlyPriAdmin") {
       res.status(200).json(reservationDetails);
     } else {
@@ -412,7 +419,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
       },
     });
 
-    let reservationDetails = await getReservationDetails(reservation, "past");
+    let reservationDetails = await getReservationDetails(reservation);
     if (adminNo === "HomlyPriAdmin") {
       res
         .status(200)
@@ -448,7 +455,7 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
       },
     });
 
-    let reservationDetails = await getReservationDetails(reservation, "special");
+    let reservationDetails = await getReservationDetails(reservation);
     if (adminNo === "HomlyPriAdmin") {
       res.status(200).json(reservationDetails);
     } else {
@@ -480,7 +487,7 @@ export const getCanceledReservation = async (req: Request, res: Response) => {
       },
     });
 
-    let reservationDetails = await getReservationDetails(reservation, "Cancelled");
+    let reservationDetails = await getReservationDetails(reservation);
     if (adminNo === "HomlyPriAdmin") {
       res.status(200).json(reservationDetails);
     } else {
