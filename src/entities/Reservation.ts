@@ -7,6 +7,11 @@ import {
   BaseEntity,
 } from "typeorm";
 
+export enum Role {
+  USER = "User",
+  PRIADMIN = "PrimaryAdmin",
+  LOCADMIN = "LocationAdmin",
+}
 @Entity()
 export class Reservation extends BaseEntity {
   @PrimaryColumn()
@@ -67,6 +72,13 @@ export class Reservation extends BaseEntity {
     default: false,
   })
   IsCancelled!: boolean;
+
+  @Column({
+    type: "enum",
+    enum: Role,
+    default: Role.USER,
+  })
+  CancelledBy!: Role;
 
   @CreateDateColumn()
   createdAt!: Date;
