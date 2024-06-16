@@ -390,20 +390,28 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
       res.status(200).json(reservationDetails);
     } else {
       let adminReservation = [];
-      for (var i = 0; i < reservationDetails.length; i++) {
-        console.log(reservationDetails[i].holidayHome[0].AdminNo);
-        if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-          adminReservation.push(reservationDetails[i]);
+      for (let i = 0; i < reservationDetails.length; i++) {
+        if (
+          reservationDetails[i].holidayHome &&
+          reservationDetails[i].holidayHome.length > 0 &&
+          reservationDetails[i].holidayHome[0].AdminNo
+        ) {
+          console.log(reservationDetails[i].holidayHome[0].AdminNo);
+          if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
+            adminReservation.push(reservationDetails[i]);
+          }
+        } else {
+          console.error(`holidayHome[0] is undefined for reservation ${i}`);
         }
       }
-
       res.status(200).json(adminReservation);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+
 
 export const getPastReservation = async (req: Request, res: Response) => {
   const adminNo = (req as any).serviceNo;
