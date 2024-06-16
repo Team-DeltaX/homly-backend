@@ -21,6 +21,6 @@ ReservationRouter.get("/user/reservation/availableHalls",getAvailableHalls);
 ReservationRouter.get("/user/reservation/getTotalRoomRental/:HolidayHomeId",getTotalRoomRental);
 ReservationRouter.put("/user/auth/reservation/completePayment",CompletePayment);
 ReservationRouter.get("/admin/auth/reservation/employee/:serviceno",getUserFromEmployee);
-ReservationRouter.get("/admin/auth/reservation/refund/",getRefund);
+ReservationRouter.get("/admin/auth/reservation/refund",getRefund);
 
 export {ReservationRouter}

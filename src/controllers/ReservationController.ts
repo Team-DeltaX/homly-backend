@@ -886,7 +886,7 @@ const getUserFromEmployee = async (req: Request, res: Response) => {
 const getRefund = async (req: Request, res: Response) => {
   try {
     const refund = await AppDataSource.manager.find(Refund);
-    return refund;
+    res.status(200).json(refund);
   } catch (error) {
     console.log(error);
     return [];
