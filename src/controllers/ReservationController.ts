@@ -147,90 +147,96 @@ const AddResrvation = async (req: Request, res: Response) => {
   let reserveID;
   let TotalPrice = RoomPrice + HallPrice;
   try {
+    const validHolidayHome = await checkHolidayHomeValidation(HolidayHome);
+    if(validHolidayHome && validHolidayHome.length > 0) {
+      const reservationId = await AppDataSource.query(
+        `SELECT MAX("ReservationId") as maxval FROM "INOADMIN"."reservation"`
+      );
+      console.log("reservation id", reservationId[0].MAXVAL);
+      let maxvalue = reservationId[0].MAXVAL;
+  
+      if (maxvalue) {
+        // Extract the numeric part and increment by 1
+        let num = parseInt(maxvalue.split("-")[1]);
+        num++; // Increment
+        reserveID = "RES-" + num.toString().padStart(5, "0"); // Format with leading zeros
+      } else {
+        reserveID = "RES-00001"; // Initial reservation ID
+      }
+  
+      let checkinDate = new Date(CheckinDate);
+      checkinDate.setHours(0, 0, 0, 0);
+      console.log("checkinDate", checkinDate);
+  
+      let checkoutDate = new Date(CheckoutDate);
+      checkoutDate.setHours(23, 59, 0, 0);
+  
+      const reservationData = await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(Reservation)
+        .values([
+          {
+            ReservationId: reserveID,
+            ServiceNO,
+            HolidayHome,
+            CheckinDate: checkinDate, // Set time to 12:00 am
+            CheckoutDate: checkoutDate, // Set time to 11:59 pm
+            NoOfAdults,
+            NoOfChildren,
+            NoOfRooms,
+            NoOfHalls,
+            RoomPrice,
+            HallPrice,
+            Price,
+            IsPaid,
+          },
+        ])
+        .execute();
+      if (RoomCodes) {
+        for (var i = 0; i < RoomCodes.length; i++) {
+          await AppDataSource.createQueryBuilder()
+            .insert()
+            .into(ReservedRooms)
+            .values([
+              {
+                ReservationId: reserveID,
+                roomCode: RoomCodes[i],
+              },
+            ])
+            .execute();
+        }
+      }
+      if (HallCodes) {
+        for (var i = 0; i < HallCodes.length; i++) {
+          await AppDataSource.createQueryBuilder()
+            .insert()
+            .into(ReservedHalls)
+            .values([
+              {
+                ReservationId: reserveID,
+                hallCode: HallCodes[i],
+              },
+            ])
+            .execute();
+        }
+      }
+      res
+        .status(200)
+        .json({
+          message: "Reservation added successfully",
+          reservationId: reserveID,
+          adminNumber: VictimAdminNo,
+          serviceNo: ServiceNO,
+          empName: employeeName,
+          holidayHomeName: holidayHomeName,
+          employeeDetails: employee,
+          userDetails: homlyUser,
+        });
+    } else{
+      res.status(400).json({ message: "Invalid Holiday Home!" });
+    }
     // generate unique auto incrementing reservation id
-    const reservationId = await AppDataSource.query(
-      `SELECT MAX("ReservationId") as maxval FROM "INOADMIN"."reservation"`
-    );
-    console.log("reservation id", reservationId[0].MAXVAL);
-    let maxvalue = reservationId[0].MAXVAL;
-
-    if (maxvalue) {
-      // Extract the numeric part and increment by 1
-      let num = parseInt(maxvalue.split("-")[1]);
-      num++; // Increment
-      reserveID = "RES-" + num.toString().padStart(5, "0"); // Format with leading zeros
-    } else {
-      reserveID = "RES-00001"; // Initial reservation ID
-    }
-
-    let checkinDate = new Date(CheckinDate);
-    checkinDate.setHours(0, 0, 0, 0);
-    console.log("checkinDate", checkinDate);
-
-    let checkoutDate = new Date(CheckoutDate);
-    checkoutDate.setHours(23, 59, 0, 0);
-
-    const reservationData = await AppDataSource.createQueryBuilder()
-      .insert()
-      .into(Reservation)
-      .values([
-        {
-          ReservationId: reserveID,
-          ServiceNO,
-          HolidayHome,
-          CheckinDate: checkinDate, // Set time to 12:00 am
-          CheckoutDate: checkoutDate, // Set time to 11:59 pm
-          NoOfAdults,
-          NoOfChildren,
-          NoOfRooms,
-          NoOfHalls,
-          RoomPrice,
-          HallPrice,
-          Price,
-          IsPaid,
-        },
-      ])
-      .execute();
-    if (RoomCodes) {
-      for (var i = 0; i < RoomCodes.length; i++) {
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(ReservedRooms)
-          .values([
-            {
-              ReservationId: reserveID,
-              roomCode: RoomCodes[i],
-            },
-          ])
-          .execute();
-      }
-    }
-    if (HallCodes) {
-      for (var i = 0; i < HallCodes.length; i++) {
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(ReservedHalls)
-          .values([
-            {
-              ReservationId: reserveID,
-              hallCode: HallCodes[i],
-            },
-          ])
-          .execute();
-      }
-    }
-    res
-      .status(200)
-      .json({
-        message: "Reservation added successfully",
-        reservationId: reserveID,
-        adminNumber: VictimAdminNo,
-        serviceNo: ServiceNO,
-        empName: employeeName,
-        holidayHomeName: holidayHomeName,
-        employeeDetails: employee,
-        userDetails: homlyUser,
-      });
+    
   } catch (error) {
     console.log(`error is ${error}`);
     res.status(500).json({ message: "Internal Server Error!" });
@@ -837,8 +843,9 @@ const checkUserValidation = async (serviceNO: string) => {
       blacklisted: false,
     },
   });
+  console.log("first",user);
   return user;
-}
+};
 
 const checkHolidayHomeValidation = async (holidayHomeId: string) => {
   const holidayHome = await AppDataSource.manager.find(HolidayHome, {
@@ -849,13 +856,13 @@ const checkHolidayHomeValidation = async (holidayHomeId: string) => {
     },
   });
   return holidayHome;
-}
+};
 
 const getUserFromEmployee = async (req: Request, res: Response) => {
   const serviceno = req.params.serviceno;
   try {
     const user = await checkUserValidation(serviceno);
-    if(user) {
+    if(user && user.length > 0) {
       await AppDataSource.manager.find(Employee, {
         where: {
           service_number: serviceno,
