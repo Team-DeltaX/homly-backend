@@ -21,6 +21,7 @@ import { Complaints } from "./entities/Complaint";
 import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
 import { Reservation } from "./entities/Reservation";
+import { Refund } from "./entities/Refund";
 import { LocationAdminRoute } from "./routes/LocationAdminRoute";
 import {
   HomlyUser,
@@ -81,6 +82,7 @@ export const AppDataSource = new DataSource({
     Unit,
     Room,
     Reservation,
+    Refund,
     ContactNo,
     LocationAdmin,
     Rental,
