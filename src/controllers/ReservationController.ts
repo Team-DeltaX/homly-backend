@@ -4,6 +4,7 @@ import { Employee } from "../entities/Empolyee";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
 import { Complaints } from "../entities/Complaint";
+import { Refund } from "../entities/Refund";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 import { HolidayHome } from "../entities/HolidayHome";
@@ -881,6 +882,17 @@ const getUserFromEmployee = async (req: Request, res: Response) => {
   }
 };
 
+// get all from refund
+const getRefund = async (req: Request, res: Response) => {
+  try {
+    const refund = await AppDataSource.manager.find(Refund);
+    return refund;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
 const deleteExpiredReservations = async () => {
   const expireDate = new Date(Date.now() - expireTime);
   console.log("Expiration date", expireDate);
@@ -933,4 +945,5 @@ export {
   CompletePayment,
   deleteExpiredReservations,
   getUserFromEmployee,
+  getRefund,
 };
