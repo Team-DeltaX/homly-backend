@@ -439,6 +439,11 @@ export const getPastReservation = async (req: Request, res: Response) => {
           service_number: reservation[i].ServiceNO,
         },
       });
+      const isComplaint = await AppDataSource.manager.find(Complaints, {
+        where: {
+          ReservationNo: reservation[i].ReservationId,
+        },
+      });
       if (reservedrooms.length === 0) {
         reservationDetails.push({
           reservation: reservation[i],
@@ -447,6 +452,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
           holidayHome: holidayHome,
           employeeName: employeeName,
           employeeDetails: employeeDetails,
+          isComplaint: isComplaint,
         });
       }
       if (reservedhalls.length === 0) {
@@ -457,6 +463,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
           holidayHome: holidayHome,
           employeeName: employeeName,
           employeeDetails: employeeDetails,
+          isComplaint: isComplaint,
         });
       } else {
         reservationDetails.push({
@@ -466,6 +473,7 @@ export const getPastReservation = async (req: Request, res: Response) => {
           holidayHome: holidayHome,
           employeeName: employeeName,
           employeeDetails: employeeDetails,
+          isComplaint: isComplaint,
         });
       }
     }

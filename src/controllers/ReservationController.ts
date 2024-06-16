@@ -16,8 +16,7 @@ import SendCancelReservationEmail from "../template/SendCancelReservation";
 import { HomlyUser } from "../entities/User";
 import dayjs from "dayjs";
 
-const router = express.Router();
-const schedule = require("node-schedule");
+
 const expireTime = 6 * 24 * 60 * 60 * 1000;
 const getHolidayHomeName = async (holidayHomeId: string): Promise<string> => {
   try {
@@ -830,6 +829,48 @@ const CompletePayment = async (req: Request, res: Response) => {
   }
 };
 
+const checkUserValidation = async (serviceNO: string) => {
+  const user = await AppDataSource.manager.find(HomlyUser, {
+    where: {
+      service_number: serviceNO,
+      verified: true,
+      blacklisted: false,
+    },
+  });
+  return user;
+}
+
+const checkHolidayHomeValidation = async (holidayHomeId: string) => {
+  const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      HolidayHomeId: holidayHomeId,
+      Approved: true,
+      Status: "Active",
+    },
+  });
+  return holidayHome;
+}
+
+const getUserFromEmployee = async (req: Request, res: Response) => {
+  const serviceno = req.params.serviceno;
+  try {
+    const user = await checkUserValidation(serviceno);
+    if(user) {
+      await AppDataSource.manager.find(Employee, {
+        where: {
+          service_number: serviceno,
+        },
+      }).then((data) => {
+        if(data) {
+          res.send(data);
+        }});
+      };    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
 const deleteExpiredReservations = async () => {
   const expireDate = new Date(Date.now() - expireTime);
   console.log("Expiration date", expireDate);
@@ -881,4 +922,5 @@ export {
   getTotalRoomRental,
   CompletePayment,
   deleteExpiredReservations,
+  getUserFromEmployee,
 };
