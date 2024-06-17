@@ -893,6 +893,66 @@ const getRefund = async (req: Request, res: Response) => {
   }
 };
 
+//add refund
+const addRefundByUser = async (req: Request, res: Response) => {
+  const {
+    reservationNo,
+    serviceNo,
+    contactNumber,
+    cancelledBy,
+    status,
+    accountHolder,
+    accountNumber,
+    bank,
+    branch,
+  } = req.body;
+  try {
+    await AppDataSource.createQueryBuilder()
+      .insert()
+      .into(Refund)
+      .values([
+        {
+          reservationNo,
+          serviceNo,
+          contactNumber,
+          cancelledBy,
+          status,
+          accountHolder,
+          accountNumber,
+          bank,
+          branch,
+        },
+      ])
+      .execute();
+    res.status(200).json({ message: "Refund added successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+}
+const UpdateRefundByAdmin = (req: Request, res: Response) => {
+  const { 
+    refundId, 
+    status, 
+    refundDate, 
+    bankSlip 
+  } = req.body;
+  try {
+    AppDataSource.manager.update(
+      Refund,
+      { refundId },
+      {
+        status,
+        refundDate,
+        bankSlip,
+      }
+    );
+    res.status(200).json({ message: "Refund updated successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+}
 const deleteExpiredReservations = async () => {
   const expireDate = new Date(Date.now() - expireTime);
   console.log("Expiration date", expireDate);
@@ -946,4 +1006,6 @@ export {
   deleteExpiredReservations,
   getUserFromEmployee,
   getRefund,
+  addRefundByUser,
+  UpdateRefundByAdmin,
 };

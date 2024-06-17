@@ -19,7 +19,7 @@ import {
     serviceNo!: string;
 
     @Column()
-    contact_number!: string;
+    contactNumber!: string;
 
     @Column()
     cancelledBy!: string;
