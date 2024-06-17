@@ -931,7 +931,7 @@ const addRefundByUser = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 }
-const UpdateRefundByAdmin = (req: Request, res: Response) => {
+const UpdateRefundByAdmin = async (req: Request, res: Response) => {
   const { 
     refundId, 
     status,
@@ -940,14 +940,14 @@ const UpdateRefundByAdmin = (req: Request, res: Response) => {
     bankSlip 
   } = req.body;
   try {
-    AppDataSource.manager.update(
+    await AppDataSource.manager.update(
       Refund,
       { refundId },
       {
         status,
         refundAmount, 
         reason,
-        refundDate: new Date,
+        refundDate: new Date(),
         bankSlip,
       }
     );
