@@ -51,6 +51,9 @@ import {
     )
     refundAmount!: number;
 
+    @Column({nullable: true,})
+    reason!: string;
+
     @Column({
         nullable: true,
         type: "date",
