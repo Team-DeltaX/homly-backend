@@ -861,3 +861,24 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
 
 
 // });
+
+
+
+export const markSendWarning = async (req: Request, res: Response) => {
+  try {
+    
+    const CompID = req.body.CompID;
+    console.log(CompID)
+    await AppDataSource.manager.update(
+      Complaints,
+      { ComplaintID: CompID },
+      { IsWarned: true }
+    );
+
+    res.status(200).json({ message: "Successfully marked send warning" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error in marking send warning" });
+  }
+};
