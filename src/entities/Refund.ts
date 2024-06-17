@@ -51,7 +51,7 @@ import {
     )
     refundAmount!: number;
 
-    @Column({nullable: true,})
+    @Column({nullable: true})
     reason!: string;
 
     @Column({
