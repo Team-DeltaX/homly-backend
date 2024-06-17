@@ -1324,51 +1324,92 @@ const deleteNotification = async (req: Request, res: Response) => {
   }
 };
 
+const findAdminNo = async (reservationId: string) => {
+  let adminNum = "hiii";
+  await AppDataSource.manager
+    .find(Reservation, {
+      select: ["HolidayHome"],
+      where: {
+        ReservationId: reservationId,
+      },
+    })
+    .then(async (holidayHome) => {
+      if (holidayHome.length > 0) {
+        await AppDataSource.manager
+          .find(HolidayHome, {
+            select: ["AdminNo"],
+            where: {
+              HolidayHomeId: holidayHome[0].HolidayHome,
+            },
+          })
+          .then((adminNo) => {
+            adminNum = adminNo[0].AdminNo;
+          })
+          .catch(() => {
+            adminNum = "";
+          });
+      }
+    })
+    .catch(() => {
+      adminNum = "";
+    });
+  return adminNum;
+};
+
 // cancelled reservation
 const cancelReservation = async (req: Request, res: Response) => {
   const { reservationId, isPaid } = req.body;
-  if (isPaid) {
-    await AppDataSource.manager
-      .update(
-        Reservation,
-        { ReservationId: reservationId },
-        { IsCancelled: true }
-      )
-      .then(() => {
-        res
-          .status(200)
-          .json({ message: "Reservation Cancelled", success: true });
-      })
-      .catch(() => {
-        res.status(500).json({ message: "Internal Server error" });
-      });
-  } else {
-    await AppDataSource.manager
-      .delete(Reservation, {
-        ReservationId: reservationId,
-      })
-      .then(async () => {
-        await AppDataSource.manager
-          .delete(ReservedRooms, {
-            ReservationId: reservationId,
-          })
-          .then(() => {})
-          .catch(() => {});
+  try {
+    const adminNo = await findAdminNo(reservationId);
+    if (isPaid) {
+      await AppDataSource.manager
+        .update(
+          Reservation,
+          { ReservationId: reservationId },
+          { IsCancelled: true }
+        )
+        .then(() => {
+          res.status(200).json({
+            message: "Reservation Cancelled",
+            adminNo: adminNo,
+            success: true,
+          });
+        })
+        .catch(() => {
+          res.status(500).json({ message: "Internal Server error" });
+        });
+    } else {
+      await AppDataSource.manager
+        .delete(Reservation, {
+          ReservationId: reservationId,
+        })
+        .then(async () => {
+          await AppDataSource.manager
+            .delete(ReservedRooms, {
+              ReservationId: reservationId,
+            })
+            .then(() => {})
+            .catch(() => {});
 
-        await AppDataSource.manager
-          .delete(ReservedHalls, {
-            ReservationId: reservationId,
-          })
-          .then(() => {})
-          .catch(() => {});
+          await AppDataSource.manager
+            .delete(ReservedHalls, {
+              ReservationId: reservationId,
+            })
+            .then(() => {})
+            .catch(() => {});
 
-        res
-          .status(200)
-          .json({ message: "Reservation Cancelled", success: true });
-      })
-      .catch(() => {
-        res.status(500).json({ message: "Internal Server error" });
-      });
+          res.status(200).json({
+            message: "Reservation Cancelled",
+            adminNo: adminNo,
+            success: true,
+          });
+        })
+        .catch(() => {
+          res.status(500).json({ message: "Internal Server error" });
+        });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
