@@ -892,6 +892,21 @@ const getRefund = async (req: Request, res: Response) => {
   }
 };
 
+const getRefundById = async (req: Request, res: Response) => {
+  try {
+    const refund = await AppDataSource.manager.find(Refund, {
+      where: {
+        reservationNo: req.params.reservationNo,
+      }
+    });
+    console.log("responseee", refund);
+    res.status(200).json(refund);
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
 //add refund
 const addRefundByUser = async (req: Request, res: Response) => {
   const {
@@ -1012,4 +1027,5 @@ export {
   getRefund,
   addRefundByUser,
   UpdateRefundByAdmin,
+  getRefundById,
 };
