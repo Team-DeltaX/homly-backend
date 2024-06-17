@@ -4,6 +4,7 @@ import { Employee } from "../entities/Empolyee";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
 import { Complaints } from "../entities/Complaint";
+import { Refund } from "../entities/Refund";
 import { Request, Response } from "express";
 import { AppDataSource } from "../index";
 import { HolidayHome } from "../entities/HolidayHome";
@@ -16,8 +17,7 @@ import SendCancelReservationEmail from "../template/SendCancelReservation";
 import { HomlyUser } from "../entities/User";
 import dayjs from "dayjs";
 
-const router = express.Router();
-const schedule = require("node-schedule");
+
 const expireTime = 6 * 24 * 60 * 60 * 1000;
 const getHolidayHomeName = async (holidayHomeId: string): Promise<string> => {
   try {
@@ -148,154 +148,161 @@ const AddResrvation = async (req: Request, res: Response) => {
   let reserveID;
   let TotalPrice = RoomPrice + HallPrice;
   try {
-    // generate unique auto incrementing reservation id
-    const reservationId = await AppDataSource.query(
-      `SELECT MAX("ReservationId") as maxval FROM "INOADMIN"."reservation"`
-    );
-    console.log("reservation id", reservationId[0].MAXVAL);
-    let maxvalue = reservationId[0].MAXVAL;
-
-    if (maxvalue) {
-      // Extract the numeric part and increment by 1
-      let num = parseInt(maxvalue.split("-")[1]);
-      num++; // Increment
-      reserveID = "RES-" + num.toString().padStart(5, "0"); // Format with leading zeros
-    } else {
-      reserveID = "RES-00001"; // Initial reservation ID
-    }
-
-    let checkinDate = new Date(CheckinDate);
-    checkinDate.setHours(0, 0, 0, 0);
-    console.log("checkinDate", checkinDate);
-
-    let checkoutDate = new Date(CheckoutDate);
-    checkoutDate.setHours(23, 59, 0, 0);
-
-    const reservationData = await AppDataSource.createQueryBuilder()
-      .insert()
-      .into(Reservation)
-      .values([
-        {
-          ReservationId: reserveID,
+    const validHolidayHome = await checkHolidayHomeValidation(HolidayHome);
+    if(validHolidayHome && validHolidayHome.length > 0) {
+      const reservationId = await AppDataSource.query(
+        `SELECT MAX("ReservationId") as maxval FROM "INOADMIN"."reservation"`
+      );
+      console.log("reservation id", reservationId[0].MAXVAL);
+      let maxvalue = reservationId[0].MAXVAL;
+  
+      if (maxvalue) {
+        // Extract the numeric part and increment by 1
+        let num = parseInt(maxvalue.split("-")[1]);
+        num++; // Increment
+        reserveID = "RES-" + num.toString().padStart(5, "0"); // Format with leading zeros
+      } else {
+        reserveID = "RES-00001"; // Initial reservation ID
+      }
+  
+      let checkinDate = new Date(CheckinDate);
+      checkinDate.setHours(0, 0, 0, 0);
+      console.log("checkinDate", checkinDate);
+  
+      let checkoutDate = new Date(CheckoutDate);
+      checkoutDate.setHours(23, 59, 0, 0);
+  
+      const reservationData = await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(Reservation)
+        .values([
+          {
+            ReservationId: reserveID,
+            ServiceNO,
+            HolidayHome,
+            CheckinDate: checkinDate, // Set time to 12:00 am
+            CheckoutDate: checkoutDate, // Set time to 11:59 pm
+            NoOfAdults,
+            NoOfChildren,
+            NoOfRooms,
+            NoOfHalls,
+            RoomPrice,
+            HallPrice,
+            Price,
+            IsPaid,
+          },
+        ])
+        .execute();
+      if (RoomCodes) {
+        for (var i = 0; i < RoomCodes.length; i++) {
+          await AppDataSource.createQueryBuilder()
+            .insert()
+            .into(ReservedRooms)
+            .values([
+              {
+                ReservationId: reserveID,
+                roomCode: RoomCodes[i],
+              },
+            ])
+            .execute();
+        }
+      }
+      if (HallCodes) {
+        for (var i = 0; i < HallCodes.length; i++) {
+          await AppDataSource.createQueryBuilder()
+            .insert()
+            .into(ReservedHalls)
+            .values([
+              {
+                ReservationId: reserveID,
+                hallCode: HallCodes[i],
+              },
+            ])
+            .execute();
+        }
+      }
+      res
+        .status(200)
+        .json({
+          message: "Reservation added successfully",
+          reservationId: reserveID,
+          adminNumber: VictimAdminNo,
+          serviceNo: ServiceNO,
+          empName: employeeName,
+          holidayHomeName: holidayHomeName,
+          employeeDetails: employee,
+          userDetails: homlyUser,
+        });
+        console.log("reservation id", reserveID);
+        console.log("holidayHome id", HolidayHome);
+        console.log("holidayhomename" + holidayHomeName);
+        // get the email from serviceNO
+        const employeeEmail = (
+          await AppDataSource.manager.find(HomlyUser, {
+            select: ["email"],
+            where: {
+              service_number: ServiceNO,
+            },
+          })
+        )[0]?.email;
+        const sendRecipt = (
+          email: string,
+          employeeName: string,
+          holidayHome: string,
+          reservationNumber: string,
+          checkinDate: Date,
+          checkoutDate: Date,
+          maxAdults: string,
+          maxChildren: string,
+          rooms: string,
+          halls: string,
+          roomPrice: string,
+          hallPrice: string,
+          TotalPrice: string
+        ) => {
+          const subject = "Reservation Recipt";
+          const message = SendReciptEmail(
+            employeeName,
+            holidayHomeName,
+            reservationNumber,
+            checkinDate,
+            checkoutDate,
+            maxAdults,
+            maxChildren,
+            rooms,
+            halls,
+            roomPrice,
+            hallPrice,
+            TotalPrice
+          );
+          sentEmail(email, subject, message);
+        };
+        console.log("reservation id", reserveID);
+        sendRecipt(
+          employeeEmail,
           ServiceNO,
           HolidayHome,
-          CheckinDate: checkinDate, // Set time to 12:00 am
-          CheckoutDate: checkoutDate, // Set time to 11:59 pm
+          reserveID ?? "",
+          new Date(emailCheckinDate),
+          new Date(emailCheckoutDate),
           NoOfAdults,
           NoOfChildren,
-          NoOfRooms,
-          NoOfHalls,
+          RoomCodes,
+          HallCodes,
           RoomPrice,
           HallPrice,
-          Price,
-          IsPaid,
-        },
-      ])
-      .execute();
-    if (RoomCodes) {
-      for (var i = 0; i < RoomCodes.length; i++) {
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(ReservedRooms)
-          .values([
-            {
-              ReservationId: reserveID,
-              roomCode: RoomCodes[i],
-            },
-          ])
-          .execute();
-      }
+          TotalPrice
+        );
+    } else{
+      res.status(500).json({ text: "Invalid Holiday Home!" });
     }
-    if (HallCodes) {
-      for (var i = 0; i < HallCodes.length; i++) {
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(ReservedHalls)
-          .values([
-            {
-              ReservationId: reserveID,
-              hallCode: HallCodes[i],
-            },
-          ])
-          .execute();
-      }
-    }
-    res
-      .status(200)
-      .json({
-        message: "Reservation added successfully",
-        reservationId: reserveID,
-        adminNumber: VictimAdminNo,
-        serviceNo: ServiceNO,
-        empName: employeeName,
-        holidayHomeName: holidayHomeName,
-        employeeDetails: employee,
-        userDetails: homlyUser,
-      });
+    // generate unique auto incrementing reservation id
+    
   } catch (error) {
     console.log(`error is ${error}`);
     res.status(500).json({ message: "Internal Server Error!" });
   }
-  console.log("reservation id", reserveID);
-  console.log("holidayHome id", HolidayHome);
-  console.log("holidayhomename" + holidayHomeName);
-  // get the email from serviceNO
-  const employeeEmail = (
-    await AppDataSource.manager.find(HomlyUser, {
-      select: ["email"],
-      where: {
-        service_number: ServiceNO,
-      },
-    })
-  )[0]?.email;
-  const sendRecipt = (
-    email: string,
-    employeeName: string,
-    holidayHome: string,
-    reservationNumber: string,
-    checkinDate: Date,
-    checkoutDate: Date,
-    maxAdults: string,
-    maxChildren: string,
-    rooms: string,
-    halls: string,
-    roomPrice: string,
-    hallPrice: string,
-    TotalPrice: string
-  ) => {
-    const subject = "Reservation Recipt";
-    const message = SendReciptEmail(
-      employeeName,
-      holidayHomeName,
-      reservationNumber,
-      checkinDate,
-      checkoutDate,
-      maxAdults,
-      maxChildren,
-      rooms,
-      halls,
-      roomPrice,
-      hallPrice,
-      TotalPrice
-    );
-    sentEmail(email, subject, message);
-  };
-  console.log("reservation id", reserveID);
-  sendRecipt(
-    employeeEmail,
-    ServiceNO,
-    HolidayHome,
-    reserveID ?? "",
-    new Date(emailCheckinDate),
-    new Date(emailCheckoutDate),
-    NoOfAdults,
-    NoOfChildren,
-    RoomCodes,
-    HallCodes,
-    RoomPrice,
-    HallPrice,
-    TotalPrice
-  );
+
 };
 const AddSpecialResrvation = async (req: Request, res: Response) => {
   console.log(req.body);
@@ -384,6 +391,7 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
         },
         {
           IsCancelled: true,
+          CancelledBy: "PriAdmin",
         }
       );
       await AppDataSource.manager.delete(ReservedRooms, {
@@ -830,6 +838,121 @@ const CompletePayment = async (req: Request, res: Response) => {
   }
 };
 
+const checkUserValidation = async (serviceNO: string) => {
+  const user = await AppDataSource.manager.find(HomlyUser, {
+    where: {
+      service_number: serviceNO,
+      verified: true,
+      blacklisted: false,
+    },
+  });
+  console.log("first",user);
+  return user;
+};
+
+const checkHolidayHomeValidation = async (holidayHomeId: string) => {
+  const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      HolidayHomeId: holidayHomeId,
+      Approved: true,
+      Status: "Active",
+    },
+  });
+  console.log("holiday home check ", holidayHome);
+  return holidayHome;
+};
+
+const getUserFromEmployee = async (req: Request, res: Response) => {
+  const serviceno = req.params.serviceno;
+  try {
+    const user = await checkUserValidation(serviceno);
+    if(user && user.length > 0) {
+      await AppDataSource.manager.find(Employee, {
+        where: {
+          service_number: serviceno,
+        },
+      }).then((data) => {
+        if(data) {
+          res.send(data);
+        }});
+      };    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
+// get all from refund
+const getRefund = async (req: Request, res: Response) => {
+  try {
+    const refund = await AppDataSource.manager.find(Refund);
+    res.status(200).json(refund);
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
+//add refund
+const addRefundByUser = async (req: Request, res: Response) => {
+  const {
+    reservationNo,
+    serviceNo,
+    contactNumber,
+    cancelledBy,
+    status,
+    accountHolder,
+    accountNumber,
+    bank,
+    branch,
+  } = req.body;
+  try {
+    await AppDataSource.createQueryBuilder()
+      .insert()
+      .into(Refund)
+      .values([
+        {
+          reservationNo,
+          serviceNo,
+          contactNumber,
+          cancelledBy,
+          status,
+          accountHolder,
+          accountNumber,
+          bank,
+          branch,
+        },
+      ])
+      .execute();
+    res.status(200).json({ message: "Refund added successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+}
+const UpdateRefundByAdmin = (req: Request, res: Response) => {
+  const { 
+    refundId, 
+    status, 
+    refundDate, 
+    bankSlip 
+  } = req.body;
+  try {
+    AppDataSource.manager.update(
+      Refund,
+      { refundId },
+      {
+        status,
+        refundDate,
+        bankSlip,
+      }
+    );
+    res.status(200).json({ message: "Refund updated successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+}
 const deleteExpiredReservations = async () => {
   const expireDate = new Date(Date.now() - expireTime);
   console.log("Expiration date", expireDate);
@@ -881,4 +1004,8 @@ export {
   getTotalRoomRental,
   CompletePayment,
   deleteExpiredReservations,
+  getUserFromEmployee,
+  getRefund,
+  addRefundByUser,
+  UpdateRefundByAdmin,
 };
