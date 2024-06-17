@@ -23,6 +23,9 @@ import {
 
     @Column()
     cancelledBy!: string;
+
+    @Column()
+    payment!: number;
   
     @Column({
         default: "Pending",
@@ -40,6 +43,13 @@ import {
 
     @Column()
     branch!: string; 
+
+    @Column(
+      {
+        default: 0,
+    }
+    )
+    refundAmount!: number;
 
     @Column({
         nullable: true,
