@@ -39,6 +39,28 @@ const getHolidayHomes = async (req: Request, res: Response) => {
   res.json({ pending: pending, active: acitve, inactive: inactive });
 };
 
+export const getAllHolidayHomes = async (req: Request, res: Response) => {
+  const pending = await AppDataSource.manager.find(HolidayHome, {
+    where: { Approved: false },
+  });
+
+  const acitve = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      Status: "Active",
+      Approved: true,
+    },
+  });
+
+  const inactive = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      Status: "Inactive",
+      Approved: true,
+    },
+  });
+
+  res.json({ pending: pending, active: acitve, inactive: inactive });
+};
+
 const getHolidayHomesDetails = async (req: Request, res: Response) => {
   const { HolidayHomeId } = req.params;
 
