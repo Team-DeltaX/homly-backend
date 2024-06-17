@@ -934,8 +934,9 @@ const addRefundByUser = async (req: Request, res: Response) => {
 const UpdateRefundByAdmin = (req: Request, res: Response) => {
   const { 
     refundId, 
-    status, 
-    refundDate, 
+    status,
+    refundAmount, 
+    reason, 
     bankSlip 
   } = req.body;
   try {
@@ -944,7 +945,9 @@ const UpdateRefundByAdmin = (req: Request, res: Response) => {
       { refundId },
       {
         status,
-        refundDate,
+        refundAmount, 
+        reason,
+        refundDate: new Date,
         bankSlip,
       }
     );
