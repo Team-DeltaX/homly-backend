@@ -38,4 +38,9 @@ export class Complaints{
   })
   Marked!:Boolean
 
+  @Column({
+    default:false
+  })
+  IsWarned!:Boolean
+
 }

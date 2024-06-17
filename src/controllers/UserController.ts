@@ -148,12 +148,12 @@ const userRegistration = async (req: Request, res: Response) => {
         } else {
           return res
             .status(201)
-            .json({ message: "User already exists!", success: false });
+            .json({ message: "You are alredy registered!", success: false });
         }
       } else {
         res
           .status(202)
-          .json({ message: "Your are not an employee", success: false });
+          .json({ message: "You are not an employee.", success: false });
       }
     })
     .catch(() => {
@@ -271,7 +271,7 @@ const userLogin = async (req: Request, res: Response) => {
             .json({ token: token, message: "Login Successful", success: true });
         } else {
           res.status(200).json({
-            message: "Incorrect password or Username",
+            message: "Incorrect Username or Password",
             success: false,
           });
         }
@@ -347,10 +347,12 @@ const forgetPasswordDetails = async (req: Request, res: Response) => {
     } else {
       res
         .status(200)
-        .json({ message: "You are a Blacklisted User", success: false });
+        .json({ message: "You are a blacklisted user", success: false });
     }
   } else {
-    res.status(200).json({ message: "User not found", success: false });
+    res
+      .status(200)
+      .json({ message: "You are not a registered user", success: false });
   }
 };
 
@@ -371,7 +373,7 @@ const otpVerification = async (req: Request, res: Response) => {
       await AppDataSource.manager.delete(UserOTPVerification, {
         service_number: serviceNo,
       });
-      res.status(200).json({ message: "OTP Expired", success: false });
+      res.status(200).json({ message: "OTP has expired", success: false });
     } else {
       bcrypt.compare(otp, userOTP.otp).then(async (result) => {
         if (result) {
@@ -380,14 +382,18 @@ const otpVerification = async (req: Request, res: Response) => {
             { service_number: serviceNo },
             { verified: true }
           );
-          res.status(200).json({ message: "OTP Verified", success: true });
+          res
+            .status(200)
+            .json({ message: "OTP has been verified", success: true });
         } else {
           res.status(200).json({ message: "Invalid OTP", success: false });
         }
       });
     }
   } else {
-    res.status(200).json({ message: "error", success: false });
+    res
+      .status(200)
+      .json({ message: "OTP is invalid or expired", success: false });
   }
 };
 
@@ -417,6 +423,9 @@ const resetPassword = async (req: Request, res: Response) => {
             { service_number: serviceNo },
             { password: hash }
           );
+          await AppDataSource.manager.delete(UserOTPVerification, {
+            service_number: serviceNo,
+          });
           res
             .status(200)
             .json({ message: "Password Reset Successful", success: true });
@@ -518,6 +527,13 @@ const updateUserDetails = async (req: Request, res: Response) => {
 const updateUserPassword = async (req: Request, res: Response) => {
   try {
     const { oldPassword, newPassword } = req.body;
+    if (oldPassword === newPassword) {
+      res.status(200).json({
+        message: "Old password and new password are same",
+        success: false,
+      });
+      return;
+    }
     const serviceNo = (req as any).serviceNo;
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -948,7 +964,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
       Name: Like(`%${search?.toString().toLowerCase()}%`),
     },
     order: {
-      updatedAt: "DESC",
+      Name: "ASC",
     },
   };
 
@@ -1015,7 +1031,7 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
       Status: "Active",
     },
     order: {
-      updatedAt: "DESC",
+      overall_rating: "DESC",
     },
   };
 

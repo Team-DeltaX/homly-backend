@@ -68,6 +68,11 @@ export class Reservation extends BaseEntity {
   })
   IsCancelled!: boolean;
 
+  @Column({
+    default: "User",
+  })
+  CancelledBy!: string;
+
   @CreateDateColumn()
   createdAt!: Date;
 
