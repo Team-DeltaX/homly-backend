@@ -1,7 +1,7 @@
 import {
     Entity,
     BaseEntity,
-    PrimaryColumn,
+    PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
     UpdateDateColumn,
@@ -9,7 +9,7 @@ import {
   
   @Entity()
   export class Refund extends BaseEntity {
-    @PrimaryColumn('uuid')
+    @PrimaryGeneratedColumn('uuid')
     refundId!: string;
     
     @Column()
