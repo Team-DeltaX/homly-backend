@@ -320,7 +320,6 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
     Price,
     IsPaid,
   } = req.body;
-  console.log("arunaaa", ServiceNO);
   const emailCheckinDate = dayjs(CheckinDate).format("YYYY-MM-DD");
   const emailCheckoutDate = dayjs(CheckoutDate).format("YYYY-MM-DD");
   let reserveID;
@@ -391,7 +390,7 @@ const AddSpecialResrvation = async (req: Request, res: Response) => {
         },
         {
           IsCancelled: true,
-          CancelledBy: "PriAdmin",
+          CancelledBy: "Primary Admin",
         }
       );
       await AppDataSource.manager.delete(ReservedRooms, {
@@ -900,6 +899,7 @@ const addRefundByUser = async (req: Request, res: Response) => {
     serviceNo,
     contactNumber,
     cancelledBy,
+    payment,
     status,
     accountHolder,
     accountNumber,
@@ -916,6 +916,7 @@ const addRefundByUser = async (req: Request, res: Response) => {
           serviceNo,
           contactNumber,
           cancelledBy,
+          payment,
           status,
           accountHolder,
           accountNumber,
@@ -930,20 +931,23 @@ const addRefundByUser = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 }
-const UpdateRefundByAdmin = (req: Request, res: Response) => {
+const UpdateRefundByAdmin = async (req: Request, res: Response) => {
   const { 
     refundId, 
-    status, 
-    refundDate, 
+    status,
+    refundAmount, 
+    reason, 
     bankSlip 
   } = req.body;
   try {
-    AppDataSource.manager.update(
+    await AppDataSource.manager.update(
       Refund,
       { refundId },
       {
         status,
-        refundDate,
+        refundAmount, 
+        reason,
+        refundDate: new Date(),
         bankSlip,
       }
     );

@@ -39,6 +39,28 @@ const getHolidayHomes = async (req: Request, res: Response) => {
   res.json({ pending: pending, active: acitve, inactive: inactive });
 };
 
+export const getAllHolidayHomes = async (req: Request, res: Response) => {
+  const pending = await AppDataSource.manager.find(HolidayHome, {
+    where: { Approved: false },
+  });
+
+  const acitve = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      Status: "Active",
+      Approved: true,
+    },
+  });
+
+  const inactive = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      Status: "Inactive",
+      Approved: true,
+    },
+  });
+
+  res.json({ pending: pending, active: acitve, inactive: inactive });
+};
+
 const getHolidayHomesDetails = async (req: Request, res: Response) => {
   const { HolidayHomeId } = req.params;
 
@@ -560,109 +582,6 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         await careTaker2.save();
       }
     }
-
-    // //get all the RTId that available in database realated to HolidayHomeId
-    // const RTIds = await AppDataSource.manager.find(RoomTypeSettings, {
-    //   where: { HolidayHomeId },
-    //   select: ["RTId"],
-    // });
-
-    // const RTIdsArray = RTIds.map((roomType) => roomType.RTId);
-
-    // for (let i = 0; i < updatedValues.roomTypeArray.length; i++) {
-    //   if (RTIdsArray.includes(updatedValues.roomTypeArray[i].RTId)) {
-    //     console.log("inclued in database");
-    //     await RoomTypeSettings.update(
-    //       { RTId: updatedValues.roomTypeArray[i].RTId },
-    //       {
-    //         roomType: updatedValues.roomTypeArray[i].roomType,
-    //         adults: updatedValues.roomTypeArray[i].adults,
-    //         children: updatedValues.roomTypeArray[i].children,
-    //       }
-    //     );
-    //   } else {
-    //     console.log("new roomTypeSettings");
-    //     const roomTypeId = await AppDataSource.query(
-    //       `SELECT MAX("RTId") as maxval FROM "INOADMIN"."room_type_settings"`
-    //     );
-    //     console.log("roomtypesettings id", roomTypeId[0].MAXVAL);
-    //     let maxvalue = roomTypeId[0].MAXVAL;
-
-    //     let RTId;
-    //     if (maxvalue) {
-    //       // incremenet string maxvalue by 1
-    //       let num = maxvalue.split("-");
-    //       console.log(num[1]);
-    //       RTId = "RT-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
-    //     } else {
-    //       RTId = "RT-0000001";
-    //     }
-
-    //     const updatedValues = req.body;
-
-    //     const roomType = RoomTypeSettings.create({
-    //       RTId: RTId,
-    //       roomType: updatedValues.roomTypeArray[i].roomType,
-    //       adults: updatedValues.roomTypeArray[i].adults,
-    //       children: updatedValues.roomTypeArray[i].children,
-    //       HolidayHomeId: HolidayHomeId,
-    //       // HolidayHomeId: holidayHome.HolidayHomeId
-    //     });
-    //     await roomType.save();
-    //   }
-    // }
-
-    // //get all the RSId that available in database realated to HolidayHomeId
-
-    // const RSIds = await AppDataSource.manager.find(RoomRentalSettings, {
-    //   where: { HolidayHomeId },
-    //   select: ["RSId"],
-    // });
-
-    // const RSIdsArray = RSIds.map((roomRental) => roomRental.RSId);
-
-    // for (let i = 0; i < updatedValues.settingRoomRentalArray.length; i++) {
-    //   if (RSIdsArray.includes(updatedValues.settingRoomRentalArray[i].RSId)) {
-    //     console.log("inclued in database RoomRentalSettings");
-    //     await RoomRentalSettings.update(
-    //       { RSId: updatedValues.settingRoomRentalArray[i].RSId },
-    //       {
-    //         roomType: updatedValues.settingRoomRentalArray[i].roomType,
-    //         acNonAc: updatedValues.settingRoomRentalArray[i].acNonAc,
-    //         rental: updatedValues.settingRoomRentalArray[i].rental,
-    //       }
-    //     );
-    //   } else {
-    //     console.log("new RoomRentalSettings");
-    //     const roomRentalId = await AppDataSource.query(
-    //       `SELECT MAX("RSId") as maxval FROM "INOADMIN"."room_rental_settings"`
-    //     );
-    //     console.log("roomrentalsettings id", roomRentalId[0].MAXVAL);
-    //     let maxvalue = roomRentalId[0].MAXVAL;
-
-    //     let RRId;
-    //     if (maxvalue) {
-    //       // incremenet string maxvalue by 1
-    //       let num = maxvalue.split("-");
-    //       console.log(num[1]);
-    //       RRId = "RR-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
-    //     } else {
-    //       RRId = "RR-000001";
-    //     }
-
-    //     const updatedValues = req.body;
-
-    //     const roomRental = RoomRentalSettings.create({
-    //       RSId: RRId,
-    //       roomType: updatedValues.settingRoomRentalArray[i].roomType,
-    //       acNonAc: updatedValues.settingRoomRentalArray[i].acNonAc,
-    //       rental: updatedValues.settingRoomRentalArray[i].rental,
-    //       HolidayHomeId: HolidayHomeId,
-    //     });
-
-    //     await roomRental.save();
-    //   }
-    // }
 
     // roomTypeSettings deelete where holidayhomeid = holidayhomeid
     await RoomTypeSettings.delete({ HolidayHomeId: HolidayHomeId });
