@@ -11,6 +11,7 @@ import {
   getRoomRental,
   updateHolidayHome,
   getHolidayHomeNames,
+  getAllHolidayHomeNames,
   getReservationDetails,
   getReservedRooms,
 } from "../controllers/HolidayHomeController";
@@ -30,6 +31,7 @@ HolidayHomeRouter.get("/all", getAllHolidayHomes);
 HolidayHomeRouter.get("/reserved/", getReservedRooms);
 HolidayHomeRouter.get("/reservation/:HolidayHomeId", getReservationDetails);
 HolidayHomeRouter.get("/names", getHolidayHomeNames);
+HolidayHomeRouter.get("/allnames", getAllHolidayHomeNames);
 HolidayHomeRouter.get("/:HolidayHomeId", getHolidayHomesDetails);
 HolidayHomeRouter.get("/:HolidayHomeId/:unitCode", getSelectedRooms);
 HolidayHomeRouter.get("/room/:HolidayHomeId/:roomCode", getRoom);

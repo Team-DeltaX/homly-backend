@@ -126,6 +126,17 @@ const getHolidayHomeNames = async (req: Request, res: Response) => {
   res.json({ names });
 };
 
+export const getAllHolidayHomeNames = async (req: Request, res: Response) => {
+  const holidayHomeNames = await AppDataSource.manager.find(HolidayHome, {
+    select: ["Name", "HolidayHomeId"],
+  });
+  const names = holidayHomeNames.map((holidayHome) => ({
+    name: holidayHome.Name,
+    id: holidayHome.HolidayHomeId,
+  }));
+  res.json({ names });
+};
+
 const getSelectedRooms = async (req: Request, res: Response) => {
   const { HolidayHomeId, unitCode } = req.params;
   console.log(HolidayHomeId, unitCode);
