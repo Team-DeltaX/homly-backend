@@ -299,7 +299,7 @@ export const checkuserexist = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error in check user exist!" });
   }
 };
-const getReservationDetails = async (reservation:any) => {
+const getReservationDetails = async (reservation: any) => {
   let reservationDetails = [];
   for (var i = 0; i < reservation.length; i++) {
     const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
@@ -347,8 +347,7 @@ const getReservationDetails = async (reservation:any) => {
         employeeDetails: employeeDetails,
         Complaints: isComplaint,
       });
-    }
-    else if (reservedhalls.length === 0) {
+    } else if (reservedhalls.length === 0) {
       reservationDetails.push({
         reservation: reservation[i],
         reservedrooms: reservedrooms,
@@ -413,7 +412,6 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
-
 
 export const getPastReservation = async (req: Request, res: Response) => {
   const adminNo = (req as any).serviceNo;
@@ -844,9 +842,12 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
     res.status(500).json({ message: "error in getting holiday home rating" });
   }
 };
+
 //shuduler function runs in every day 12 am
 //every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
+
+
 
 // export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
 //   console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
