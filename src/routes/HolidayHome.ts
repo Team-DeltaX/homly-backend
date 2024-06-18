@@ -23,7 +23,7 @@ import {
 import { HolidayHome } from "../entities/HolidayHome";
 
 const HolidayHomeRouter = express.Router();
-HolidayHomeRouter.delete("/reject", rejectHH);
+HolidayHomeRouter.put("/reject", rejectHH);
 HolidayHomeRouter.put("/accept", approveHH);
 HolidayHomeRouter.get("/pending", getNotApprovedHomes);
 HolidayHomeRouter.get("/", getHolidayHomes);

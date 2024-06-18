@@ -647,13 +647,12 @@ export const approveHH = async (req: Request, res: Response) => {
 
 export const rejectHH = async (req: Request, res: Response) => {
   const id = req.body.id;
+  const reject_reason=req.body.reject_reason
   try {
-    await HolidayHome.delete({ HolidayHomeId: id });
-    res.status(200).json({
-      message: "Successfully rejected the home(deleted from HH table)",
-    });
+    await HolidayHome.update(id, { reason: reject_reason,isDiclined:true });
+    res.status(200).json({ message: "Successfully approved the home" });
   } catch (error) {
-    res.status(500).json({ message: "Error in rejecting the home!" });
+    res.status(500).json({ message: "Error in approving the home!" });
   }
 };
 
