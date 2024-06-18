@@ -1,5 +1,5 @@
 import express from 'express'
-import { addtoblacklist, addtoblacklisthistory, checkuserexist, deletefromblacklisttable, getblacklistedhistory, getblacklistedusers, markedcomplaints, updatehomlyuser ,} from '../controllers/PrimaryAdminController';
+import { addtoblacklist, addtoblacklisthistory, checkuserexist, deletefromblacklisttable, getblacklistedhistory, getblacklistedusers, markSendWarning, markedcomplaints, updatehomlyuser ,} from '../controllers/PrimaryAdminController';
 const BlacklistRouter = express.Router();
 
 
@@ -13,6 +13,8 @@ BlacklistRouter.put('/auth/unblacklist',updatehomlyuser)
 BlacklistRouter.post('/auth/blacklisthistory',addtoblacklisthistory)
 BlacklistRouter.get('/auth/blacklisthistory',getblacklistedhistory);
 BlacklistRouter.put('/auth/markcomplaint',markedcomplaints)
+BlacklistRouter.put('/auth/markwarning',markSendWarning)
+
 
 
 
