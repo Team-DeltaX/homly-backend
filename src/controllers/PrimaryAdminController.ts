@@ -624,6 +624,8 @@ export const getNotApprovedHomes = async (req: Request, res: Response) => {
     const homes = await AppDataSource.manager.find(HolidayHome, {
       where: {
         Approved: false,
+        isDiclined:false
+
       },
     });
 
