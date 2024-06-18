@@ -25,5 +25,6 @@ ReservationRouter.get("/admin/auth/reservation/refund",getRefund);
 ReservationRouter.post("/user/auth/reservation/addRefundByUser",addRefundByUser);
 ReservationRouter.put("/admin/auth/reservation/updateRefundByAdmin",UpdateRefundByAdmin);
 ReservationRouter.get("/user/auth/reservation/getRefundById/:reservationNo",getRefundById);
+ReservationRouter.get("/admin/auth/reservation/getRefundById/:reservationNo",getRefundById);
 
 export {ReservationRouter}
