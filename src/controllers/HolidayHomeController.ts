@@ -1021,6 +1021,24 @@ const updateHolidayHome = async (req: Request, res: Response) => {
   }
 };
 
+export const updateStatus = async (req: Request, res: Response) => {
+  try {
+    const { HolidayHomeId, Status } = req.body;
+
+    await HolidayHome.update(
+      { HolidayHomeId: HolidayHomeId },
+      {
+        Status: Status,
+      }
+    );
+
+    res.json({ message: "Holiday Home status updated successfully" });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const HHcount = async (req: Request, res: Response) => {
   try {
     const serviceNo = (req as any).serviceNo;

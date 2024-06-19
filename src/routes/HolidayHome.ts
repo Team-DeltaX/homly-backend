@@ -14,6 +14,7 @@ import {
   getAllHolidayHomeNames,
   getReservationDetails,
   getReservedRooms,
+  updateStatus,
 } from "../controllers/HolidayHomeController";
 import {
   approveHH,
@@ -39,5 +40,6 @@ HolidayHomeRouter.get("/rental/:HolidayHomeId/:HRUId", getRoomRental);
 
 HolidayHomeRouter.post("/", createHolidayHome);
 HolidayHomeRouter.post("/update", updateHolidayHome);
+HolidayHomeRouter.post("/status", updateStatus);
 
 export { HolidayHomeRouter };
