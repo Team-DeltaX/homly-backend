@@ -17,7 +17,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
   console.log("admin no got from middleware", serviceNo);
   const pending = await AppDataSource.manager.find(HolidayHome, {
-    where: { Approved: false, AdminNo: serviceNo },
+    where: { Approved: false, AdminNo: serviceNo, isDiclined: false },
   });
 
   const acitve = await AppDataSource.manager.find(HolidayHome, {
@@ -36,7 +36,20 @@ const getHolidayHomes = async (req: Request, res: Response) => {
     },
   });
 
-  res.json({ pending: pending, active: acitve, inactive: inactive });
+  const declined = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      Approved: false,
+      isDiclined: true,
+      AdminNo: serviceNo,
+    },
+  });
+
+  res.json({
+    pending: pending,
+    active: acitve,
+    inactive: inactive,
+    declined: declined,
+  });
 };
 
 export const getAllHolidayHomes = async (req: Request, res: Response) => {
@@ -503,12 +516,18 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
 const updateHolidayHome = async (req: Request, res: Response) => {
   try {
-    console.log("first");
     const updatedValues = req.body;
 
     const HolidayHomeId = updatedValues.holidayHomeId;
     const CareTaker1Id = updatedValues.caretaker1Id;
     const CareTaker2Id = updatedValues.caretaker2Id;
+
+    const declined = await AppDataSource.manager.find(HolidayHome, {
+      where: { HolidayHomeId: HolidayHomeId },
+      select: ["isDiclined"],
+    });
+
+    console.log("declined", declined[0].isDiclined);
 
     await HolidayHome.update(
       { HolidayHomeId: HolidayHomeId },
@@ -532,6 +551,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         Image1: updatedValues.image1,
         Image2: updatedValues.image2,
         Image3: updatedValues.image3,
+        isDiclined: false,
       }
     );
 
@@ -1015,6 +1035,24 @@ const updateHolidayHome = async (req: Request, res: Response) => {
     }
 
     res.json({ message: "Holiday Home updated successfully" });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const updateStatus = async (req: Request, res: Response) => {
+  try {
+    const { HolidayHomeId, Status } = req.body;
+
+    await HolidayHome.update(
+      { HolidayHomeId: HolidayHomeId },
+      {
+        Status: Status,
+      }
+    );
+
+    res.json({ message: "Holiday Home status updated successfully" });
   } catch (error) {
     console.error("Error processing request:", error);
     res.status(500).json({ error: "Internal server error" });
