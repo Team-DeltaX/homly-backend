@@ -818,6 +818,7 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
     const count = await HolidayHome.count({
       where: {
         Approved: false,
+        isDiclined:false
       },
     });
     res.status(200).json({ notapprovedcount: count });
