@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, Column ,PrimaryColumn, OneToMany,CreateDateColumn} from 'typeorm';
+import { Entity, BaseEntity, Column ,PrimaryColumn, OneToMany,CreateDateColumn, UpdateDateColumn} from 'typeorm';
 import { Complaints } from './Complaint';
 @Entity()
 export class HomlyAdmin extends BaseEntity {
@@ -49,8 +49,8 @@ export class HomlyAdmin extends BaseEntity {
   // @OneToMany(() => Complaints, (complaints) => complaints.ComplaintID)
   // Complaint!: Complaints[]
 
-  // @UpdateDateColumn()
-  // updatedAt!: Date;
+  @UpdateDateColumn()
+  updatedAt!: Date;
 
 
 
