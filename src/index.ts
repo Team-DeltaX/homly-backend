@@ -32,7 +32,6 @@ import {
 import { WishList } from "./entities/WishList";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
-import { UserFeedback } from "./entities/Feedback";
 import { SelectedRooms } from "./entities/SelectedRooms";
 import { Review } from "./entities/Review";
 import { Notification } from "./entities/Notification";
@@ -85,7 +84,6 @@ export const AppDataSource = new DataSource({
     ContactNo,
     LocationAdmin,
     Rental,
-    UserFeedback,
     SelectedRooms,
     RoomRentalSettings,
     RoomTypeSettings,
