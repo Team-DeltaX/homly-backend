@@ -1,24 +1,19 @@
-import {
-  Entity,
-  BaseEntity,
-  PrimaryColumn,
-  Column,
-} from "typeorm";
+import { Entity, BaseEntity, PrimaryColumn, Column } from "typeorm";
 
 @Entity()
-export class Employee extends BaseEntity{
-    @PrimaryColumn()
-    service_number!: string;
+export class Employee extends BaseEntity {
+  @PrimaryColumn()
+  service_number!: string;
 
-    @Column()
-    name!: string;
+  @Column()
+  name!: string;
 
-    @Column()
-    nic!: string;
+  @Column()
+  nic!: string;
 
-    @Column()
-    address!: string;
+  @Column()
+  address!: string;
 
-    @Column()
-    work_place!: string;
+  @Column()
+  work_place!: string;
 }

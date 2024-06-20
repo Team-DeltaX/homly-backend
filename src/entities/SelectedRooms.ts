@@ -1,5 +1,4 @@
-import { BaseEntity, Entity, Column, PrimaryColumn } from "typeorm";
-import { HolidayHome } from "./HolidayHome";
+import { BaseEntity, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class SelectedRooms extends BaseEntity {

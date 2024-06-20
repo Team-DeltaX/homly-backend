@@ -1,62 +1,52 @@
-import { Entity, BaseEntity, Column ,PrimaryColumn, OneToMany,CreateDateColumn, UpdateDateColumn} from 'typeorm';
-import { Complaints } from './Complaint';
+import {
+  Entity,
+  BaseEntity,
+  Column,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
 @Entity()
 export class HomlyAdmin extends BaseEntity {
-    // Save() {
-    //     throw new Error("Method not implemented. ");
-    // }
   @PrimaryColumn()
-  AdminNo!: String ;
+  AdminNo!: String;
 
   @Column()
   UserName!: string;
 
   @Column()
-  Password!: string ;
+  Password!: string;
 
   @Column()
-  ContactNo!: string ;
-  
-  @Column()
-  Email!: string ;
+  ContactNo!: string;
 
   @Column()
-  WorkLocation!: string ;
+  Email!: string;
 
-  
-  @Column({
-    default:false
-  })
-  Disabled!: Boolean ;
-    // static create: any;
-
+  @Column()
+  WorkLocation!: string;
 
   @Column({
-    default:null
+    default: false,
   })
-  Sub!: string ;
+  Disabled!: Boolean;
 
   @Column({
-   
+    default: null,
   })
-  Role!: string ;
+  Sub!: string;
 
-  @CreateDateColumn({
-   
-  })
-  createddate!: string ;
+  @Column({})
+  Role!: string;
 
-  // @OneToMany(() => Complaints, (complaints) => complaints.ComplaintID)
-  // Complaint!: Complaints[]
+  @CreateDateColumn({})
+  createddate!: string;
 
   @UpdateDateColumn()
   updatedAt!: Date;
 
-
-
   @Column({
-    default:false
+    default: false,
   })
-  Verified!: Boolean ;
-
+  Verified!: Boolean;
 }

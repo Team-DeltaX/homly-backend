@@ -1,77 +1,73 @@
 import {
-    Entity,
-    BaseEntity,
-    PrimaryGeneratedColumn,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn,
-  } from "typeorm";
-  
-  @Entity()
-  export class Refund extends BaseEntity {
-    @PrimaryGeneratedColumn('uuid')
-    refundId!: string;
-    
-    @Column()
-    reservationNo!: string;
+  Entity,
+  BaseEntity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
-    @Column()
-    serviceNo!: string;
+@Entity()
+export class Refund extends BaseEntity {
+  @PrimaryGeneratedColumn("uuid")
+  refundId!: string;
 
-    @Column()
-    contactNumber!: string;
+  @Column()
+  reservationNo!: string;
 
-    @Column()
-    cancelledBy!: string;
+  @Column()
+  serviceNo!: string;
 
-    @Column()
-    payment!: number;
-  
-    @Column({
-        default: "Pending",
-    })
-    status!: string;
+  @Column()
+  contactNumber!: string;
 
-    @Column()
-    accountHolder!: string;
-    
-    @Column()
-    accountNumber!: string;
+  @Column()
+  cancelledBy!: string;
 
-    @Column()
-    bank!: string;
+  @Column()
+  payment!: number;
 
-    @Column()
-    branch!: string; 
+  @Column({
+    default: "Pending",
+  })
+  status!: string;
 
-    @Column(
-      {
-        default: 0,
-    }
-    )
-    refundAmount!: number;
+  @Column()
+  accountHolder!: string;
 
-    @Column({nullable: true,})
-    reason!: string;
+  @Column()
+  accountNumber!: string;
 
-    @Column({
-        nullable: true,
-        type: "date",
-      })
-    refundDate!: Date;
-    
-    @Column({
-        nullable: true,
-      })
-    bankSlip!: string;
-    
-    @CreateDateColumn({
-        type: "date",
-    })
-    createdAt!: Date;
+  @Column()
+  bank!: string;
 
-    @UpdateDateColumn()
-    updatedAt!: Date;
+  @Column()
+  branch!: string;
 
-  }
-  
+  @Column({
+    default: 0,
+  })
+  refundAmount!: number;
+
+  @Column({ nullable: true })
+  reason!: string;
+
+  @Column({
+    nullable: true,
+    type: "date",
+  })
+  refundDate!: Date;
+
+  @Column({
+    nullable: true,
+  })
+  bankSlip!: string;
+
+  @CreateDateColumn({
+    type: "date",
+  })
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
+}
