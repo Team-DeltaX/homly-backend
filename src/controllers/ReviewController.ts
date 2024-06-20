@@ -283,7 +283,7 @@ const updateUserReview = async (req: Request, res: Response) => {
 
 // get user review for a holiday home
 const getUserReviewForHolidayHome = async (req: Request, res: Response) => {
-  const { holidayHomeId } = req.query;
+  const { holidayHomeId } = req.params;
 
   await AppDataSource.manager
     .find(Review, {
@@ -292,7 +292,7 @@ const getUserReviewForHolidayHome = async (req: Request, res: Response) => {
       },
     })
     .then((review) => {
-      res.status(200).json({ review });
+      res.status(200).json(review);
     })
     .catch(() => {
       res.status(500).json({ message: "Internal Server Error" });
