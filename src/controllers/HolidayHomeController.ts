@@ -17,7 +17,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
   console.log("admin no got from middleware", serviceNo);
   const pending = await AppDataSource.manager.find(HolidayHome, {
-    where: { Approved: false, AdminNo: serviceNo },
+    where: { Approved: false, AdminNo: serviceNo, isDiclined: false },
   });
 
   const acitve = await AppDataSource.manager.find(HolidayHome, {
@@ -33,6 +33,41 @@ const getHolidayHomes = async (req: Request, res: Response) => {
       Status: "Inactive",
       Approved: true,
       AdminNo: serviceNo,
+    },
+  });
+
+  const declined = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      Approved: false,
+      isDiclined: true,
+      AdminNo: serviceNo,
+    },
+  });
+
+  res.json({
+    pending: pending,
+    active: acitve,
+    inactive: inactive,
+    declined: declined,
+  });
+};
+
+export const getAllHolidayHomes = async (req: Request, res: Response) => {
+  const pending = await AppDataSource.manager.find(HolidayHome, {
+    where: { Approved: false },
+  });
+
+  const acitve = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      Status: "Active",
+      Approved: true,
+    },
+  });
+
+  const inactive = await AppDataSource.manager.find(HolidayHome, {
+    where: {
+      Status: "Inactive",
+      Approved: true,
     },
   });
 
@@ -95,6 +130,17 @@ const getHolidayHomeNames = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
   const holidayHomeNames = await AppDataSource.manager.find(HolidayHome, {
     where: { AdminNo: serviceNo },
+    select: ["Name", "HolidayHomeId"],
+  });
+  const names = holidayHomeNames.map((holidayHome) => ({
+    name: holidayHome.Name,
+    id: holidayHome.HolidayHomeId,
+  }));
+  res.json({ names });
+};
+
+export const getAllHolidayHomeNames = async (req: Request, res: Response) => {
+  const holidayHomeNames = await AppDataSource.manager.find(HolidayHome, {
     select: ["Name", "HolidayHomeId"],
   });
   const names = holidayHomeNames.map((holidayHome) => ({
@@ -470,12 +516,18 @@ const createHolidayHome = async (req: Request, res: Response) => {
 
 const updateHolidayHome = async (req: Request, res: Response) => {
   try {
-    console.log("first");
     const updatedValues = req.body;
 
     const HolidayHomeId = updatedValues.holidayHomeId;
     const CareTaker1Id = updatedValues.caretaker1Id;
     const CareTaker2Id = updatedValues.caretaker2Id;
+
+    const declined = await AppDataSource.manager.find(HolidayHome, {
+      where: { HolidayHomeId: HolidayHomeId },
+      select: ["isDiclined"],
+    });
+
+    console.log("declined", declined[0].isDiclined);
 
     await HolidayHome.update(
       { HolidayHomeId: HolidayHomeId },
@@ -496,9 +548,10 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         Pool: updatedValues.homeBreakDown.bdValue.pool,
         Bar: updatedValues.homeBreakDown.bdValue.bar,
         MainImage: updatedValues.mainImage,
-        Image1: updatedValues.iamge1,
+        Image1: updatedValues.image1,
         Image2: updatedValues.image2,
         Image3: updatedValues.image3,
+        isDiclined: false,
       }
     );
 
@@ -560,109 +613,6 @@ const updateHolidayHome = async (req: Request, res: Response) => {
         await careTaker2.save();
       }
     }
-
-    // //get all the RTId that available in database realated to HolidayHomeId
-    // const RTIds = await AppDataSource.manager.find(RoomTypeSettings, {
-    //   where: { HolidayHomeId },
-    //   select: ["RTId"],
-    // });
-
-    // const RTIdsArray = RTIds.map((roomType) => roomType.RTId);
-
-    // for (let i = 0; i < updatedValues.roomTypeArray.length; i++) {
-    //   if (RTIdsArray.includes(updatedValues.roomTypeArray[i].RTId)) {
-    //     console.log("inclued in database");
-    //     await RoomTypeSettings.update(
-    //       { RTId: updatedValues.roomTypeArray[i].RTId },
-    //       {
-    //         roomType: updatedValues.roomTypeArray[i].roomType,
-    //         adults: updatedValues.roomTypeArray[i].adults,
-    //         children: updatedValues.roomTypeArray[i].children,
-    //       }
-    //     );
-    //   } else {
-    //     console.log("new roomTypeSettings");
-    //     const roomTypeId = await AppDataSource.query(
-    //       `SELECT MAX("RTId") as maxval FROM "INOADMIN"."room_type_settings"`
-    //     );
-    //     console.log("roomtypesettings id", roomTypeId[0].MAXVAL);
-    //     let maxvalue = roomTypeId[0].MAXVAL;
-
-    //     let RTId;
-    //     if (maxvalue) {
-    //       // incremenet string maxvalue by 1
-    //       let num = maxvalue.split("-");
-    //       console.log(num[1]);
-    //       RTId = "RT-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
-    //     } else {
-    //       RTId = "RT-0000001";
-    //     }
-
-    //     const updatedValues = req.body;
-
-    //     const roomType = RoomTypeSettings.create({
-    //       RTId: RTId,
-    //       roomType: updatedValues.roomTypeArray[i].roomType,
-    //       adults: updatedValues.roomTypeArray[i].adults,
-    //       children: updatedValues.roomTypeArray[i].children,
-    //       HolidayHomeId: HolidayHomeId,
-    //       // HolidayHomeId: holidayHome.HolidayHomeId
-    //     });
-    //     await roomType.save();
-    //   }
-    // }
-
-    // //get all the RSId that available in database realated to HolidayHomeId
-
-    // const RSIds = await AppDataSource.manager.find(RoomRentalSettings, {
-    //   where: { HolidayHomeId },
-    //   select: ["RSId"],
-    // });
-
-    // const RSIdsArray = RSIds.map((roomRental) => roomRental.RSId);
-
-    // for (let i = 0; i < updatedValues.settingRoomRentalArray.length; i++) {
-    //   if (RSIdsArray.includes(updatedValues.settingRoomRentalArray[i].RSId)) {
-    //     console.log("inclued in database RoomRentalSettings");
-    //     await RoomRentalSettings.update(
-    //       { RSId: updatedValues.settingRoomRentalArray[i].RSId },
-    //       {
-    //         roomType: updatedValues.settingRoomRentalArray[i].roomType,
-    //         acNonAc: updatedValues.settingRoomRentalArray[i].acNonAc,
-    //         rental: updatedValues.settingRoomRentalArray[i].rental,
-    //       }
-    //     );
-    //   } else {
-    //     console.log("new RoomRentalSettings");
-    //     const roomRentalId = await AppDataSource.query(
-    //       `SELECT MAX("RSId") as maxval FROM "INOADMIN"."room_rental_settings"`
-    //     );
-    //     console.log("roomrentalsettings id", roomRentalId[0].MAXVAL);
-    //     let maxvalue = roomRentalId[0].MAXVAL;
-
-    //     let RRId;
-    //     if (maxvalue) {
-    //       // incremenet string maxvalue by 1
-    //       let num = maxvalue.split("-");
-    //       console.log(num[1]);
-    //       RRId = "RR-" + (parseInt(num[1]) + 1).toString().padStart(5, "0");
-    //     } else {
-    //       RRId = "RR-000001";
-    //     }
-
-    //     const updatedValues = req.body;
-
-    //     const roomRental = RoomRentalSettings.create({
-    //       RSId: RRId,
-    //       roomType: updatedValues.settingRoomRentalArray[i].roomType,
-    //       acNonAc: updatedValues.settingRoomRentalArray[i].acNonAc,
-    //       rental: updatedValues.settingRoomRentalArray[i].rental,
-    //       HolidayHomeId: HolidayHomeId,
-    //     });
-
-    //     await roomRental.save();
-    //   }
-    // }
 
     // roomTypeSettings deelete where holidayhomeid = holidayhomeid
     await RoomTypeSettings.delete({ HolidayHomeId: HolidayHomeId });
@@ -1037,39 +987,7 @@ const updateHolidayHome = async (req: Request, res: Response) => {
             roomAttached: updatedValues.unitArray[i].roomAttached,
           }
         );
-        if (updatedValues.unitArray[i].selectedRooms !== undefined) {
-          console.log("selectedRooms array not undefined");
-          for (
-            let j = 0;
-            j < updatedValues.unitArray[i].selectedRooms.length;
-            j++
-          ) {
-            await SelectedRooms.update(
-              {
-                unitCode: updatedValues.unitArray[i].unitCode,
-                roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
-              },
-              {
-                HolidayHomeId: HolidayHomeId,
-              }
-            );
-          }
-        }
       } else {
-        for (
-          let j = 0;
-          j < updatedValues.unitArray[i].selectedRooms.length;
-          j++
-        ) {
-          console.log("first");
-          const selectedRoom = SelectedRooms.create({
-            roomCode: updatedValues.unitArray[i].selectedRooms[j].roomCode,
-            unitCode: updatedValues.unitArray[i].unitCode,
-            HolidayHomeId: HolidayHomeId,
-          });
-
-          await selectedRoom.save();
-        }
         const unit = Unit.create({
           unitCode: updatedValues.unitArray[i].unitCode,
           unitAc: updatedValues.unitArray[i].unitAc,
@@ -1083,7 +1001,58 @@ const updateHolidayHome = async (req: Request, res: Response) => {
       }
     }
 
+    // ............... SelectedRooms Editing .........................
+
+    //get the keys of a object to an array
+
+    const SelectedUnitsArray = Object.keys(updatedValues.selectedRoomDetails);
+
+    //deleting the selected rooms related to holidayhomeid and unitCode
+
+    await SelectedRooms.delete({ HolidayHomeId: HolidayHomeId });
+
+    for (let i = 0; i < SelectedUnitsArray.length; i++) {
+      for (
+        let j = 0;
+        j < updatedValues.selectedRoomDetails[SelectedUnitsArray[i]].length;
+        j++
+      ) {
+        console.log(SelectedUnitsArray[i]);
+        console.log(
+          updatedValues.selectedRoomDetails[SelectedUnitsArray[i]][j].roomCode
+        );
+
+        const selectedRooms = SelectedRooms.create({
+          roomCode:
+            updatedValues.selectedRoomDetails[SelectedUnitsArray[i]][j]
+              .roomCode,
+          unitCode: SelectedUnitsArray[i],
+          HolidayHomeId: HolidayHomeId,
+        });
+
+        await selectedRooms.save();
+      }
+    }
+
     res.json({ message: "Holiday Home updated successfully" });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const updateStatus = async (req: Request, res: Response) => {
+  try {
+    const { HolidayHomeId, Status } = req.body;
+
+    await HolidayHome.update(
+      { HolidayHomeId: HolidayHomeId },
+      {
+        Status: Status,
+      }
+    );
+
+    res.json({ message: "Holiday Home status updated successfully" });
   } catch (error) {
     console.error("Error processing request:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -1343,7 +1312,7 @@ export const holidayHomeRatings = async (req: Request, res: Response) => {
     for (let i = 0; i < HidArray.length; i++) {
       const rating = await HolidayHome.find({
         where: { HolidayHomeId: HidArray[i] },
-        select: ["Name", "overall_rating"],
+        select: ["Name", "overall_rating", "HolidayHomeId"],
       });
       ratings.push(rating);
     }
@@ -1433,6 +1402,37 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
     res.status(200).json({ rating: rating });
   } catch {
     res.status(500).json({ message: "error in getting holiday home rating" });
+  }
+};
+
+export const ratingCatogeries = async (req: Request, res: Response) => {
+  const homeId = req.params.homeId;
+  console.log(homeId, "homeId");
+  try {
+    const ratings = await HolidayHome.find({
+      where: { HolidayHomeId: homeId },
+      select: [
+        "food_rating",
+        "value_for_money_rating",
+        "wifi_rating",
+        "location_rating",
+        "furniture_rating",
+        "staff_rating",
+      ],
+    });
+
+    const ratingCatogeries = {
+      food: ratings[0].food_rating * 10,
+      value: ratings[0].value_for_money_rating * 10,
+      wifi: ratings[0].wifi_rating * 10,
+      location: ratings[0].location_rating * 10,
+      furniture: ratings[0].furniture_rating * 10,
+      staff: ratings[0].staff_rating * 10,
+    };
+
+    res.status(200).json({ ratingCatogeries });
+  } catch {
+    res.status(500).json({ message: "error in getting rating catogeries" });
   }
 };
 

@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {
@@ -33,7 +33,7 @@ import { ReservedHalls } from "../entities/ReservedHalls";
 import { WishList } from "../entities/WishList";
 import { Notification } from "../entities/Notification";
 import dotenv from "dotenv";
-import sentSms from "../services/sentSms";
+const schedule = require("node-schedule");
 dotenv.config();
 
 const expireTime = 3 * 24 * 60 * 60 * 1000;
@@ -140,7 +140,7 @@ const userRegistration = async (req: Request, res: Response) => {
                 success: true,
               });
             })
-            .catch((err) => {
+            .catch(() => {
               return res
                 .status(404)
                 .json({ message: "Error saving user", success: false });
@@ -148,16 +148,16 @@ const userRegistration = async (req: Request, res: Response) => {
         } else {
           return res
             .status(201)
-            .json({ message: "User already exists!", success: false });
+            .json({ message: "You are alredy registered!", success: false });
         }
       } else {
         res
           .status(202)
-          .json({ message: "Your are not an employee", success: false });
+          .json({ message: "You are not an employee.", success: false });
       }
     })
-    .catch((err) => {
-      res.status(202).json({ message: "err ", success: false });
+    .catch(() => {
+      res.status(404).json({ message: "Error saving user", success: false });
     });
 };
 
@@ -180,7 +180,7 @@ const emailVerification = async (req: Request, res: Response) => {
         .delete(UserEmailVerification, {
           service_number: serviceNo,
         })
-        .then((result) => {
+        .then(() => {
           AppDataSource.manager.delete(HomlyUser, {
             service_number: serviceNo,
           });
@@ -271,7 +271,7 @@ const userLogin = async (req: Request, res: Response) => {
             .json({ token: token, message: "Login Successful", success: true });
         } else {
           res.status(200).json({
-            message: "Incorrect password or Username",
+            message: "Incorrect Username or Password",
             success: false,
           });
         }
@@ -347,10 +347,12 @@ const forgetPasswordDetails = async (req: Request, res: Response) => {
     } else {
       res
         .status(200)
-        .json({ message: "You are a Blacklisted User", success: false });
+        .json({ message: "You are a blacklisted user", success: false });
     }
   } else {
-    res.status(200).json({ message: "User not found", success: false });
+    res
+      .status(200)
+      .json({ message: "You are not a registered user", success: false });
   }
 };
 
@@ -371,7 +373,7 @@ const otpVerification = async (req: Request, res: Response) => {
       await AppDataSource.manager.delete(UserOTPVerification, {
         service_number: serviceNo,
       });
-      res.status(200).json({ message: "OTP Expired", success: false });
+      res.status(200).json({ message: "OTP has expired", success: false });
     } else {
       bcrypt.compare(otp, userOTP.otp).then(async (result) => {
         if (result) {
@@ -380,14 +382,18 @@ const otpVerification = async (req: Request, res: Response) => {
             { service_number: serviceNo },
             { verified: true }
           );
-          res.status(200).json({ message: "OTP Verified", success: true });
+          res
+            .status(200)
+            .json({ message: "OTP has been verified", success: true });
         } else {
           res.status(200).json({ message: "Invalid OTP", success: false });
         }
       });
     }
   } else {
-    res.status(200).json({ message: "error", success: false });
+    res
+      .status(200)
+      .json({ message: "OTP is invalid or expired", success: false });
   }
 };
 
@@ -417,6 +423,9 @@ const resetPassword = async (req: Request, res: Response) => {
             { service_number: serviceNo },
             { password: hash }
           );
+          await AppDataSource.manager.delete(UserOTPVerification, {
+            service_number: serviceNo,
+          });
           res
             .status(200)
             .json({ message: "Password Reset Successful", success: true });
@@ -518,6 +527,13 @@ const updateUserDetails = async (req: Request, res: Response) => {
 const updateUserPassword = async (req: Request, res: Response) => {
   try {
     const { oldPassword, newPassword } = req.body;
+    if (oldPassword === newPassword) {
+      res.status(200).json({
+        message: "Old password and new password are same",
+        success: false,
+      });
+      return;
+    }
     const serviceNo = (req as any).serviceNo;
     const user = await AppDataSource.createQueryBuilder()
       .select("user")
@@ -948,7 +964,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
       Name: Like(`%${search?.toString().toLowerCase()}%`),
     },
     order: {
-      updatedAt: "DESC",
+      Name: "ASC",
     },
   };
 
@@ -1015,7 +1031,7 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
       Status: "Active",
     },
     order: {
-      updatedAt: "DESC",
+      overall_rating: "DESC",
     },
   };
 
@@ -1260,6 +1276,7 @@ const deleteFromWishList = async (req: Request, res: Response) => {
 // get notifications
 const getNotifications = async (req: Request, res: Response) => {
   const userId = (req as any).serviceNo;
+
   if (userId) {
     await AppDataSource.manager
       .find(Notification, {
@@ -1307,89 +1324,129 @@ const deleteNotification = async (req: Request, res: Response) => {
   }
 };
 
+const findAdminNo = async (reservationId: string) => {
+  let adminNum = "hiii";
+  await AppDataSource.manager
+    .find(Reservation, {
+      select: ["HolidayHome"],
+      where: {
+        ReservationId: reservationId,
+      },
+    })
+    .then(async (holidayHome) => {
+      if (holidayHome.length > 0) {
+        await AppDataSource.manager
+          .find(HolidayHome, {
+            select: ["AdminNo"],
+            where: {
+              HolidayHomeId: holidayHome[0].HolidayHome,
+            },
+          })
+          .then((adminNo) => {
+            adminNum = adminNo[0].AdminNo;
+          })
+          .catch(() => {
+            adminNum = "";
+          });
+      }
+    })
+    .catch(() => {
+      adminNum = "";
+    });
+  return adminNum;
+};
+
 // cancelled reservation
 const cancelReservation = async (req: Request, res: Response) => {
   const { reservationId, isPaid } = req.body;
-  if (isPaid) {
-    await AppDataSource.manager
-      .update(
-        Reservation,
-        { ReservationId: reservationId },
-        { IsCancelled: true }
-      )
-      .then(() => {
-        res
-          .status(200)
-          .json({ message: "Reservation Cancelled", success: true });
-      })
-      .catch(() => {
-        res.status(500).json({ message: "Internal Server error" });
-      });
-  } else {
-    await AppDataSource.manager
-      .delete(Reservation, {
-        ReservationId: reservationId,
-      })
-      .then(async () => {
-        await AppDataSource.manager
-          .delete(ReservedRooms, {
-            ReservationId: reservationId,
-          })
-          .then(() => {})
-          .catch(() => {});
+  try {
+    const adminNo = await findAdminNo(reservationId);
+    if (isPaid) {
+      await AppDataSource.manager
+        .update(
+          Reservation,
+          { ReservationId: reservationId },
+          { IsCancelled: true }
+        )
+        .then(() => {
+          res.status(200).json({
+            message: "Reservation Cancelled",
+            adminNo: adminNo,
+            success: true,
+          });
+        })
+        .catch(() => {
+          res.status(500).json({ message: "Internal Server error" });
+        });
+    } else {
+      await AppDataSource.manager
+        .delete(Reservation, {
+          ReservationId: reservationId,
+        })
+        .then(async () => {
+          await AppDataSource.manager
+            .delete(ReservedRooms, {
+              ReservationId: reservationId,
+            })
+            .then(() => {})
+            .catch(() => {});
 
-        await AppDataSource.manager
-          .delete(ReservedHalls, {
-            ReservationId: reservationId,
-          })
-          .then(() => {})
-          .catch(() => {});
+          await AppDataSource.manager
+            .delete(ReservedHalls, {
+              ReservationId: reservationId,
+            })
+            .then(() => {})
+            .catch(() => {});
 
-        res
-          .status(200)
-          .json({ message: "Reservation Cancelled", success: true });
-      })
-      .catch(() => {
-        res.status(500).json({ message: "Internal Server error" });
-      });
+          res.status(200).json({
+            message: "Reservation Cancelled",
+            adminNo: adminNo,
+            success: true,
+          });
+        })
+        .catch(() => {
+          res.status(500).json({ message: "Internal Server error" });
+        });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
 
-// delete expire reservation
-const deleteExpireReservation = async () => {
-  const expireDate = new Date(Date.now() - expireTime);
+// delete expired verification codes
+const deleteExpiredVerificationCodes = async () => {
   await AppDataSource.manager
-    .find(Reservation, {
+    .find(UserEmailVerification, {
       where: {
-        createdAt: MoreThan(expireDate),
-        IsPaid: false,
+        expires_at: LessThan(new Date()),
       },
     })
-    .then(async (reservations: Reservation[]) => {
-      for (const reservation of reservations) {
-        await AppDataSource.manager
-          .delete(Reservation, {
-            ReservationId: reservation.ReservationId,
-          })
-          .then(async () => {
-            await AppDataSource.manager
-              .delete(ReservedRooms, {
-                ReservationId: reservation.ReservationId,
-              })
-              .then(() => {})
-              .catch(() => {});
-
-            await AppDataSource.manager
-              .delete(ReservedHalls, {
-                ReservationId: reservation.ReservationId,
-              })
-              .then(() => {})
-              .catch(() => {});
-          })
-          .catch(() => {});
+    .then((expiredCodes) => {
+      if (expiredCodes.length > 0) {
+        AppDataSource.manager.delete(UserEmailVerification, expiredCodes);
+        for (let i = 0; i < expiredCodes.length; i++) {
+          AppDataSource.manager.delete(HomlyUser, {
+            service_number: expiredCodes[i].service_number,
+            validated: false,
+          });
+        }
       }
+    });
+};
+
+// delete expired OTPs
+const deleteExpiredOTPs = async () => {
+  await AppDataSource.manager
+    .find(UserOTPVerification, {
+      where: {
+        expires_at: LessThan(new Date()),
+      },
     })
-    .catch(() => {});
+    .then((expiredOTPs) => {
+      if (expiredOTPs.length > 0) {
+        AppDataSource.manager.delete(UserOTPVerification, expiredOTPs);
+      }
+    });
 };
 
 export {
@@ -1418,5 +1475,6 @@ export {
   getNotifications,
   deleteNotification,
   cancelReservation,
-  deleteExpireReservation,
+  deleteExpiredOTPs,
+  deleteExpiredVerificationCodes,
 };

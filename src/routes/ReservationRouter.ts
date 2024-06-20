@@ -1,7 +1,6 @@
 import express from "express";
-import { getReservation, AddResrvation, AddSpecialResrvation, getHolidayHomeNames, getRooms, getHalls, AddComplaint,getAvailableRooms, getAvailableHalls, getTotalRoomRental, CompletePayment} from "../controllers/ReservationController"
-import {getOngoingReservation, getPastReservation, getSpecialReservation, getCanceledReservation} from "../controllers/PrimaryAdminController";
-
+import { getReservation, AddResrvation, AddSpecialResrvation, getHolidayHomeNames, getRooms, getHalls, AddComplaint,getAvailableRooms, getAvailableHalls, getTotalRoomRental, CompletePayment, getUserFromEmployee, getRefund, addRefundByUser, UpdateRefundByAdmin, getRefundById} from "../controllers/ReservationController"
+import { getOngoingReservation, getPastReservation, getSpecialReservation, getCanceledReservation } from "../controllers/PrimaryAdminController";
 
 const ReservationRouter = express.Router ();
 
@@ -20,5 +19,11 @@ ReservationRouter.get("/user/reservation/availableRooms",getAvailableRooms);
 ReservationRouter.get("/user/reservation/availableHalls",getAvailableHalls);
 ReservationRouter.get("/user/reservation/getTotalRoomRental/:HolidayHomeId",getTotalRoomRental);
 ReservationRouter.put("/user/auth/reservation/completePayment",CompletePayment);
+ReservationRouter.get("/admin/auth/reservation/employee/:serviceno",getUserFromEmployee);
+ReservationRouter.get("/admin/auth/reservation/refund",getRefund);
+ReservationRouter.post("/user/auth/reservation/addRefundByUser",addRefundByUser);
+ReservationRouter.put("/admin/auth/reservation/updateRefundByAdmin",UpdateRefundByAdmin);
+ReservationRouter.get("/user/auth/reservation/getRefundById/:reservationNo",getRefundById);
+ReservationRouter.get("/admin/auth/reservation/getRefundById/:reservationNo",getRefundById);
 
 export {ReservationRouter}

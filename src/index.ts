@@ -4,10 +4,8 @@ import cors from "cors";
 import OracleDB from "oracledb";
 import io from "./services/socketio";
 import { DataSource } from "typeorm";
-import { SpecailReservation } from "./entities/SpecialReservation";
 import { ReservedRooms } from "./entities/ReservedRooms";
 import { ReservedHalls } from "./entities/ReservedHalls";
-import { SpecialReservationRouter } from "./routes/SpecialReservationRouter";
 import { Hall } from "./entities/Hall";
 import { CareTaker } from "./entities/CareTaker";
 import { HolidayHome } from "./entities/HolidayHome";
@@ -23,6 +21,7 @@ import { Complaints } from "./entities/Complaint";
 import { BlackListedUser } from "./entities/BlackListedUser";
 import { BlackListHistory } from "./entities/BlackListHistory";
 import { Reservation } from "./entities/Reservation";
+import { Refund } from "./entities/Refund";
 import { LocationAdminRoute } from "./routes/LocationAdminRoute";
 import {
   HomlyUser,
@@ -45,7 +44,6 @@ import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 import { ReportsRouter } from "./routes/ReportRouters";
-import PaymentRoutes from "./routes/PaymentRoutes";
 import { requireAuth } from "./middleware/authMiddleware";
 import { requireUserAuth } from "./middleware/authUserMiddleware";
 import { requireAdminAuth } from "./middleware/authAdminMiddleware";
@@ -83,10 +81,10 @@ export const AppDataSource = new DataSource({
     Unit,
     Room,
     Reservation,
+    Refund,
     ContactNo,
     LocationAdmin,
     Rental,
-    SpecailReservation,
     UserFeedback,
     SelectedRooms,
     RoomRentalSettings,
@@ -118,7 +116,6 @@ AppDataSource.initialize()
     app.use("/user/auth/*", requireUserAuth);
     app.use("/admin/auth/*", requireAdminAuth);
     app.use("/admin/auth/locationadmin/holidayhome", HolidayHomeRouter);
-    app.use("/admin/auth/locationadmin/reservations", SpecialReservationRouter);
     app.use("/admin", LocationAdminRoute);
     app.use("/admin", ReportsRouter);
     app.use("/admin", BlacklistRouter);
@@ -129,7 +126,6 @@ AppDataSource.initialize()
     app.use("/", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
     app.use("/admin", LocationAdminDashboardRouter);
-    app.use("/payment", PaymentRoutes);
     app.use("/common", common_router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);

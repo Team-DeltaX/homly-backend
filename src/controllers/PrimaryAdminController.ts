@@ -27,8 +27,10 @@ import { Hall } from "../entities/Hall";
 import { Room } from "../entities/Room";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
+import { Notification } from "../entities/Notification";
 
-const schedule = require('node-schedule');
+// const schedule = require("node-schedule");
+import schedule from "node-schedule";
 
 dotenv.config();
 
@@ -105,6 +107,24 @@ export const getall = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+export const getallDisabled = async (req: Request, res: Response) => {
+  
+  try {
+    const admins = await AppDataSource.manager.find(HomlyAdmin, {
+      where: {
+        Disabled:true
+      },
+      order: {
+        updatedAt: "DESC",
+      },
+    });
+
+    res.status(200).json(admins);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
 
 export const disableadmin = async (req: Request, res: Response) => {
   const id = req.params.id;
@@ -297,6 +317,78 @@ export const checkuserexist = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error in check user exist!" });
   }
 };
+const getReservationDetails = async (reservation: any) => {
+  let reservationDetails = [];
+  for (var i = 0; i < reservation.length; i++) {
+    const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
+      select: ["roomCode"],
+      where: {
+        ReservationId: reservation[i].ReservationId,
+      },
+    });
+    const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
+      select: ["hallCode"],
+      where: {
+        ReservationId: reservation[i].ReservationId,
+      },
+    });
+    const holidayHome = await AppDataSource.manager.find(HolidayHome, {
+      select: ["Name", "MainImage", "AdminNo"],
+      where: {
+        HolidayHomeId: reservation[i].HolidayHome,
+      },
+    });
+    const employeeName = await AppDataSource.manager.find(Employee, {
+      select: ["name"],
+      where: {
+        service_number: reservation[i].ServiceNO,
+      },
+    });
+    const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
+      select: ["contact_number", "email", "image"],
+      where: {
+        service_number: reservation[i].ServiceNO,
+      },
+    });
+    const isComplaint = await AppDataSource.manager.find(Complaints, {
+      where: {
+        ReservationNo: reservation[i].ReservationId,
+      },
+    });
+    if (reservedrooms.length === 0) {
+      reservationDetails.push({
+        reservation: reservation[i],
+        reservedrooms: [],
+        reservedhalls: reservedhalls,
+        holidayHome: holidayHome,
+        employeeName: employeeName,
+        employeeDetails: employeeDetails,
+        Complaints: isComplaint,
+      });
+    } else if (reservedhalls.length === 0) {
+      reservationDetails.push({
+        reservation: reservation[i],
+        reservedrooms: reservedrooms,
+        reservedhalls: [],
+        holidayHome: holidayHome,
+        employeeName: employeeName,
+        employeeDetails: employeeDetails,
+        Complaints: isComplaint,
+      });
+    } else {
+      reservationDetails.push({
+        reservation: reservation[i],
+        reservedrooms: reservedrooms,
+        reservedhalls: reservedhalls,
+        holidayHome: holidayHome,
+        employeeName: employeeName,
+        employeeDetails: employeeDetails,
+        complaints: isComplaint,
+      });
+    }
+  }
+  return reservationDetails;
+};
 
 export const getOngoingReservation = async (req: Request, res: Response) => {
   const adminNo = (req as any).serviceNo;
@@ -305,90 +397,36 @@ export const getOngoingReservation = async (req: Request, res: Response) => {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         CheckoutDate: MoreThan(currentDate),
-        IsCancelled:false,
+        IsCancelled: false,
+      },
+      order: {
+        CheckinDate: "ASC",
       },
     });
 
-    let reservationDetails = [];
-    for (var i = 0; i < reservation.length; i++) {
-      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
-        select: ["roomCode"],
-        where: {
-          ReservationId: reservation[i].ReservationId,
-        },
-      });
-      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
-        select: ["hallCode"],
-        where: {
-          ReservationId: reservation[i].ReservationId,
-        },
-      });
-      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name","MainImage","AdminNo"],
-        where: {
-          HolidayHomeId: reservation[i].HolidayHome,
-        },
-      });
-      const employeeName = await AppDataSource.manager.find(Employee, {
-        select: ["name"],
-        where: {
-          service_number: reservation[i].ServiceNO,
-        },
-      });
-      const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email", "image"],
-        where: {
-          service_number: reservation[i].ServiceNO,
-        },
-      });
-      if (reservedrooms.length === 0) {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: [],
-          reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      }
-      if (reservedhalls.length === 0) {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: reservedrooms,
-          reservedhalls: [],
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      
-      } else {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: reservedrooms,
-          reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      }
-    }
-    if(adminNo === "HomlyPriAdmin"){
-
+    let reservationDetails = await getReservationDetails(reservation);
+    if (adminNo === "HomlyPriAdmin") {
       res.status(200).json(reservationDetails);
-    }else{
+    } else {
       let adminReservation = [];
-      for (var i = 0; i < reservationDetails.length; i++) {
-        console.log(reservationDetails[i].holidayHome[0].AdminNo)
-        if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-
-          adminReservation.push(reservationDetails[i]);
+      for (let i = 0; i < reservationDetails.length; i++) {
+        if (
+          reservationDetails[i].holidayHome &&
+          reservationDetails[i].holidayHome.length > 0 &&
+          reservationDetails[i].holidayHome[0].AdminNo
+        ) {
+          console.log(reservationDetails[i].holidayHome[0].AdminNo);
+          if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
+            adminReservation.push(reservationDetails[i]);
+          }
+        } else {
+          console.error(`holidayHome[0] is undefined for reservation ${i}`);
         }
       }
-      
       res.status(200).json(adminReservation);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
@@ -400,84 +438,30 @@ export const getPastReservation = async (req: Request, res: Response) => {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
         CheckoutDate: LessThan(currentDate),
-        IsPaid:true,
+        IsPaid: true,
+      },
+      order: {
+        CheckinDate: "ASC",
       },
     });
 
-    let reservationDetails = [];
-    for (var i = 0; i < reservation.length; i++) {
-      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
-        select: ["roomCode"],
-        where: {
-          ReservationId: reservation[i].ReservationId,
-        },
-      });
-      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
-        select: ["hallCode"],
-        where: {
-          ReservationId: reservation[i].ReservationId,
-        },
-      });
-      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name","MainImage","AdminNo"],
-        where: {
-          HolidayHomeId: reservation[i].HolidayHome,
-        },
-      });
-      const employeeName = await AppDataSource.manager.find(Employee, {
-        select: ["name"],
-        where: {
-          service_number: reservation[i].ServiceNO,
-        },
-      });
-      const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email", "image"],
-        where: {
-          service_number: reservation[i].ServiceNO,
-        },
-      });  
-      if (reservedrooms.length === 0) {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: [],
-          reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      }
-      if (reservedhalls.length === 0) {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: reservedrooms,
-          reservedhalls: [],
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      } else {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: reservedrooms,
-          reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      }
-    }
-    if(adminNo === "HomlyPriAdmin"){
-      res.status(200).json({reservationDetails:reservationDetails, adminNo: adminNo});
-    }else{
+    let reservationDetails = await getReservationDetails(reservation);
+    if (adminNo === "HomlyPriAdmin") {
+      res
+        .status(200)
+        .json({ reservationDetails: reservationDetails, adminNo: adminNo });
+    } else {
       let adminReservation = [];
       for (var i = 0; i < reservationDetails.length; i++) {
-        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        console.log(reservationDetails[i].holidayHome[0].AdminNo);
         if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
           adminReservation.push(reservationDetails[i]);
         }
       }
-      
-      res.status(200).json({reservationDetails:adminReservation, adminNo: adminNo});
+
+      res
+        .status(200)
+        .json({ reservationDetails: adminReservation, adminNo: adminNo });
     }
   } catch (error) {
     console.log(error);
@@ -490,85 +474,25 @@ export const getSpecialReservation = async (req: Request, res: Response) => {
   try {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
-        IsSpecial:true,
+        IsSpecial: true,
+      },
+      order: {
+        CheckinDate: "ASC",
       },
     });
 
-    let reservationDetails = [];
-    for (var i = 0; i < reservation.length; i++) {
-      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
-        select: ["roomCode"],
-        where: {
-          ReservationId: reservation[i].ReservationId,
-        },
-      });
-      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
-        select: ["hallCode"],
-        where: {
-          ReservationId: reservation[i].ReservationId,
-        },
-      });
-      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name","MainImage","AdminNo"],
-        where: {
-          HolidayHomeId: reservation[i].HolidayHome,
-        },
-      });
-      const employeeName = await AppDataSource.manager.find(Employee, {
-        select: ["name"],
-        where: {
-          service_number: reservation[i].ServiceNO,
-        },
-      });
-      const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email", "image"],
-        where: {
-          service_number: reservation[i].ServiceNO,
-        },
-      });
-      if (reservedrooms.length === 0) {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: [],
-          reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      }
-      if (reservedhalls.length === 0) {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: reservedrooms,
-          reservedhalls: [],
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      } else {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: reservedrooms,
-          reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      }
-    }
-    if(adminNo === "HomlyPriAdmin"){
-
+    let reservationDetails = await getReservationDetails(reservation);
+    if (adminNo === "HomlyPriAdmin") {
       res.status(200).json(reservationDetails);
-    }else{
+    } else {
       let adminReservation = [];
       for (var i = 0; i < reservationDetails.length; i++) {
-        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        console.log(reservationDetails[i].holidayHome[0].AdminNo);
         if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-
           adminReservation.push(reservationDetails[i]);
         }
       }
-      
+
       res.status(200).json(adminReservation);
     }
   } catch (error) {
@@ -582,85 +506,25 @@ export const getCanceledReservation = async (req: Request, res: Response) => {
   try {
     const reservation = await AppDataSource.manager.find(Reservation, {
       where: {
-        IsCancelled:true,
+        IsCancelled: true,
+      },
+      order: {
+        CheckinDate: "ASC",
       },
     });
 
-    let reservationDetails = [];
-    for (var i = 0; i < reservation.length; i++) {
-      const reservedrooms = await AppDataSource.manager.find(ReservedRooms, {
-        select: ["roomCode"],
-        where: {
-          ReservationId: reservation[i].ReservationId,
-        },
-      });
-      const reservedhalls = await AppDataSource.manager.find(ReservedHalls, {
-        select: ["hallCode"],
-        where: {
-          ReservationId: reservation[i].ReservationId,
-        },
-      });
-      const holidayHome = await AppDataSource.manager.find(HolidayHome, {
-        select: ["Name","MainImage","AdminNo"],
-        where: {
-          HolidayHomeId: reservation[i].HolidayHome,
-        },
-      });
-      const employeeName = await AppDataSource.manager.find(Employee, {
-        select: ["name"],
-        where: {
-          service_number: reservation[i].ServiceNO,
-        },
-      });
-      const employeeDetails = await AppDataSource.manager.find(HomlyUser, {
-        select: ["contact_number", "email", "image"],
-        where: {
-          service_number: reservation[i].ServiceNO,
-        },
-      });
-      if (reservedrooms.length === 0) {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: [],
-          reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      }
-      if (reservedhalls.length === 0) {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: reservedrooms,
-          reservedhalls: [],
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      } else {
-        reservationDetails.push({
-          reservation: reservation[i],
-          reservedrooms: reservedrooms,
-          reservedhalls: reservedhalls,
-          holidayHome:holidayHome,
-          employeeName:employeeName,
-          employeeDetails:employeeDetails
-        });
-      }
-    }
-    if(adminNo === "HomlyPriAdmin"){
-
+    let reservationDetails = await getReservationDetails(reservation);
+    if (adminNo === "HomlyPriAdmin") {
       res.status(200).json(reservationDetails);
-    }else{
+    } else {
       let adminReservation = [];
       for (var i = 0; i < reservationDetails.length; i++) {
-        console.log(reservationDetails[i].holidayHome[0].AdminNo)
+        console.log(reservationDetails[i].holidayHome[0].AdminNo);
         if (reservationDetails[i].holidayHome[0].AdminNo === adminNo) {
-
           adminReservation.push(reservationDetails[i]);
         }
       }
-      
+
       res.status(200).json(adminReservation);
     }
   } catch (error) {
@@ -778,6 +642,8 @@ export const getNotApprovedHomes = async (req: Request, res: Response) => {
     const homes = await AppDataSource.manager.find(HolidayHome, {
       where: {
         Approved: false,
+        isDiclined:false
+
       },
     });
 
@@ -799,13 +665,12 @@ export const approveHH = async (req: Request, res: Response) => {
 
 export const rejectHH = async (req: Request, res: Response) => {
   const id = req.body.id;
+  const reject_reason=req.body.reject_reason
   try {
-    await HolidayHome.delete({ HolidayHomeId: id });
-    res.status(200).json({
-      message: "Successfully rejected the home(deleted from HH table)",
-    });
+    await HolidayHome.update(id, { reason: reject_reason,isDiclined:true });
+    res.status(200).json({ message: "Successfully approved the home" });
   } catch (error) {
-    res.status(500).json({ message: "Error in rejecting the home!" });
+    res.status(500).json({ message: "Error in approving the home!" });
   }
 };
 
@@ -912,7 +777,6 @@ export const get_income_in_date = async (req: Request, res: Response) => {
       sumForDate += reservation.Price;
     });
 
-   
     res.status(200).json({ sumForDate });
   } catch (error) {
     res.status(500).json({ message: "error occured in get income in date" });
@@ -972,6 +836,7 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
     const count = await HolidayHome.count({
       where: {
         Approved: false,
+        isDiclined:false
       },
     });
     res.status(200).json({ notapprovedcount: count });
@@ -981,7 +846,6 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
 };
 
 export const get_holiday_home_rating = async (req: Request, res: Response) => {
-  
   const holidayhomeid = req.params.homeid;
   try {
     const rating = await AppDataSource.manager.find(HolidayHome, {
@@ -992,13 +856,50 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
         HolidayHomeId: holidayhomeid,
       },
     });
-    
+
     res.status(200).json({ rating });
   } catch {
     res.status(500).json({ message: "error in getting holiday home rating" });
   }
 };
 
-export const everyFiveSeconds = schedule.scheduleJob('0 0 * * *', () => {
-  console.log('Task executed every 5 seconds:', new Date().toLocaleTimeString());
-});
+//shuduler function runs in every day 12 am
+//every 10s- */10 * * * * *
+//every day 12am-0 0 * * *
+
+
+
+// export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
+//   console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
+//   const blacklist=await BlackListedUser.find()
+//   // console.log(blacklist)
+//   blacklist.map((item)=>{
+//     console.log(item.Date)
+//   })
+
+      
+
+
+
+// });
+
+
+
+export const markSendWarning = async (req: Request, res: Response) => {
+  try {
+    
+    const CompID = req.body.CompID;
+    console.log(CompID)
+    await AppDataSource.manager.update(
+      Complaints,
+      { ComplaintID: CompID },
+      { IsWarned: true }
+    );
+
+    res.status(200).json({ message: "Successfully marked send warning" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error in marking send warning" });
+  }
+};

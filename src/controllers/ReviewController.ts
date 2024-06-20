@@ -253,6 +253,22 @@ const getUserReview = async (req: Request, res: Response) => {
     });
 };
 
+//get review count for paaticular holidayHome
+const getReviewCount = async (holidayHomeId: string) => {
+  let reviewCount = 0;
+  await AppDataSource.manager
+    .find(Review, {
+      where: {
+        HolidayHomeId: holidayHomeId,
+      },
+    })
+    .then((rev) => {
+      reviewCount = rev.length;
+    });
+
+  return reviewCount;
+};
+
 const updateUserReview = async (req: Request, res: Response) => {
   const { reservationID, review } = req.body;
   await AppDataSource.manager
