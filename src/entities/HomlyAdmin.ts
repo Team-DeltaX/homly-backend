@@ -49,6 +49,10 @@ export class HomlyAdmin extends BaseEntity {
   // @OneToMany(() => Complaints, (complaints) => complaints.ComplaintID)
   // Complaint!: Complaints[]
 
+  // @UpdateDateColumn()
+  // updatedAt!: Date;
+
+
 
   @Column({
     default:false
