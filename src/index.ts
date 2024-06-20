@@ -44,7 +44,6 @@ import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 import { ReportsRouter } from "./routes/ReportRouters";
-import PaymentRoutes from "./routes/PaymentRoutes";
 import { requireAuth } from "./middleware/authMiddleware";
 import { requireUserAuth } from "./middleware/authUserMiddleware";
 import { requireAdminAuth } from "./middleware/authAdminMiddleware";
@@ -127,7 +126,6 @@ AppDataSource.initialize()
     app.use("/", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
     app.use("/admin", LocationAdminDashboardRouter);
-    app.use("/payment", PaymentRoutes);
     app.use("/common", common_router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);

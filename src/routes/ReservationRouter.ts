@@ -2,7 +2,6 @@ import express from "express";
 import { getReservation, AddResrvation, AddSpecialResrvation, getHolidayHomeNames, getRooms, getHalls, AddComplaint,getAvailableRooms, getAvailableHalls, getTotalRoomRental, CompletePayment, getUserFromEmployee, getRefund, addRefundByUser, UpdateRefundByAdmin, getRefundById} from "../controllers/ReservationController"
 import { getOngoingReservation, getPastReservation, getSpecialReservation, getCanceledReservation } from "../controllers/PrimaryAdminController";
 
-
 const ReservationRouter = express.Router ();
 
 ReservationRouter.get("/admin/auth/reservation/",getReservation);
