@@ -1,11 +1,12 @@
 import express from 'express'
-import { AddAdmin,getall,disableadmin,sendMail,editadmindeatails, getcomplaints, get_user_from_user, get_user_from_employee, getprevcomplaints} from "../controllers/PrimaryAdminController";
+import { AddAdmin,getall,disableadmin,sendMail,editadmindeatails, getcomplaints, get_user_from_user, get_user_from_employee, getprevcomplaints, getallDisabled} from "../controllers/PrimaryAdminController";
 const LocationAdminRoute = express.Router();
 
 
 
 LocationAdminRoute.post("/auth/locationadmin/add", AddAdmin)
 LocationAdminRoute.get("/auth/locationadmin/all", getall)
+LocationAdminRoute.get("/auth/locationadmin/alldisabled", getallDisabled)
 LocationAdminRoute.put("/auth/locationadmin/disable/:id", disableadmin)
 LocationAdminRoute.post("/auth/locationadmin/resetpassword", sendMail)
 LocationAdminRoute.put("/auth/locationadmin/",editadmindeatails )
