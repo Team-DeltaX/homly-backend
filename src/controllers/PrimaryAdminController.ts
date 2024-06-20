@@ -115,7 +115,7 @@ export const getallDisabled = async (req: Request, res: Response) => {
         Disabled:true
       },
       order: {
-        updatedAt: "ASC",
+        updatedAt: "DESC",
       },
     });
 
