@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryColumn, Column } from "typeorm";
+import { Entity, BaseEntity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Review extends BaseEntity {
@@ -12,5 +12,15 @@ export class Review extends BaseEntity {
   UserReview!: string;
 
   @Column()
-  ServiceNo!: string;
+  ServiceNo! : string;
+
+  @CreateDateColumn({
+    type: "date",
+})
+  createdAt!: Date;
+
+  @UpdateDateColumn({
+    type: "date",
+})
+  updatedAt!: Date;
 }
