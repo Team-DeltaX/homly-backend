@@ -1,12 +1,14 @@
-
-
-import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn, OneToOne,CreateDateColumn, BaseEntity} from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  BaseEntity,
+} from "typeorm";
 @Entity()
-export class BlackListedUser extends BaseEntity{
-
-  @PrimaryGeneratedColumn('uuid')
-  BlackListId!: String ;
-
+export class BlackListedUser extends BaseEntity {
+  @PrimaryGeneratedColumn("uuid")
+  BlackListId!: String;
 
   @Column()
   BlackListReason!: String;
@@ -14,7 +16,7 @@ export class BlackListedUser extends BaseEntity{
   @CreateDateColumn({
     nullable: false,
   })
-  Date!: Date; 
+  Date!: Date;
 
   @Column()
   ServiceNo!: String;

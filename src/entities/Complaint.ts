@@ -1,29 +1,21 @@
-import { Entity, PrimaryGeneratedColumn, Column ,PrimaryColumn, OneToMany, ManyToOne, JoinColumn,CreateDateColumn} from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn } from "typeorm";
 
 @Entity()
-export class Complaints{
-    Save() {
-        throw new Error("Method not implemented.");
-    }
+export class Complaints {
+  Save() {
+    throw new Error("Method not implemented.");
+  }
   @PrimaryColumn()
-  ComplaintID!: String ;
+  ComplaintID!: String;
 
   @Column()
-  ServiceNo!:String;
-
-
-  // @ManyToOne(() => Userdel, (userdel) =>userdel.ServiceNo)
-  // @JoinColumn({ name: 'ServiceNo' })
-  //   ServiceNoEmp!: Userdel
-
-  // @ManyToOne(() => LocationAdmin, (locationadmin) => locationadmin.Complaint)
-  // @JoinColumn({ name: 'AdminNo' })
-  //   AdminNo!: LocationAdmin
-  @Column()
-  AdminNo!:String
+  ServiceNo!: String;
 
   @Column()
-  ReservationNo!:String;
+  AdminNo!: String;
+
+  @Column()
+  ReservationNo!: String;
 
   @CreateDateColumn({
     nullable: false,
@@ -31,16 +23,15 @@ export class Complaints{
   created_at!: Date;
 
   @Column()
-  Reason!:String;
+  Reason!: String;
 
   @Column({
-    default:false
+    default: false,
   })
-  Marked!:Boolean
+  Marked!: Boolean;
 
   @Column({
-    default:false
+    default: false,
   })
-  IsWarned!:Boolean
-
+  IsWarned!: Boolean;
 }

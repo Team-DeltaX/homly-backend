@@ -1,12 +1,4 @@
-import {
-  BaseEntity,
-  Entity,
-  PrimaryColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-} from "typeorm";
-import { HolidayHome } from "./HolidayHome";
+import { BaseEntity, Entity, PrimaryColumn, Column } from "typeorm";
 
 @Entity()
 export class CareTaker extends BaseEntity {

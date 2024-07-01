@@ -1,28 +1,23 @@
-import { BaseEntity, Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, Collection } from "typeorm";
-import { HolidayHome } from "./HolidayHome";
+import { BaseEntity, Entity, PrimaryColumn, Column } from "typeorm";
 
 @Entity()
 export class Rental extends BaseEntity {
-    @PrimaryColumn()
-    Month!: String
+  @PrimaryColumn()
+  Month!: String;
 
-    @Column({
-        type: "numeric"
-    })
-    WeekRental!: number
+  @Column({
+    type: "numeric",
+  })
+  WeekRental!: number;
 
-    @Column({
-        type: "numeric"
-    })
-    WeekEndRental!: number
+  @Column({
+    type: "numeric",
+  })
+  WeekEndRental!: number;
 
-    @PrimaryColumn()
-    HolidayHomeId!: String
+  @PrimaryColumn()
+  HolidayHomeId!: String;
 
-    @PrimaryColumn()
-    HRUId!: String
-
-
-
-
+  @PrimaryColumn()
+  HRUId!: String;
 }

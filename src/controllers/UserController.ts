@@ -1,15 +1,7 @@
-import { v4 as uuidv4, validate } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {
-  LessThan,
-  MoreThanOrEqual,
-  Like,
-  Between,
-  Not,
-  In,
-  MoreThan,
-} from "typeorm";
+import { LessThan, MoreThanOrEqual, Like, Between, Not, In } from "typeorm";
 import { Request, Response } from "express";
 import emailVerify from "../template/emailVerify";
 import sentOTPEmail from "../template/sentOTPEmail";
@@ -30,7 +22,7 @@ import { Reservation } from "../entities/Reservation";
 import { Review } from "../entities/Review";
 import { ReservedRooms } from "../entities/ReservedRooms";
 import { ReservedHalls } from "../entities/ReservedHalls";
-import { WishList } from "../entities/WishList";
+import { FavoriteHH } from "../entities/FavoritehhList";
 import { Notification } from "../entities/Notification";
 import dotenv from "dotenv";
 const schedule = require("node-schedule");
@@ -699,7 +691,7 @@ const getTopRatedHolidayHomes = async (req: Request, res: Response) => {
     const totalRental = await calculateTotalRental(
       topRatedHolidayHomes[i].HolidayHomeId
     );
-    const isFavourite = await AppDataSource.manager.find(WishList, {
+    const isFavourite = await AppDataSource.manager.find(FavoriteHH, {
       where: {
         service_number: (req as any).serviceNo,
         holidayHomeId: topRatedHolidayHomes[i].HolidayHomeId,
@@ -983,7 +975,7 @@ const getHolidayHomes = async (req: Request, res: Response) => {
       const totalRental = await calculateTotalRental(
         holidayHomes[i].HolidayHomeId
       );
-      const isFavourite = AppDataSource.manager.find(WishList, {
+      const isFavourite = AppDataSource.manager.find(FavoriteHH, {
         where: {
           service_number: serviceNo,
           holidayHomeId: holidayHomes[i].HolidayHomeId,
@@ -1201,7 +1193,7 @@ const searchHolidayHomes = async (req: Request, res: Response) => {
 const addtoWhishList = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
   const { holidayHomeId } = req.body;
-  const wishList = WishList.create({
+  const wishList = FavoriteHH.create({
     service_number: serviceNo,
     holidayHomeId: holidayHomeId,
   });
@@ -1220,7 +1212,7 @@ const getWishList = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
 
   try {
-    const wishList = await AppDataSource.manager.find(WishList, {
+    const wishList = await AppDataSource.manager.find(FavoriteHH, {
       where: {
         service_number: serviceNo,
       },
@@ -1261,7 +1253,7 @@ const deleteFromWishList = async (req: Request, res: Response) => {
   const { holidayHomeId } = req.body;
 
   await AppDataSource.manager
-    .delete(WishList, {
+    .delete(FavoriteHH, {
       service_number: serviceNo,
       holidayHomeId: holidayHomeId,
     })
