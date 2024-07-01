@@ -29,10 +29,9 @@ import {
   UserOTPVerification,
   UserInteresed,
 } from "./entities/User";
-import { WishList } from "./entities/WishList";
+import { FavoriteHH } from "./entities/FavoritehhList";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
-import { UserFeedback } from "./entities/Feedback";
 import { SelectedRooms } from "./entities/SelectedRooms";
 import { Review } from "./entities/Review";
 import { Notification } from "./entities/Notification";
@@ -85,14 +84,13 @@ export const AppDataSource = new DataSource({
     ContactNo,
     LocationAdmin,
     Rental,
-    UserFeedback,
     SelectedRooms,
     RoomRentalSettings,
     RoomTypeSettings,
     ReservedRooms,
     Review,
     ReservedHalls,
-    WishList,
+    FavoriteHH,
     Notification,
   ],
   synchronize: true,

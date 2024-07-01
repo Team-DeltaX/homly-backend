@@ -2,10 +2,9 @@ import { Entity, BaseEntity, PrimaryColumn, Column, CreateDateColumn, UpdateDate
 
 @Entity()
 export class Review extends BaseEntity {
-  
   @PrimaryColumn()
   ReservationId!: string;
-  
+
   @Column()
   HolidayHomeId!: string;
 
@@ -24,5 +23,4 @@ export class Review extends BaseEntity {
     type: "date",
 })
   updatedAt!: Date;
-
 }

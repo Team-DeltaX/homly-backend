@@ -6,7 +6,7 @@ import { HolidayHome } from "../entities/HolidayHome";
 import { UserInteresed } from "../entities/User";
 import { Reservation } from "../entities/Reservation";
 import { Review } from "../entities/Review";
-import { WishList } from "../entities/WishList";
+import { FavoriteHH } from "../entities/FavoritehhList";
 
 // get all holiday homes and save max rating holiday home
 const getHolidayHomesSorted = async (req: Request, res: Response) => {
@@ -71,7 +71,7 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
                 value: interested_value[i][inter3],
               },
             };
-            const isFavourite = await AppDataSource.manager.find(WishList, {
+            const isFavourite = await AppDataSource.manager.find(FavoriteHH, {
               where: {
                 service_number: serviceNo,
                 holidayHomeId: interested_value[i].HolidayHomeId,

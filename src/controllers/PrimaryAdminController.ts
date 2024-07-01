@@ -107,6 +107,24 @@ export const getall = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+export const getallDisabled = async (req: Request, res: Response) => {
+  
+  try {
+    const admins = await AppDataSource.manager.find(HomlyAdmin, {
+      where: {
+        Disabled:true
+      },
+      order: {
+        updatedAt: "DESC",
+      },
+    });
+
+    res.status(200).json(admins);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
 
 export const disableadmin = async (req: Request, res: Response) => {
   const id = req.params.id;
@@ -818,6 +836,7 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
     const count = await HolidayHome.count({
       where: {
         Approved: false,
+        isDiclined:false
       },
     });
     res.status(200).json({ notapprovedcount: count });
