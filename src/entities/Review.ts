@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryColumn, Column } from "typeorm";
+import { Entity, BaseEntity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Review extends BaseEntity {

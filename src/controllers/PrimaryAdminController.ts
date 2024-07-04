@@ -107,6 +107,24 @@ export const getall = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
+export const getallDisabled = async (req: Request, res: Response) => {
+  
+  try {
+    const admins = await AppDataSource.manager.find(HomlyAdmin, {
+      where: {
+        Disabled:true
+      },
+      order: {
+        updatedAt: "DESC",
+      },
+    });
+
+    res.status(200).json(admins);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error!!" });
+  }
+};
+
 
 export const disableadmin = async (req: Request, res: Response) => {
   const id = req.params.id;
@@ -624,6 +642,8 @@ export const getNotApprovedHomes = async (req: Request, res: Response) => {
     const homes = await AppDataSource.manager.find(HolidayHome, {
       where: {
         Approved: false,
+        isDiclined:false
+
       },
     });
 
@@ -645,13 +665,12 @@ export const approveHH = async (req: Request, res: Response) => {
 
 export const rejectHH = async (req: Request, res: Response) => {
   const id = req.body.id;
+  const reject_reason=req.body.reject_reason
   try {
-    await HolidayHome.delete({ HolidayHomeId: id });
-    res.status(200).json({
-      message: "Successfully rejected the home(deleted from HH table)",
-    });
+    await HolidayHome.update(id, { reason: reject_reason,isDiclined:true });
+    res.status(200).json({ message: "Successfully approved the home" });
   } catch (error) {
-    res.status(500).json({ message: "Error in rejecting the home!" });
+    res.status(500).json({ message: "Error in approving the home!" });
   }
 };
 
@@ -817,6 +836,7 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
     const count = await HolidayHome.count({
       where: {
         Approved: false,
+        isDiclined:false
       },
     });
     res.status(200).json({ notapprovedcount: count });
@@ -863,3 +883,23 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
 
 // });
 
+
+
+export const markSendWarning = async (req: Request, res: Response) => {
+  try {
+    
+    const CompID = req.body.CompID;
+    console.log(CompID)
+    await AppDataSource.manager.update(
+      Complaints,
+      { ComplaintID: CompID },
+      { IsWarned: true }
+    );
+
+    res.status(200).json({ message: "Successfully marked send warning" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error in marking send warning" });
+  }
+};

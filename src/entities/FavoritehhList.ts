@@ -1,7 +1,7 @@
 import { Entity, BaseEntity, PrimaryColumn, CreateDateColumn } from "typeorm";
 
 @Entity()
-export class WishList extends BaseEntity {
+export class FavoriteHH extends BaseEntity {
   @PrimaryColumn()
   service_number!: string;
 
@@ -10,5 +10,4 @@ export class WishList extends BaseEntity {
 
   @CreateDateColumn()
   created_at!: Date;
-  
 }

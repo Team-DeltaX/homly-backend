@@ -1,15 +1,17 @@
-import { BaseEntity, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import { HolidayHome } from "./HolidayHome";
+import {
+  BaseEntity,
+  Entity,
+  PrimaryColumn,
+} from "typeorm";
 
 @Entity()
 export class ContactNo extends BaseEntity {
-    @PrimaryColumn({
-        unique: true,
-        width: 10
-    })
-    ContactNo!: string;
+  @PrimaryColumn({
+    unique: true,
+    width: 10,
+  })
+  ContactNo!: string;
 
-
-    @PrimaryColumn()
-    HolidayHomeId!: string;
+  @PrimaryColumn()
+  HolidayHomeId!: string;
 }

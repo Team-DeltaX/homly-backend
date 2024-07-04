@@ -29,10 +29,9 @@ import {
   UserOTPVerification,
   UserInteresed,
 } from "./entities/User";
-import { WishList } from "./entities/WishList";
+import { FavoriteHH } from "./entities/FavoritehhList";
 import { Employee } from "./entities/Empolyee";
 import { HomlyAdmin } from "./entities/HomlyAdmin";
-import { UserFeedback } from "./entities/Feedback";
 import { SelectedRooms } from "./entities/SelectedRooms";
 import { Review } from "./entities/Review";
 import { Notification } from "./entities/Notification";
@@ -44,7 +43,6 @@ import { admin_router } from "./routes/AdminRouters";
 import { homly_review } from "./routes/Review";
 import { BlacklistRouter } from "./routes/BlacklistRouter";
 import { ReportsRouter } from "./routes/ReportRouters";
-import PaymentRoutes from "./routes/PaymentRoutes";
 import { requireAuth } from "./middleware/authMiddleware";
 import { requireUserAuth } from "./middleware/authUserMiddleware";
 import { requireAdminAuth } from "./middleware/authAdminMiddleware";
@@ -86,14 +84,13 @@ export const AppDataSource = new DataSource({
     ContactNo,
     LocationAdmin,
     Rental,
-    UserFeedback,
     SelectedRooms,
     RoomRentalSettings,
     RoomTypeSettings,
     ReservedRooms,
     Review,
     ReservedHalls,
-    WishList,
+    FavoriteHH,
     Notification,
   ],
   synchronize: true,
@@ -127,7 +124,6 @@ AppDataSource.initialize()
     app.use("/", ReservationRouter);
     app.use("/admin", PrimaryAdminDashboardRouter);
     app.use("/admin", LocationAdminDashboardRouter);
-    app.use("/payment", PaymentRoutes);
     app.use("/common", common_router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);

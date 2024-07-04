@@ -70,7 +70,9 @@ import {
     })
     createdAt!: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({
+      type: "date",
+  })
     updatedAt!: Date;
 
   }
