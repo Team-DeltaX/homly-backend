@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "..";
 import { Reservation } from "../entities/Reservation";
+import { BlackListHistory } from "../entities/BlackListHistory";
 import {
   Any,
   Between,
@@ -10,6 +11,23 @@ import {
 } from "typeorm";
 import { HolidayHome } from "../entities/HolidayHome";
 import { Employee } from "../entities/Empolyee";
+
+const getEmployeeName = async (ServiceNo: string): Promise<string> => {
+  console.log("Service Number in getEmployeeName:", ServiceNo);
+  try {
+    const employee = await AppDataSource.manager.find(Employee, {
+      select: ["name"],
+      where: {
+        service_number: ServiceNo,
+      },
+    });
+    return employee[0].name;
+  } catch (error) {
+    console.log(`error is ${error}`);
+    return "Employee";
+  }
+};
+
 
 const getGeneratedReport = async (req: Request, res: Response) => {
   const { HHName, fromDate, toDate } = req.query;
@@ -187,4 +205,47 @@ const getReservationReport = async (req: Request, res: Response) => {
   }
 };
 
-export { getGeneratedReport, getHolidayHomeId, getReservationReport };
+const getBlackListHistory = async (req: Request, res: Response) => {
+  const { fromDate, toDate } = req.query;
+  const fDate = new Date(fromDate as string);
+  const tDate = new Date(toDate as string);
+  try {
+    let blackListHistory: any[] = [];
+    blackListHistory = await AppDataSource.manager.find(BlackListHistory, {
+      where: [
+        {
+          BlacklistedDate: Between(fromDate, toDate),
+        },
+        {
+          RemovedDate: Between(fDate, tDate),
+        },
+        {
+          BlacklistedDate: LessThan(fromDate),
+          RemovedDate: MoreThanOrEqual(tDate),
+        },
+      ],
+    });
+    const blackListHistoryWithNames = await Promise.all(
+      blackListHistory.map(async (record) => {
+        console.log("Record structure:", record);  // Log the record structure
+        const empName = await getEmployeeName(record.ServiceNo);  // Use ServiceNo here
+        console.log("ServiceNo:", record.ServiceNo, "empName:", empName);
+        return {
+          ...record,
+          empName,
+        };
+      })
+    );
+    // console.log("blackListHistoryWithNames", blackListHistoryWithNames);
+    res.status(200).json(blackListHistoryWithNames);
+  } catch (err) {
+    console.log(err);
+    res.status(400).json(err);
+  }
+};
+export {
+  getGeneratedReport,
+  getHolidayHomeId,
+  getReservationReport,
+  getBlackListHistory,
+};
