@@ -8,9 +8,19 @@ export class Review extends BaseEntity {
   @Column()
   HolidayHomeId!: string;
 
-  @Column({ nullable: true })
+  @Column()
   UserReview!: string;
 
   @Column()
-  ServiceNo!: string;
+  ServiceNo! : string;
+
+  @CreateDateColumn({
+    type: "date",
+})
+  createdAt!: Date;
+
+  @UpdateDateColumn({
+    type: "date",
+})
+  updatedAt!: Date;
 }
