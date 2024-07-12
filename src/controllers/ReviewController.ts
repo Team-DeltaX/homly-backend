@@ -206,13 +206,13 @@ const addUserReview = async (req: Request, res: Response) => {
                 HolidayHome,
                 { HolidayHomeId: res[0].HolidayHome },
                 {
-                  food_rating: newfr,
-                  value_for_money_rating: newvfmr,
-                  staff_rating: newsr,
-                  location_rating: newlr,
-                  furniture_rating: newftr,
-                  wifi_rating: newwr,
-                  overall_rating: newOveralRating,
+                  food_rating: parseFloat(newfr.toFixed(1)),
+                  value_for_money_rating: parseFloat(newvfmr.toFixed(1)),
+                  staff_rating: parseFloat(newsr.toFixed(1)),
+                  location_rating: parseFloat(newlr.toFixed(1)),
+                  furniture_rating: parseFloat(newftr.toFixed(1)),
+                  wifi_rating: parseFloat(newwr.toFixed(1)),
+                  overall_rating: parseFloat(newOveralRating.toFixed(1)),
                 }
               );
 
