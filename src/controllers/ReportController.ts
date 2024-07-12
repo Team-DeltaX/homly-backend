@@ -30,6 +30,7 @@ const getEmployeeName = async (ServiceNo: string): Promise<string> => {
 
 
 const getGeneratedReport = async (req: Request, res: Response) => {
+  const adminNo = (req as any).serviceNo;
   const { HHName, fromDate, toDate } = req.query;
   console.log(HHName, fromDate, toDate, "aaaaaaaaaaaaaaaaaaaaaaa");
   const fDate = new Date(fromDate as string);
@@ -56,7 +57,8 @@ const getGeneratedReport = async (req: Request, res: Response) => {
         ],
       });
       console.log(reservations, "aaaaaaaaaaaaaaaaaaa");
-    } else {
+    } 
+    else {
       reservations = await AppDataSource.manager.find(Reservation, {
         where: [
           {
@@ -87,7 +89,30 @@ const getGeneratedReport = async (req: Request, res: Response) => {
             t.TotalPrice = t.TotalPrice + reservations[i].Price;
           }
         });
-      } else {
+      }
+      else if(adminNo !== "HomlyPriAdmin"){
+        console.log("admin noooooooooooooooogb", adminNo)
+        await AppDataSource.manager
+          .find(HolidayHome, {
+            where: {
+              AdminNo: "HomlyLocAdmin27",
+              HolidayHomeId: reservations[i].HolidayHome,
+            },
+          })
+          .then((hhdetails) => {
+            console.log("vnvvnvnv")
+            totalPrice.push({
+              HHID: reservations[i].HolidayHome,
+              HHName: hhdetails[0].Name,
+              TotalPrice: reservations[i].Price,
+            });
+            HHcount = HHcount + 1;
+            console.log(hhdetails[0].AdminNo, "hhdetails[0].AdminNo")
+          });
+          console.log(HHcount, "HHcount")
+      }
+      else {
+        console.log("admin noooooooooooooojbhjoogb", adminNo)
         await AppDataSource.manager
           .find(HolidayHome, {
             where: {
@@ -127,6 +152,26 @@ const getHolidayHomeId = async (req: Request, res: Response) => {
       res.status(500);
     });
 };
+
+const getLocHolidayHomeId = async (req: Request, res: Response) => {
+  const adminNo = (req as any).serviceNo;
+  await AppDataSource.manager
+    .find(HolidayHome, {
+      where: {
+        AdminNo: adminNo,
+      },
+      select: ["HolidayHomeId", "Name"],
+    })
+    .then((hhdetails) => {
+      console.log("admin no", adminNo)
+      console.log(hhdetails);
+      res.status(200).json(hhdetails);
+    })
+    .catch(() => {
+      res.status(500);
+    });
+};
+
 
 const getReservationReport = async (req: Request, res: Response) => {
   const { HHName, fromDate, toDate } = req.query;
@@ -248,4 +293,5 @@ export {
   getHolidayHomeId,
   getReservationReport,
   getBlackListHistory,
+  getLocHolidayHomeId,
 };

@@ -392,6 +392,7 @@ const getReservationDetails = async (reservation: any) => {
 
 export const getOngoingReservation = async (req: Request, res: Response) => {
   const adminNo = (req as any).serviceNo;
+  console.log(adminNo)
   try {
     const currentDate = new Date();
     const reservation = await AppDataSource.manager.find(Reservation, {
