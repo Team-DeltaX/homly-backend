@@ -57,8 +57,7 @@ const getGeneratedReport = async (req: Request, res: Response) => {
         ],
       });
       console.log(reservations, "aaaaaaaaaaaaaaaaaaa");
-    } 
-    else {
+    } else {
       reservations = await AppDataSource.manager.find(Reservation, {
         where: [
           {
@@ -89,30 +88,38 @@ const getGeneratedReport = async (req: Request, res: Response) => {
             t.TotalPrice = t.TotalPrice + reservations[i].Price;
           }
         });
-      }
-      else if(adminNo !== "HomlyPriAdmin"){
-        console.log("admin noooooooooooooooogb", adminNo)
+      } else if (adminNo !== "HomlyPriAdmin") {
+        console.log("admin noooooooooooooooogb", adminNo);
         await AppDataSource.manager
           .find(HolidayHome, {
             where: {
-              AdminNo: "HomlyLocAdmin27",
+              AdminNo: adminNo,
               HolidayHomeId: reservations[i].HolidayHome,
             },
           })
           .then((hhdetails) => {
-            console.log("vnvvnvnv")
-            totalPrice.push({
-              HHID: reservations[i].HolidayHome,
-              HHName: hhdetails[0].Name,
-              TotalPrice: reservations[i].Price,
-            });
-            HHcount = HHcount + 1;
-            console.log(hhdetails[0].AdminNo, "hhdetails[0].AdminNo")
+            if (hhdetails && hhdetails.length > 0) {
+              if (
+                totalPrice.filter((t) => t.HHID === reservations[i].HolidayHome)
+                  .length === 0
+              ) {
+                totalPrice.push({
+                  HHID: reservations[i].HolidayHome,
+                  HHName: hhdetails[0].Name,
+                  TotalPrice: reservations[i].Price,
+                });
+                HHcount = HHcount + 1;
+              } else {
+                totalPrice.forEach((t) => {
+                  if (t.HHID === reservations[i].HolidayHome) {
+                    t.TotalPrice = t.TotalPrice + reservations[i].Price;
+                  }
+                });
+              }
+              tPrice = tPrice + reservations[i].Price;
+            }
           });
-          console.log(HHcount, "HHcount")
-      }
-      else {
-        console.log("admin noooooooooooooojbhjoogb", adminNo)
+      } else {
         await AppDataSource.manager
           .find(HolidayHome, {
             where: {
@@ -120,18 +127,29 @@ const getGeneratedReport = async (req: Request, res: Response) => {
             },
           })
           .then((hhdetails) => {
-            totalPrice.push({
-              HHID: reservations[i].HolidayHome,
-              HHName: hhdetails[0].Name,
-              TotalPrice: reservations[i].Price,
-            });
-            HHcount = HHcount + 1;
+            if (
+              totalPrice.filter((t) => t.HHID === reservations[i].HolidayHome)
+                .length === 0
+            ) {
+              totalPrice.push({
+                HHID: reservations[i].HolidayHome,
+                HHName: hhdetails[0].Name,
+                TotalPrice: reservations[i].Price,
+              });
+              HHcount = HHcount + 1;
+            } else {
+              totalPrice.forEach((t) => {
+                if (t.HHID === reservations[i].HolidayHome) {
+                  t.TotalPrice = t.TotalPrice + reservations[i].Price;
+                }
+              });
+            }
+            tPrice = tPrice + reservations[i].Price;
           });
       }
-      tPrice = tPrice + reservations[i].Price;
     }
 
-    console.log(totalPrice);
+    console.log(totalPrice, "total price");
     res
       .status(200)
       .json({ TotalPerHH: totalPrice, HHcount: HHcount, TotalPrice: tPrice });
@@ -175,6 +193,7 @@ const getLocHolidayHomeId = async (req: Request, res: Response) => {
 
 const getReservationReport = async (req: Request, res: Response) => {
   const { HHName, fromDate, toDate } = req.query;
+  const adminNo = (req as any).serviceNo;
   console.log(fromDate, toDate, "date");
   const fDate = new Date(fromDate as string);
   const tDate = new Date(toDate as string);
@@ -218,29 +237,58 @@ const getReservationReport = async (req: Request, res: Response) => {
 
     const reservationWithHH: any[] = [];
     for (let i = 0; i < reservations.length; i++) {
-      await AppDataSource.manager
-        .find(HolidayHome, {
-          select: ["Name"],
-          where: {
-            HolidayHomeId: reservations[i].HolidayHome,
-          },
-        })
-        .then(async (hhdetails) => {
-          await AppDataSource.manager
-            .find(Employee, {
-              select: ["name"],
-              where: {
-                service_number: reservations[i].ServiceNO,
-              },
-            })
-            .then((empDetails) => {
-              reservationWithHH.push({
-                reservations: reservations[i],
-                hhName: hhdetails[0].Name,
-                empName: empDetails[0].name,
+      if (adminNo !== "HomlyPriAdmin" && HHName && HHName === "all") {
+        await AppDataSource.manager
+          .find(HolidayHome, {
+            select: ["Name"],
+            where: {
+              AdminNo: adminNo,
+              HolidayHomeId: reservations[i].HolidayHome,
+            },
+          })
+          .then(async (hhdetails) => {
+            if (hhdetails && hhdetails.length > 0) {
+              await AppDataSource.manager
+                .find(Employee, {
+                  select: ["name"],
+                  where: {
+                    service_number: reservations[i].ServiceNO,
+                  },
+                })
+                .then((empDetails) => {
+                  reservationWithHH.push({
+                    reservations: reservations[i],
+                    hhName: hhdetails[0].Name,
+                    empName: empDetails[0].name,
+                  });
+                });
+            }
+          });
+      } else {
+        await AppDataSource.manager
+          .find(HolidayHome, {
+            select: ["Name"],
+            where: {
+              HolidayHomeId: reservations[i].HolidayHome,
+            },
+          })
+          .then(async (hhdetails) => {
+            await AppDataSource.manager
+              .find(Employee, {
+                select: ["name"],
+                where: {
+                  service_number: reservations[i].ServiceNO,
+                },
+              })
+              .then((empDetails) => {
+                reservationWithHH.push({
+                  reservations: reservations[i],
+                  hhName: hhdetails[0].Name,
+                  empName: empDetails[0].name,
+                });
               });
-            });
-        });
+          });
+      }
     }
     console.log(reservationWithHH, "res");
     res.status(200).json(reservationWithHH);

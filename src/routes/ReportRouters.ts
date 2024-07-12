@@ -6,7 +6,7 @@ const ReportsRouter = express.Router();
 ReportsRouter.get("/auth/report/income", getGeneratedReport);
 ReportsRouter.get("/auth/HHnames", getHolidayHomeId);
 ReportsRouter.get("/auth/locHHnames", getLocHolidayHomeId);
-ReportsRouter.get("/auth/auth/report/reservation", getReservationReport);
+ReportsRouter.get("/auth/report/reservation", getReservationReport);
 ReportsRouter.get("/report/blacklist", getBlackListHistory);
 
 
