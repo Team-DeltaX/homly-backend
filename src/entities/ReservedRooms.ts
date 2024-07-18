@@ -1,16 +1,21 @@
-import { Entity, PrimaryColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @Entity()
 export class ReservedRooms {
-    @PrimaryColumn()
-    ReservationId!: string;
+  @PrimaryColumn()
+  ReservationId!: string;
 
-    @PrimaryColumn()
-    roomCode!: string;
+  @PrimaryColumn()
+  roomCode!: string;
 
-    @CreateDateColumn()
-    createdAt!: Date;
-  
-    @UpdateDateColumn()
-    updatedAt!: Date;
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }

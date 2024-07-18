@@ -1,42 +1,38 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-// import { Unit } from "./Unit";
-import { HolidayHome } from "./HolidayHome";
-// import { Unit } from "./Unit";
+import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class Room extends BaseEntity {
-    @PrimaryColumn({
-        unique: true
-    })
-    roomCode!: string;
+  @PrimaryColumn({
+    unique: true,
+  })
+  roomCode!: string;
 
-    @Column()
-    roomAc!: String;
+  @Column()
+  roomAc!: String;
 
-    @Column({
-        type: "numeric"
-    })
-    roomRental!: number;
+  @Column({
+    type: "numeric",
+  })
+  roomRental!: number;
 
-    @Column()
-    roomRemarks!: String;
+  @Column()
+  roomRemarks!: String;
 
-    @Column()
-    RoomType!: String;
+  @Column()
+  RoomType!: String;
 
-    @Column()
-    FloorLevel!: String;
+  @Column()
+  FloorLevel!: String;
 
-    @Column()
-    NoOfAdults!: number;
+  @Column()
+  NoOfAdults!: number;
 
-    @Column()
-    NoOfChildren!: number;
+  @Column()
+  NoOfChildren!: number;
 
-    @Column()
-    groupByUnit!: Boolean;
+  @Column()
+  groupByUnit!: Boolean;
 
-    @PrimaryColumn()
-    HolidayHomeId!: String;
-
+  @PrimaryColumn()
+  HolidayHomeId!: String;
 }

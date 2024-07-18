@@ -1,23 +1,11 @@
 import {
   Entity,
   PrimaryColumn,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
-  OneToMany,
-  ManyToOne,
-  JoinColumn,
 } from "typeorm";
-import { CareTaker } from "./CareTaker";
-import { Hall } from "./Hall";
-
-import { ContactNo } from "./ContactNo";
-import { Unit } from "./Unit";
-import { Room } from "./Room";
-import { LocationAdmin } from "./LocationAdmin";
-import { Rental } from "./Rental";
 @Entity()
 export class HolidayHome extends BaseEntity {
   @PrimaryColumn()

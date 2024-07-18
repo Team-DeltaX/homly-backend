@@ -1,11 +1,12 @@
 import { AppDataSource } from "../index";
 import { Request, Response } from "express";
-
+import { HomlyUser } from "../entities/User";
+import { Employee } from "../entities/Empolyee";
 import { HolidayHome } from "../entities/HolidayHome";
 import { UserInteresed } from "../entities/User";
 import { Reservation } from "../entities/Reservation";
 import { Review } from "../entities/Review";
-import { WishList } from "../entities/WishList";
+import { FavoriteHH } from "../entities/FavoritehhList";
 
 // get all holiday homes and save max rating holiday home
 const getHolidayHomesSorted = async (req: Request, res: Response) => {
@@ -70,7 +71,7 @@ const getHolidayHomesSorted = async (req: Request, res: Response) => {
                 value: interested_value[i][inter3],
               },
             };
-            const isFavourite = await AppDataSource.manager.find(WishList, {
+            const isFavourite = await AppDataSource.manager.find(FavoriteHH, {
               where: {
                 service_number: serviceNo,
                 holidayHomeId: interested_value[i].HolidayHomeId,
@@ -205,13 +206,13 @@ const addUserReview = async (req: Request, res: Response) => {
                 HolidayHome,
                 { HolidayHomeId: res[0].HolidayHome },
                 {
-                  food_rating: newfr,
-                  value_for_money_rating: newvfmr,
-                  staff_rating: newsr,
-                  location_rating: newlr,
-                  furniture_rating: newftr,
-                  wifi_rating: newwr,
-                  overall_rating: newOveralRating,
+                  food_rating: parseFloat(newfr.toFixed(1)),
+                  value_for_money_rating: parseFloat(newvfmr.toFixed(1)),
+                  staff_rating: parseFloat(newsr.toFixed(1)),
+                  location_rating: parseFloat(newlr.toFixed(1)),
+                  furniture_rating: parseFloat(newftr.toFixed(1)),
+                  wifi_rating: parseFloat(newwr.toFixed(1)),
+                  overall_rating: parseFloat(newOveralRating.toFixed(1)),
                 }
               );
 
@@ -253,22 +254,6 @@ const getUserReview = async (req: Request, res: Response) => {
     });
 };
 
-//get review count for paaticular holidayHome
-const getReviewCount = async (holidayHomeId: string) => {
-  let reviewCount = 0;
-  await AppDataSource.manager
-    .find(Review, {
-      where: {
-        HolidayHomeId: holidayHomeId,
-      },
-    })
-    .then((rev) => {
-      reviewCount = rev.length;
-    });
-
-  return reviewCount;
-};
-
 const updateUserReview = async (req: Request, res: Response) => {
   const { reservationID, review } = req.body;
   await AppDataSource.manager
@@ -281,9 +266,44 @@ const updateUserReview = async (req: Request, res: Response) => {
     });
 };
 
+//get employee name by serviceNo
+const getEmployeeName = async (req: Request, res: Response) => {
+  const {serviceNo} = req.params;
+  await AppDataSource.manager.find(Employee, {
+    where: {
+      service_number: serviceNo,
+    },   
+  })
+  .then((Employee) =>
+  {
+    res.status(200).json(Employee);
+  })
+  .catch(() => {
+    res.status(500).json({ message: "Internal Server Error" });
+  });
+};
+
+//get user image by serviceNo
+const getUserImage = async (req: Request, res: Response) => {
+  const {serviceNo} = req.params;
+  await AppDataSource.manager.find(HomlyUser, {
+    where: {
+      service_number: serviceNo,
+    },  
+  })
+  .then((HomlyUser) =>
+  {
+    res.status(200).json(HomlyUser);
+  })
+  .catch(() => {
+    res.status(500).json({ message: "Internal Server Error" });
+  });
+};
+
+
 // get user review for a holiday home
 const getUserReviewForHolidayHome = async (req: Request, res: Response) => {
-  const { holidayHomeId } = req.query;
+  const { holidayHomeId } = req.params;
 
   await AppDataSource.manager
     .find(Review, {
@@ -292,7 +312,7 @@ const getUserReviewForHolidayHome = async (req: Request, res: Response) => {
       },
     })
     .then((review) => {
-      res.status(200).json({ review });
+      res.status(200).json(review);
     })
     .catch(() => {
       res.status(500).json({ message: "Internal Server Error" });
@@ -305,4 +325,6 @@ export {
   getUserReview,
   updateUserReview,
   getUserReviewForHolidayHome,
+  getUserImage,
+  getEmployeeName,
 };
