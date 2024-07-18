@@ -12,10 +12,17 @@ import { RoomTypeSettings } from "../entities/HolidayHome";
 import { RoomRentalSettings } from "../entities/HolidayHome";
 import { Reservation } from "../entities/Reservation";
 import { ReservedRooms } from "../entities/ReservedRooms";
+import { HomlyAdmin } from "../entities/HomlyAdmin";
 
 const getHolidayHomes = async (req: Request, res: Response) => {
   const serviceNo = (req as any).serviceNo;
   console.log("admin no got from middleware", serviceNo);
+
+  const locationAdmins = await AppDataSource.manager.find(HomlyAdmin, {
+    where: { AdminNo: serviceNo },
+  });
+  console.log("locationAdmins", locationAdmins);
+
   const pending = await AppDataSource.manager.find(HolidayHome, {
     where: { Approved: false, AdminNo: serviceNo, isDiclined: false },
   });
