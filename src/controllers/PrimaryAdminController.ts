@@ -191,7 +191,11 @@ export const sendMail = (req: Request, res: Response) => {
 
 export const getcomplaints = async (req: Request, res: Response) => {
   try {
-    const complaints = await AppDataSource.manager.find(Complaints);
+    const complaints = await AppDataSource.manager.find(Complaints,{
+      order: {
+        created_at: "DESC",
+      },
+    });
     res.status(200).json(complaints);
   } catch (error) {
     console.log(error);
