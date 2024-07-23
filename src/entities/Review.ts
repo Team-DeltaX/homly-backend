@@ -15,7 +15,7 @@ export class Review extends BaseEntity {
   @Column()
   HolidayHomeId!: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 1000 })
   UserReview!: string;
 
   @Column()

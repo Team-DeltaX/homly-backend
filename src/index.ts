@@ -48,6 +48,8 @@ import { requireUserAuth } from "./middleware/authUserMiddleware";
 import { requireAdminAuth } from "./middleware/authAdminMiddleware";
 import { common_router } from "./routes/Common";
 
+import { scheduleFunctions } from "./controllers/scheduleFunctions";
+
 import dotenv from "dotenv";
 import { ReservationRouter } from "./routes/ReservationRouter";
 import { PrimaryAdminDashboardRouter } from "./routes/ParimayAdminDashboardRouters";
@@ -107,7 +109,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 io.listen(8081);
-
+scheduleFunctions();
 AppDataSource.initialize()
   .then(() => {
     app.use("/common/auth/*", requireAuth);

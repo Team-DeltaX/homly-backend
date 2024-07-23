@@ -488,6 +488,12 @@ const updateUserDetails = async (req: Request, res: Response) => {
         service_number: serviceNo,
       },
     });
+    const emails = await AppDataSource.manager.find(HomlyUser, {
+      where: {
+        email: email,
+      },
+    });
+
     if (user && user.verified) {
       await AppDataSource.manager.update(
         HomlyUser,
@@ -497,6 +503,11 @@ const updateUserDetails = async (req: Request, res: Response) => {
           image,
         }
       );
+      if (emails) {
+        return res
+          .status(200)
+          .json({ message: "Email already exists", success: false });
+      }
       if (user.email !== email) {
         sendVerificationEmail(email, serviceNo, employee[0].name, true);
         res.status(200).json({
@@ -1419,7 +1430,7 @@ const deleteExpiredVerificationCodes = async () => {
         for (let i = 0; i < expiredCodes.length; i++) {
           AppDataSource.manager.delete(HomlyUser, {
             service_number: expiredCodes[i].service_number,
-            validated: false,
+            verified: false,
           });
         }
       }

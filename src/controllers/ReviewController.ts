@@ -256,50 +256,50 @@ const getUserReview = async (req: Request, res: Response) => {
 
 const updateUserReview = async (req: Request, res: Response) => {
   const { reservationID, review } = req.body;
+  console.log(reservationID, review);
   await AppDataSource.manager
     .update(Review, { ReservationId: reservationID }, { UserReview: review })
     .then(() => {
       res.status(200).json({ message: "Successfully updated", success: true });
     })
-    .catch(() => {
+    .catch((e) => {
       res.status(500).json({ message: "Internal Server Error" });
     });
 };
 
 //get employee name by serviceNo
 const getEmployeeName = async (req: Request, res: Response) => {
-  const {serviceNo} = req.params;
-  await AppDataSource.manager.find(Employee, {
-    where: {
-      service_number: serviceNo,
-    },   
-  })
-  .then((Employee) =>
-  {
-    res.status(200).json(Employee);
-  })
-  .catch(() => {
-    res.status(500).json({ message: "Internal Server Error" });
-  });
+  const { serviceNo } = req.params;
+  await AppDataSource.manager
+    .find(Employee, {
+      where: {
+        service_number: serviceNo,
+      },
+    })
+    .then((Employee) => {
+      res.status(200).json(Employee);
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Internal Server Error" });
+    });
 };
 
 //get user image by serviceNo
 const getUserImage = async (req: Request, res: Response) => {
-  const {serviceNo} = req.params;
-  await AppDataSource.manager.find(HomlyUser, {
-    where: {
-      service_number: serviceNo,
-    },  
-  })
-  .then((HomlyUser) =>
-  {
-    res.status(200).json(HomlyUser);
-  })
-  .catch(() => {
-    res.status(500).json({ message: "Internal Server Error" });
-  });
+  const { serviceNo } = req.params;
+  await AppDataSource.manager
+    .find(HomlyUser, {
+      where: {
+        service_number: serviceNo,
+      },
+    })
+    .then((HomlyUser) => {
+      res.status(200).json(HomlyUser);
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Internal Server Error" });
+    });
 };
-
 
 // get user review for a holiday home
 const getUserReviewForHolidayHome = async (req: Request, res: Response) => {
