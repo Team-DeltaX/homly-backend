@@ -108,11 +108,10 @@ export const getall = async (req: Request, res: Response) => {
   }
 };
 export const getallDisabled = async (req: Request, res: Response) => {
-  
   try {
     const admins = await AppDataSource.manager.find(HomlyAdmin, {
       where: {
-        Disabled:true
+        Disabled: true,
       },
       order: {
         updatedAt: "DESC",
@@ -124,7 +123,6 @@ export const getallDisabled = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error!!" });
   }
 };
-
 
 export const disableadmin = async (req: Request, res: Response) => {
   const id = req.params.id;
@@ -392,7 +390,7 @@ const getReservationDetails = async (reservation: any) => {
 
 export const getOngoingReservation = async (req: Request, res: Response) => {
   const adminNo = (req as any).serviceNo;
-  console.log(adminNo)
+  console.log(adminNo);
   try {
     const currentDate = new Date();
     const reservation = await AppDataSource.manager.find(Reservation, {
@@ -643,8 +641,7 @@ export const getNotApprovedHomes = async (req: Request, res: Response) => {
     const homes = await AppDataSource.manager.find(HolidayHome, {
       where: {
         Approved: false,
-        isDiclined:false
-
+        isDiclined: false,
       },
     });
 
@@ -666,9 +663,9 @@ export const approveHH = async (req: Request, res: Response) => {
 
 export const rejectHH = async (req: Request, res: Response) => {
   const id = req.body.id;
-  const reject_reason=req.body.reject_reason
+  const reject_reason = req.body.reject_reason;
   try {
-    await HolidayHome.update(id, { reason: reject_reason,isDiclined:true });
+    await HolidayHome.update(id, { reason: reject_reason, isDiclined: true });
     res.status(200).json({ message: "Successfully approved the home" });
   } catch (error) {
     res.status(500).json({ message: "Error in approving the home!" });
@@ -837,7 +834,7 @@ export const get_not_approved_count = async (req: Request, res: Response) => {
     const count = await HolidayHome.count({
       where: {
         Approved: false,
-        isDiclined:false
+        isDiclined: false,
       },
     });
     res.status(200).json({ notapprovedcount: count });
@@ -868,29 +865,17 @@ export const get_holiday_home_rating = async (req: Request, res: Response) => {
 //every 10s- */10 * * * * *
 //every day 12am-0 0 * * *
 
-
-
-// export const every_Day_12AM = schedule.scheduleJob('*/10 * * * * *', async() => {
-//   console.log('Task executed every day 12 am 🚀', new Date().toLocaleTimeString());
-//   const blacklist=await BlackListedUser.find()
-//   // console.log(blacklist)
-//   blacklist.map((item)=>{
-//     console.log(item.Date)
-//   })
-
-      
-
-
-
-// });
-
-
+// export const every_Day_12AM = schedule.scheduleJob(
+//   "*/10 * * * * *",
+//   async () => {
+//     console.log("Task executed every  10s 🚀", new Date().toLocaleTimeString());
+//   }
+// );
 
 export const markSendWarning = async (req: Request, res: Response) => {
   try {
-    
     const CompID = req.body.CompID;
-    console.log(CompID)
+    console.log(CompID);
     await AppDataSource.manager.update(
       Complaints,
       { ComplaintID: CompID },
@@ -899,8 +884,6 @@ export const markSendWarning = async (req: Request, res: Response) => {
 
     res.status(200).json({ message: "Successfully marked send warning" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error in marking send warning" });
+    res.status(500).json({ message: "Error in marking send warning" });
   }
 };
